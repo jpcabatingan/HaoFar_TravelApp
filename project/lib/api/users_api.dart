@@ -61,4 +61,96 @@ class FirebaseUsersApi {
                   .toList(),
         );
   }
+
+  Future<void> acceptFriendRequest(String requestId) async {
+    final requestDoc = _db.collection(_friendRequestsCollection).doc(requestId);
+    final requestSnapshot = await requestDoc.get();
+
+    if (requestSnapshot.exists) {
+      final data = requestSnapshot.data() as Map<String, dynamic>;
+      final fromUserId = data['fromUserId'];
+      final toUserId = data['toUserId'];
+
+      // Update the friend request status to 'accepted'
+      await requestDoc.update({'status': 'accepted'});
+
+      // Add both users to each other's friends list
+      await _db.collection(_friendsCollection).doc(fromUserId).update({
+        'friends': FieldValue.arrayUnion([toUserId]),
+      });
+      await _db.collection(_friendsCollection).doc(toUserId).update({
+        'friends': FieldValue.arrayUnion([fromUserId]),
+      });
+    }
+  }
+
+  Future<void> rejectFriendRequest(String requestId) async {
+    final requestDoc = _db.collection(_friendRequestsCollection).doc(requestId);
+    await requestDoc.delete();
+  }
+
+  Future<List<custom_user.User>> getFriends() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return [];
+
+    final friendsSnapshot =
+        await _db.collection(_friendsCollection).doc(userId).get();
+
+    if (friendsSnapshot.exists) {
+      final friendsData = friendsSnapshot.data() as Map<String, dynamic>;
+      final friendIds = List<String>.from(friendsData['friends'] ?? []);
+
+      final friendDocs =
+          await _db
+              .collection(_usersCollection)
+              .where(FieldPath.documentId, whereIn: friendIds)
+              .get();
+
+      return friendDocs.docs
+          .map((doc) => custom_user.User.fromFirestore(doc))
+          .toList();
+    }
+
+    return [];
+  }
+
+  Future<void> removeFriend(String friendId) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    // Remove from user's friends list
+    await _db.collection(_friendsCollection).doc(userId).update({
+      'friends': FieldValue.arrayRemove([friendId]),
+    });
+
+    // Remove from friend's friends list
+    await _db.collection(_friendsCollection).doc(friendId).update({
+      'friends': FieldValue.arrayRemove([userId]),
+    });
+  }
+
+  Future<void> updateUserProfile(custom_user.User user) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    await _db.collection(_usersCollection).doc(userId).update({
+      'firstName': user.firstName,
+      'lastName': user.lastName,
+      'email': user.email,
+      'username': user.username,
+      'phoneNumber': user.phoneNumber,
+      'interests': user.interests,
+      'travelStyles': user.travelStyles,
+      'profilePicture': user.profilePicture,
+      'isProfilePublic': user.isProfilePublic,
+    });
+  }
+
+  Future<custom_user.User?> getUserById(String userId) async {
+    final doc = await _db.collection(_usersCollection).doc(userId).get();
+    if (doc.exists) {
+      return custom_user.User.fromFirestore(doc);
+    }
+    return null;
+  }
 }
