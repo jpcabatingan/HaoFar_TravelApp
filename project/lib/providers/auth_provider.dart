@@ -4,14 +4,14 @@ import 'package:project/api/auth_api.dart';
 
 class AuthProvider with ChangeNotifier {
   final FirebaseAuthApi _authService = FirebaseAuthApi();
-  User? _user;
+  User? user;
 
   AuthProvider() {
     fetchUser();
   }
 
   void fetchUser() async {
-    _user = _authService.getUser();
+    user = _authService.getUser();
     notifyListeners();
   }
 
