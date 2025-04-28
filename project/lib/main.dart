@@ -45,6 +45,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
+        scaffoldBackgroundColor: const Color.fromARGB(255, 253,248,226),
         textTheme: GoogleFonts.poppinsTextTheme(), // imported google fonts
         inputDecorationTheme: InputDecorationTheme(
           labelStyle: GoogleFonts.poppins(

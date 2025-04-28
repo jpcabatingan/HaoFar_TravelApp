@@ -1,6 +1,7 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/gestures.dart';
 // import 'package:provider/provider.dart';
 // import 'package:my_app/providers/auth_provider.dart' as authprov;
 
@@ -13,9 +14,11 @@ class SignIn extends StatefulWidget {
 
 class _SignInState extends State<SignIn> {
   //  app colors
-  final Color _labelsColor = const Color.fromARGB(255, 96, 101, 145);
-  final Color _fieldColor = const Color.fromARGB(255, 232, 231, 244);
-  final Color _titleColor = const Color.fromARGB(255, 109, 68, 171);
+  final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
+  final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
+  final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
+  final Color _btnColor = const Color.fromARGB(255, 163, 181, 101);
+  final Color _linkColor = const Color.fromARGB(255, 241, 100, 46);
 
   final formkey = GlobalKey<FormState>();
 
@@ -25,10 +28,7 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(foregroundColor: Colors.blue),
-      body: _createBody(context),
-    );
+    return Scaffold(body: _createBody(context));
   }
 
   Widget _createBody(BuildContext context) {
@@ -36,13 +36,15 @@ class _SignInState extends State<SignIn> {
       key: formkey,
       child: Center(
         child: Column(
-          spacing: 10,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          spacing: 20,
           children: [
             Padding(
-              padding: EdgeInsets.only(top: 35.0),
+              padding: EdgeInsets.only(top: 35.0, bottom: 35.0),
               child: Text(
-                "TRAVEL",
-                style: GoogleFonts.dmSerifText(
+                "Travel App",
+                style: GoogleFonts.inter(
                   textStyle: TextStyle(
                     fontSize: 60,
                     fontWeight: FontWeight.bold,
@@ -57,22 +59,14 @@ class _SignInState extends State<SignIn> {
             // USERNAME FIELD
             Padding(
               padding: EdgeInsets.only(left: 60.0, right: 60.0),
-              child: _createTextFormField(
-                "Username",
-                Icons.person_rounded,
-              ),
+              child: _createTextFormField("Username", Icons.person_rounded),
             ),
 
             // PASSWORD FIELD
             Padding(
               padding: EdgeInsets.only(left: 60.0, right: 60.0),
-              child: _createTextFormField(
-                "Password",
-                Icons.password_rounded,
-              ),
+              child: _createTextFormField("Password", Icons.password_rounded),
             ),
-
-            SizedBox(height: 20),
 
             // SIGN IN BUTTON
             Padding(
@@ -82,11 +76,19 @@ class _SignInState extends State<SignIn> {
 
             SizedBox(height: 20),
 
-            // SIGN UP INSTEAD
-            Text("Don't have an account yet? Sign up instead."),
+            // SIGN-UP INSTEAD
             Padding(
-              padding: EdgeInsets.only(left: 60.0, right: 60.0),
-              child: _createSignUpButton(),
+              padding: EdgeInsets.all(16.0),
+              child: RichText(
+                text: TextSpan(
+                  style: TextStyle(color: Colors.black),
+                  children: <TextSpan>[
+                    TextSpan(text: 'No account yet? '),
+                    _createHyperlink('Sign-up'),
+                    TextSpan(text: ' instead.'),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -94,11 +96,24 @@ class _SignInState extends State<SignIn> {
     );
   }
 
+  TextSpan _createHyperlink(String linkText) {
+    return TextSpan(
+      text: linkText,
+      style: TextStyle(
+        color: _linkColor,
+        decoration: TextDecoration.underline,
+        fontWeight: FontWeight.bold,
+      ),
+      recognizer:
+          TapGestureRecognizer()
+            ..onTap = () async {
+              Navigator.pushNamed(context, '/signUp');
+            },
+    );
+  }
+
   // reusable text form field
-  Widget _createTextFormField(
-    String label,
-    IconData icon,
-  ) {
+  Widget _createTextFormField(String label, IconData icon) {
     return TextFormField(
       initialValue: "",
       decoration: InputDecoration(
@@ -127,23 +142,31 @@ class _SignInState extends State<SignIn> {
     );
   }
 
-  // sign-up button
-  _createSignUpButton() {
-    return OutlinedButton(
-      onPressed: () {
-        Navigator.pushNamed(context, '/signUp');
-      },
-      child: const Text("Sign up"),
-    );
-  }
-
   // sign-in button
   Widget _createSignInButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () => {
-        print("nothing")
-      },
-      child: const Text("Sign In"),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _btnColor,
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+            side: const BorderSide(color: Colors.black26, width: 1),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+          elevation: 2,
+        ),
+        onPressed: () {
+          print("Log In button pressed");
+        },
+        child: const Text("LOG IN"),
+      ),
     );
   }
 }
