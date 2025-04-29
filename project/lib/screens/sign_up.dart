@@ -37,13 +37,11 @@ class _SignUpState extends State<SignUp> {
   final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColor = const Color.fromARGB(255, 163, 181, 101);
-  final Color _linkColor = const Color.fromARGB(255, 241,100,46);
+  final Color _linkColor = const Color.fromARGB(255, 241, 100, 46);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _createBody(),
-    );
+    return Scaffold(body: _createBody());
   }
 
   Widget _createBody() {
@@ -62,14 +60,12 @@ class _SignUpState extends State<SignUp> {
                     // PAGE TITLE
                     Text(
                       "Create account",
-                      style: GoogleFonts.inter(
-                        textStyle: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: _titleColor,
-                          letterSpacing: 1,
-                          height: 1,
-                        ),
+                      style: TextStyle(
+                        fontSize: 60,
+                        fontWeight: FontWeight.bold,
+                        color: _titleColor,
+                        letterSpacing: 1,
+                        height: 1,
                       ),
                     ),
                     SizedBox(height: 10),
@@ -159,7 +155,7 @@ class _SignUpState extends State<SignUp> {
       style: TextStyle(
         color: _linkColor,
         decoration: TextDecoration.underline,
-        fontWeight: FontWeight.bold
+        fontWeight: FontWeight.bold,
       ),
       recognizer:
           TapGestureRecognizer()
@@ -168,7 +164,6 @@ class _SignUpState extends State<SignUp> {
             },
     );
   }
-
 
   // reusable text field for form field inputs
   Widget _createTextField(String label, IconData icon) {
@@ -222,6 +217,7 @@ class _SignUpState extends State<SignUp> {
         ),
         onPressed: () {
           print("Sign up button pressed");
+          Navigator.pushNamed(context, '/signUpInterests');
         },
         child: const Text("SIGN UP"),
       ),

@@ -44,7 +44,7 @@ class _SignInState extends State<SignIn> {
               padding: EdgeInsets.only(top: 35.0, bottom: 35.0),
               child: Text(
                 "Travel App",
-                style: GoogleFonts.inter(
+                style: GoogleFonts.boogaloo(
                   textStyle: TextStyle(
                     fontSize: 60,
                     fontWeight: FontWeight.bold,

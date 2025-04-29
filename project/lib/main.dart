@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 // other pubs
 import 'package:google_fonts/google_fonts.dart';
+import 'package:project/screens/sign_up_travel_styles.dart';
 
 // providers
 import 'package:provider/provider.dart';
@@ -14,7 +15,13 @@ import 'package:provider/provider.dart';
 // screens
 import 'package:project/screens/sign_in.dart';
 import 'package:project/screens/sign_up.dart';
+import 'package:project/screens/sign_up_interests.dart';
 
+import 'package:project/screens/homepage/homepage.dart';
+import 'package:project/screens/profile/profile.dart';
+import 'package:project/screens/friends/friends.dart';
+
+import 'package:project/mainwrapper.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,20 +53,28 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         scaffoldBackgroundColor: const Color.fromARGB(255, 253,248,226),
-        textTheme: GoogleFonts.poppinsTextTheme(), // imported google fonts
+        textTheme: GoogleFonts.lexendTextTheme(), // imported google fonts
         inputDecorationTheme: InputDecorationTheme(
-          labelStyle: GoogleFonts.poppins(
+          labelStyle: GoogleFonts.lexend(
             color: const Color.fromARGB(255, 84, 89, 132),
           ),
         ),
       ),
       initialRoute: "/",
       // routes of different pages
-      routes: {
-        '/': (context) => const SignIn(),
-        '/signIn': (context) => const SignIn(),
-        '/signUp': (context) => const SignUp(),
-      },
+      // routes: {
+      //   '/': (context) => const SignIn(),
+      //   '/signIn': (context) => const SignIn(),
+      //   '/signUp': (context) => const SignUp(),
+      //   '/signUpInterests': (context) => const SignUpInterests(),
+      //   '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
+      //   '/homepage': (context) => const Homepage(),
+      // },
+      home: const Banner(
+        message: 'Navigation Bar',
+        location: BannerLocation.bottomStart,
+        child: MainWrapper(),
+      ),
     );
   }
 }
