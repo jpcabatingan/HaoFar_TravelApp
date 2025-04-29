@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:project/providers/auth_provider.dart';
 import 'package:project/screens/home_page.dart';
-import 'package:project/screens/landing_page.dart';
 import 'package:project/screens/signin_page.dart';
+import 'package:project/screens/signup_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -24,8 +24,10 @@ void main() async {
 
 class AppRoutes {
   static const String homeRoute = '/';
-  static const String signInRoute = '/sign-in';
-  static const String landingRoute = '/landing-page';
+  static const String signUpRoute = '/sign-up';
+  static const String landingRoute = '/home';
+  static const String interestsRoute = '/interests';
+  static const String travelListRoute = '/travel-list';
   // add routs here
 }
 
@@ -33,11 +35,17 @@ class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.homeRoute:
-        return MaterialPageRoute(builder: (_) => const Homepage());
-      case AppRoutes.signInRoute:
         return MaterialPageRoute(builder: (_) => const SignInPage());
+      case AppRoutes.signUpRoute:
+        return MaterialPageRoute(builder: (_) => const SignupPage());
       case AppRoutes.landingRoute:
-        return MaterialPageRoute(builder: (_) => const LandingPage());
+        return MaterialPageRoute(builder: (_) => const Homepage());
+      case AppRoutes.interestsRoute:
+        // Handle interests route
+        return MaterialPageRoute(builder: (_) => const Homepage());
+      case AppRoutes.travelListRoute:
+        // Handle travel list route
+        return MaterialPageRoute(builder: (_) => const Homepage());
       default:
         // Handle unknown routes
         return MaterialPageRoute(builder: (_) => const Homepage());
