@@ -7,50 +7,49 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-void main() async {
+// firebase
+import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
+
+// other pubs
+import 'package:google_fonts/google_fonts.dart';
+import 'package:project/screens/sign_up_travel_styles.dart';
+
+// providers
+import 'package:provider/provider.dart';
+// import 'package:my_app/providers/auth_provider.dart' as authprov;
+
+// screens
+import 'package:project/screens/sign_in.dart';
+import 'package:project/screens/sign_up.dart';
+import 'package:project/screens/sign_up_interests.dart';
+
+import 'package:project/screens/homepage/homepage.dart';
+import 'package:project/screens/profile/profile.dart';
+import 'package:project/screens/friends/friends.dart';
+
+import 'package:project/mainwrapper.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options:
-        DefaultFirebaseOptions
-            .currentPlatform, // Use the correct FirebaseOptions
-  );
+
+  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(
-    MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => AuthProvider())],
-      child: MyApp(),
-    ),
+    const MyApp(),
+    // MultiProvider(
+    //   providers: [
+    //     ChangeNotifierProvider(create: (_) => authprov.AuthProvider()),
+    //     ChangeNotifierProxyProvider<authprov.AuthProvider, ExpenseProvider>(
+    //       create:
+    //           (context) =>
+    //               ExpenseProvider(context.read<authprov.AuthProvider>()),
+    //       update: (context, auth, previous) => ExpenseProvider(auth),
+    //     ),
+    //   ],
+    //   child: const MyApp(),
+    // ),
   );
-}
-
-class AppRoutes {
-  static const String homeRoute = '/';
-  static const String signUpRoute = '/sign-up';
-  static const String landingRoute = '/home';
-  static const String interestsRoute = '/interests';
-  static const String travelListRoute = '/travel-list';
-  // add routs here
-}
-
-class RouteGenerator {
-  static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case AppRoutes.homeRoute:
-        return MaterialPageRoute(builder: (_) => const SignInPage());
-      case AppRoutes.signUpRoute:
-        return MaterialPageRoute(builder: (_) => const SignupPage());
-      case AppRoutes.landingRoute:
-        return MaterialPageRoute(builder: (_) => const Homepage());
-      case AppRoutes.interestsRoute:
-        // Handle interests route
-        return MaterialPageRoute(builder: (_) => const Homepage());
-      case AppRoutes.travelListRoute:
-        // Handle travel list route
-        return MaterialPageRoute(builder: (_) => const Homepage());
-      default:
-        // Handle unknown routes
-        return MaterialPageRoute(builder: (_) => const Homepage());
-    }
-  }
 }
 
 class MyApp extends StatelessWidget {
@@ -59,12 +58,30 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Travel App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 253, 248, 226),
+        textTheme: GoogleFonts.lexendTextTheme(), // imported google fonts
+        inputDecorationTheme: InputDecorationTheme(
+          labelStyle: GoogleFonts.lexend(
+            color: const Color.fromARGB(255, 84, 89, 132),
+          ),
+        ),
       ),
-      initialRoute: AppRoutes.homeRoute,
-      onGenerateRoute: RouteGenerator.generateRoute,
+      initialRoute: "/",
+      // routes of different pages
+      // routes: {
+      //   '/': (context) => const SignIn(),
+      //   '/signIn': (context) => const SignIn(),
+      //   '/signUp': (context) => const SignUp(),
+      //   '/signUpInterests': (context) => const SignUpInterests(),
+      //   '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
+      //   '/homepage': (context) => const Homepage(),
+      // },
+      home: const Banner(
+        message: 'Navigation Bar',
+        location: BannerLocation.bottomStart,
+        child: MainWrapper(),
+      ),
     );
   }
 }
