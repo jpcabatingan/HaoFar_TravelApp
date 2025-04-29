@@ -25,9 +25,7 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: _createBody(context));
+    return Scaffold(backgroundColor: Colors.white, body: _createBody(context));
   }
 
   Widget _createBody(BuildContext context) {

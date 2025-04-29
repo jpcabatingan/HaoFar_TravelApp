@@ -16,12 +16,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> signIn(String email, String password) async {
-    try {
-      await _authService.signIn(email, password);
-      fetchUser();
-    } catch (e) {
-      throw e.toString();
-    }
+    await _authService.signIn(email, password);
+    fetchUser();
   }
 
   Future<void> signOut() async {

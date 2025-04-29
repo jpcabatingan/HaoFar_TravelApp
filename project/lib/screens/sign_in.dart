@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
+import 'package:project/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
 // import 'package:my_app/providers/auth_provider.dart' as authprov;
 
@@ -84,12 +86,14 @@ class _SignInState extends State<SignIn> {
                   style: TextStyle(color: Colors.black),
                   children: <TextSpan>[
                     TextSpan(text: 'No account yet? '),
-                    _createHyperlink('Sign-up'),
+                    _createHyperlink('Sign Up'),
                     TextSpan(text: ' instead.'),
                   ],
                 ),
               ),
             ),
+
+            _createSignUpButton(),
           ],
         ),
       ),
@@ -106,7 +110,7 @@ class _SignInState extends State<SignIn> {
       ),
       recognizer:
           TapGestureRecognizer()
-            ..onTap = () async {
+            ..onTap = () {
               Navigator.pushNamed(context, '/signUp');
             },
     );
@@ -162,11 +166,24 @@ class _SignInState extends State<SignIn> {
           ),
           elevation: 2,
         ),
-        onPressed: () {
-          print("Log In button pressed");
+        onPressed: () async {
+          await context.read<AuthProvider>().signIn(username, password);
+          print("User signed in: $username");
+
+          Navigator.pushNamed(context, '/homepage');
         },
-        child: const Text("LOG IN"),
+        child: const Text("LOG IN Testing"),
       ),
+    );
+  }
+
+  Widget _createSignUpButton() {
+    return TextButton(
+      onPressed: () {
+        // Navigate to sign-up page
+        Navigator.pushNamed(context, '/signUp');
+      },
+      child: const Text('Sign Up Testing'),
     );
   }
 }

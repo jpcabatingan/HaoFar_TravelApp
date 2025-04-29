@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project/providers/auth_provider.dart';
 import 'package:project/screens/home_page.dart';
-import 'package:project/screens/signin_page.dart';
+import 'package:project/screens/les/signin_page.dart';
 import 'package:project/screens/signup_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,7 +13,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 // other pubs
 import 'package:google_fonts/google_fonts.dart';
-import 'package:project/screens/sign_up_travel_styles.dart';
+import 'package:project/screens/maryz/sign_up_travel_styles.dart';
 
 // providers
 import 'package:provider/provider.dart';
@@ -22,33 +22,28 @@ import 'package:provider/provider.dart';
 // screens
 import 'package:project/screens/sign_in.dart';
 import 'package:project/screens/sign_up.dart';
-import 'package:project/screens/sign_up_interests.dart';
+import 'package:project/screens/maryz/sign_up_interests.dart';
 
-import 'package:project/screens/homepage/homepage.dart';
-import 'package:project/screens/profile/profile.dart';
-import 'package:project/screens/friends/friends.dart';
+import 'package:project/screens/maryz/profile/profile.dart';
+import 'package:project/screens/maryz/friends/friends.dart';
 
 import 'package:project/mainwrapper.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options:
+        DefaultFirebaseOptions
+            .currentPlatform, // Use the correct FirebaseOptions
+  );
 
   // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
-    const MyApp(),
-    // MultiProvider(
-    //   providers: [
-    //     ChangeNotifierProvider(create: (_) => authprov.AuthProvider()),
-    //     ChangeNotifierProxyProvider<authprov.AuthProvider, ExpenseProvider>(
-    //       create:
-    //           (context) =>
-    //               ExpenseProvider(context.read<authprov.AuthProvider>()),
-    //       update: (context, auth, previous) => ExpenseProvider(auth),
-    //     ),
-    //   ],
-    //   child: const MyApp(),
-    // ),
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (context) => AuthProvider())],
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -67,21 +62,20 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: "/",
+      initialRoute: "",
       // routes of different pages
-      // routes: {
-      //   '/': (context) => const SignIn(),
-      //   '/signIn': (context) => const SignIn(),
-      //   '/signUp': (context) => const SignUp(),
-      //   '/signUpInterests': (context) => const SignUpInterests(),
-      //   '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
-      //   '/homepage': (context) => const Homepage(),
-      // },
-      home: const Banner(
-        message: 'Navigation Bar',
-        location: BannerLocation.bottomStart,
-        child: MainWrapper(),
-      ),
+      routes: {
+        '/': (context) => const Homepage(),
+        '/signUp': (context) => const SignupPage(),
+        '/signUpInterests': (context) => const SignUpInterests(),
+        '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
+        '/homepage': (context) => const Homepage(),
+      },
+      // home: const Banner(
+      //   message: 'Navigation Bar',
+      //   location: BannerLocation.bottomStart,
+      //   child: MainWrapper(),
+      // ),
     );
   }
 }

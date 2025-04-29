@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:project/screens/homepage/homepage.dart';
-import 'package:project/screens/profile/profile.dart';
-import 'package:project/screens/friends/friends.dart';
+import 'package:project/screens/maryz/homepage/homepage.dart';
+import 'package:project/screens/maryz/profile/profile.dart';
+import 'package:project/screens/maryz/friends/friends.dart';
 
 class FriendsNavigator extends StatefulWidget {
   const FriendsNavigator({super.key});
@@ -19,13 +19,14 @@ class FriendsNavigatorState extends State<FriendsNavigator> {
       key: wishListNavigatorKey,
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute(
-            settings: settings,
-            builder: (BuildContext context) {
-              // if (settings.name == "/detailsFriendsNavigator") {
-              //   return const DetailsFriendsNavigatorView();
-              // }
-              return const Friends();
-            });
+          settings: settings,
+          builder: (BuildContext context) {
+            // if (settings.name == "/detailsFriendsNavigator") {
+            //   return const DetailsFriendsNavigatorView();
+            // }
+            return const Friends();
+          },
+        );
       },
     );
   }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:project/screens/home_page.dart';
 
-import 'package:project/screens/homepage/homepage.dart';
-import 'package:project/screens/profile/profile.dart';
-import 'package:project/screens/friends/friends.dart';
+import 'package:project/screens/maryz/profile/profile.dart';
+import 'package:project/screens/maryz/friends/friends.dart';
 
 class HomepageNavigator extends StatefulWidget {
   const HomepageNavigator({super.key});

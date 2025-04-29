@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
+import 'package:project/providers/auth_provider.dart';
 
 // firebase
 // import 'package:firebase_auth/firebase_auth.dart';
@@ -215,11 +216,21 @@ class _SignUpState extends State<SignUp> {
           ),
           elevation: 2,
         ),
-        onPressed: () {
-          print("Sign up button pressed");
-          Navigator.pushNamed(context, '/signUpInterests');
+        onPressed: () async {
+          print(email);
+          try {
+            await Provider.of<AuthProvider>(
+              context,
+              listen: false,
+            ).signUp(email, password, "sample", firstName, lastName);
+            Navigator.pushNamed(context, '/homepage');
+          } catch (e) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(e.toString())));
+          }
         },
-        child: const Text("SIGN UP"),
+        child: const Text("SIGN UP Sana"),
       ),
     );
   }
