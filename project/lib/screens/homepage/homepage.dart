@@ -18,16 +18,16 @@ class _HomepageState extends State<Homepage> {
   final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColorContinue = const Color.fromARGB(255, 163, 181, 101);
-  final Color _btnColorSkip = const Color.fromARGB(255, 252, 221, 157);
-  final Color _selectedColor = const Color.fromARGB(255, 241, 100, 46);
+
+  final Color _cardMyColor = const Color.fromARGB(255, 241, 100, 46);
+  final Color _textMyColor = const Color.fromARGB(255, 255, 255, 255);
+  final Color _cardSharedColor = const Color.fromARGB(255, 252, 221, 157);
 
   final formkey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: _createBody(context));
+    return Scaffold(backgroundColor: Colors.white, body: _createBody(context));
   }
 
   Widget _createBody(BuildContext context) {
@@ -35,12 +35,12 @@ class _HomepageState extends State<Homepage> {
       key: formkey,
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           // spacing: 20,
           children: [
             Padding(
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.all(50.0),
               child: Text(
                 "Travel App",
                 style: GoogleFonts.boogaloo(
@@ -54,63 +54,86 @@ class _HomepageState extends State<Homepage> {
                 ),
               ),
             ),
-            Text("Select travel plans category."),
 
-            // MY PLANS
-            ListTile(
-              title: ListTile(
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+              padding: EdgeInsets.all(60.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Hey there, JC!",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: _titleColor,
+                      letterSpacing: 1,
+                      height: 1,
+                    ),
+                  ),
+                  Text("Check out your latest travel plans below."),
+                ],
+              ),
+            ),
+            ),
+
+            Card(
+              color: _cardMyColor,
+              elevation: 8,
+              clipBehavior: Clip.hardEdge,
+              child: InkWell(
                 onTap: () {
-                  print("Clicked my plans");
+                  print('Clicked my plans.');
                 },
-                leading: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "My Plans",
+                child: SizedBox(
+                  width: 400,
+                  child: Padding(
+                    padding: EdgeInsets.all(30.0),
+                    child: Text(
+                      "MY PLANS",
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: _titleColor,
+                        color: _textMyColor,
+                        letterSpacing: 1,
+                        height: 1,
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-              leading: Icon(Icons.auto_awesome, color: _titleColor),
             ),
-            // SHARED WITH ME
+
+            Card(
+              color: _cardSharedColor,
+              elevation: 8,
+              clipBehavior: Clip.hardEdge,
+              child: InkWell(
+                onTap: () {
+                  print('Clicked shared plans.');
+                },
+                child: SizedBox(
+                  width: 400,
+                  child: Padding(
+                    padding: EdgeInsets.all(30.0),
+                    child: Text(
+                      "Shared with me",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: _cardMyColor,
+                        letterSpacing: 1,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  // continue button
-  Widget _createContinueButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _btnColorContinue,
-          foregroundColor: Colors.black,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            side: const BorderSide(color: Colors.black26, width: 1),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-          ),
-          elevation: 2,
-        ),
-        onPressed: () {
-          print("Continue button pressed");
-          Navigator.pushNamed(context, '/signUpTravelStyles');
-        },
-        child: const Text("CONTINUE"),
       ),
     );
   }

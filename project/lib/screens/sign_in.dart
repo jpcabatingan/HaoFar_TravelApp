@@ -15,7 +15,7 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   //  app colors
   final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
-  final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
+  final Color _fieldColor = const Color.fromARGB(255, 253,248,226);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColor = const Color.fromARGB(255, 163, 181, 101);
   final Color _linkColor = const Color.fromARGB(255, 241, 100, 46);
@@ -28,7 +28,7 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _createBody(context));
+    return Scaffold(body: _createBody(context), backgroundColor: Colors.white,);
   }
 
   Widget _createBody(BuildContext context) {

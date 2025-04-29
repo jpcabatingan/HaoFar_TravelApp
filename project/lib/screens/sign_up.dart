@@ -33,15 +33,15 @@ class _SignUpState extends State<SignUp> {
   String _errorPassword = "";
 
   //  app colors
-  final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
-  final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
+  final Color _labelsColor = const Color.fromARGB(255, 80,78,118);
+  final Color _fieldColor = const Color.fromARGB(255, 253,248,226);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColor = const Color.fromARGB(255, 163, 181, 101);
   final Color _linkColor = const Color.fromARGB(255, 241, 100, 46);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _createBody());
+    return Scaffold(body: _createBody(), backgroundColor: Colors.white,);
   }
 
   Widget _createBody() {
@@ -52,35 +52,38 @@ class _SignUpState extends State<SignUp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 60.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // PAGE TITLE
-                    Text(
-                      "Create account",
-                      style: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.bold,
-                        color: _titleColor,
-                        letterSpacing: 1,
-                        height: 1,
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 60.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // PAGE TITLE
+                      Text(
+                        "Create account",
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: _titleColor,
+                          letterSpacing: 1,
+                          height: 1,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    // SIGN-IN INSTEAD
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(color: Colors.black),
-                        children: <TextSpan>[
-                          TextSpan(text: 'Already have an account? '),
-                          _createHyperlink('Sign-in'),
-                          TextSpan(text: ' instead.'),
-                        ],
+                      SizedBox(height: 10),
+                      // SIGN-IN INSTEAD
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black),
+                          children: <TextSpan>[
+                            TextSpan(text: 'Already have an account? '),
+                            _createHyperlink('Sign-in'),
+                            TextSpan(text: ' instead.'),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -202,7 +205,7 @@ class _SignUpState extends State<SignUp> {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: _btnColor,
-          foregroundColor: Colors.black,
+          foregroundColor: const Color.fromARGB(255, 255, 255, 255),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),

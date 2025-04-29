@@ -45,7 +45,7 @@ class _SignUpTravelStylesState extends State<SignUpTravelStyles> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _createBody(context));
+    return Scaffold(body: _createBody(context), backgroundColor: Colors.white);
   }
 
   Widget _createBody(BuildContext context) {
@@ -57,71 +57,121 @@ class _SignUpTravelStylesState extends State<SignUpTravelStyles> {
           crossAxisAlignment: CrossAxisAlignment.center,
           // spacing: 20,
           children: [
-            Padding(
-              padding: EdgeInsets.all(0.0),
-              child: Text(
-                "Travel Styles",
-                style: TextStyle(
-                  fontSize: 60,
-                  fontWeight: FontWeight.bold,
-                  color: _titleColor,
-                  letterSpacing: 1,
-                  height: 1,
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 60.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(0.0),
+                      child: Text(
+                        "Travel Styles",
+                        style: TextStyle(
+                          fontSize: 60,
+                          fontWeight: FontWeight.bold,
+                          color: _titleColor,
+                          letterSpacing: 1,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    Text("Select your travel style."),
+                  ],
                 ),
               ),
             ),
-            Text("Select your travel style."),
-            Padding(
-              padding: EdgeInsets.all(60.0),
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 15,
-                runSpacing: 15,
-                children:
-                    _travelStyles.map((travelStyle) {
-                      final isSelected = _selectedTravelStyles.contains(
-                        travelStyle,
-                      );
-                      return GestureDetector(
-                        onTap: () => toggleSelection(travelStyle),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                isSelected
-                                    ? _selectedColor
-                                    : Colors.transparent, // ← FILL COLOR
-                            border: Border.all(
+
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: EdgeInsets.all(60.0),
+                child: Wrap(
+                  alignment: WrapAlignment.start,
+                  spacing: 15,
+                  runSpacing: 15,
+                  children:
+                      _travelStyles.map((travelStyle) {
+                        final isSelected = _selectedTravelStyles.contains(
+                          travelStyle,
+                        );
+                        return GestureDetector(
+                          onTap: () => toggleSelection(travelStyle),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
                               color:
                                   isSelected
                                       ? _selectedColor
-                                      : Colors.black54, // ← BORDER COLOR
-                              width: 1.5,
+                                      : Colors.transparent, // ← FILL COLOR
+                              border: Border.all(
+                                color:
+                                    isSelected
+                                        ? _selectedColor
+                                        : Colors.black54, // ← BORDER COLOR
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
                             ),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Text(
-                            travelStyle,
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black87,
-                              fontWeight: FontWeight.w500,
+                            child: Text(
+                              travelStyle,
+                              style: TextStyle(
+                                color:
+                                    isSelected ? Colors.white : Colors.black87,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }).toList(),
+                ),
               ),
             ),
 
-            Padding(
-              padding: EdgeInsets.only(left: 60.0, right: 60.0),
-              child: _createContinueButton(context),
-            ),
+            _selectedTravelStyles.isEmpty
+                ? Padding(
+                  padding: EdgeInsets.only(left: 60.0, right: 60.0),
+                  child: _createSkipButton(context),
+                )
+                : Padding(
+                  padding: EdgeInsets.only(left: 60.0, right: 60.0),
+                  child: _createContinueButton(context),
+                ),
           ],
         ),
+      ),
+    );
+  }
+
+  // skip button
+  Widget _createSkipButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _btnColorSkip,
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+            side: const BorderSide(color: Colors.black26, width: 1),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+          elevation: 2,
+        ),
+        onPressed: () {
+          print("Skip button pressed");
+          Navigator.pushNamed(context, '/homepage');
+        },
+        child: const Text("SKIP"),
       ),
     );
   }
@@ -146,14 +196,14 @@ class _SignUpTravelStylesState extends State<SignUpTravelStyles> {
           ),
           elevation: 2,
         ),
-        onPressed:
-            _selectedTravelStyles.isEmpty
-                ? null
-                : () {
-                  print("Finished sign up!");
-                  Navigator.pushNamed(context, '/homepage');
-                },
-        child: const Text("Finish Sign Up"),
+        onPressed: () {
+          print("Finished sign up!");
+          Navigator.pushNamed(context, '/homepage');
+        },
+        child: const Text(
+          "Finish Sign Up",
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
