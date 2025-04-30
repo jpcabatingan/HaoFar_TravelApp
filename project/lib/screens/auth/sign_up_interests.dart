@@ -65,12 +65,12 @@ class _SignUpInterestsState extends State<SignUpInterests> {
               child: Text(
                 "Interests",
                 style: TextStyle(
-                    fontSize: 60,
-                    fontWeight: FontWeight.bold,
-                    color: _titleColor,
-                    letterSpacing: 1,
-                    height: 1,
-                  ),
+                  fontSize: 60,
+                  fontWeight: FontWeight.bold,
+                  color: _titleColor,
+                  letterSpacing: 1,
+                  height: 1,
+                ),
               ),
             ),
             Text("Select what you're interested in."),
@@ -106,8 +106,7 @@ class _SignUpInterestsState extends State<SignUpInterests> {
                           child: Text(
                             interest,
                             style: TextStyle(
-                              color:
-                                  isSelected ? Colors.white : Colors.black87,
+                              color: isSelected ? Colors.white : Colors.black87,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -118,14 +117,14 @@ class _SignUpInterestsState extends State<SignUpInterests> {
             ),
 
             _selectedInterests.isEmpty
-            ? Padding(
-              padding: EdgeInsets.only(left: 60.0, right: 60.0),
-              child: _createSkipButton(context),
-            )
-            : Padding(
-              padding: EdgeInsets.only(left: 60.0, right: 60.0),
-              child: _createContinueButton(context),
-            ),
+                ? Padding(
+                  padding: EdgeInsets.only(left: 60.0, right: 60.0),
+                  child: _createSkipButton(context),
+                )
+                : Padding(
+                  padding: EdgeInsets.only(left: 60.0, right: 60.0),
+                  child: _createContinueButton(context),
+                ),
           ],
         ),
       ),

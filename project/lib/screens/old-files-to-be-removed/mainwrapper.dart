@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 // import 'package:flutter_nested_persistance_navigation/navigations/updates_navigation.dart';
 // import 'package:flutter_nested_persistance_navigation/navigations/wishlists_navigation.dart';
 
-import 'package:project/navigations/homepage_navigation.dart';
-import 'package:project/navigations/friends_navigation.dart';
-import 'package:project/navigations/profile_navigation.dart';
+import 'package:project/screens/old-files-to-be-removed/navigations/homepage_navigation.dart';
+import 'package:project/screens/old-files-to-be-removed/navigations/friends_navigation.dart';
+import 'package:project/screens/old-files-to-be-removed/navigations/profile_navigation.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -84,7 +84,7 @@ class MainWrapperState extends State<MainWrapper> {
             //   )
             // ],
             children: const <Widget>[
-              /// First Route  
+              /// First Route
               HomepageNavigator(),
 
               /// Second Route

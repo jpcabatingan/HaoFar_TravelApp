@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:project/screens/maryz/homepage/homepage.dart';
-import 'package:project/screens/maryz/profile/profile.dart';
-import 'package:project/screens/maryz/friends/friends.dart';
+import 'package:project/screens/old-files-to-be-removed/maryz/homepage/homepage.dart';
+import 'package:project/screens/profile/profile.dart';
+import 'package:project/screens/friends/friends.dart';
 
 class FriendsNavigator extends StatefulWidget {
   const FriendsNavigator({super.key});

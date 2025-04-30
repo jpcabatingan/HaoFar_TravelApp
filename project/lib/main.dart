@@ -1,47 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:project/providers/auth_provider.dart';
-import 'package:project/screens/home_page.dart';
-import 'package:project/screens/les/signin_page.dart';
-import 'package:project/screens/signup_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
-// firebase
-import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
-
-// other pubs
 import 'package:google_fonts/google_fonts.dart';
-import 'package:project/screens/maryz/sign_up_travel_styles.dart';
+import 'package:project/app/routes.dart';
 
-// providers
-import 'package:provider/provider.dart';
-// import 'package:my_app/providers/auth_provider.dart' as authprov;
-
-// screens
-import 'package:project/screens/sign_in.dart';
-import 'package:project/screens/sign_up.dart';
-import 'package:project/screens/maryz/sign_up_interests.dart';
-
-import 'package:project/screens/maryz/profile/profile.dart';
-import 'package:project/screens/maryz/friends/friends.dart';
-
-import 'package:project/mainwrapper.dart';
-
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options:
-        DefaultFirebaseOptions
-            .currentPlatform, // Use the correct FirebaseOptions
-  );
-
-  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => AuthProvider())],
+      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
       child: const MyApp(),
     ),
   );
@@ -53,29 +24,22 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color.fromARGB(255, 253, 248, 226),
-        textTheme: GoogleFonts.lexendTextTheme(), // imported google fonts
-        inputDecorationTheme: InputDecorationTheme(
-          labelStyle: GoogleFonts.lexend(
-            color: const Color.fromARGB(255, 84, 89, 132),
-          ),
+      theme: _buildTheme(),
+      debugShowCheckedModeBanner: false,
+      initialRoute: AppRoutes.home,
+      onGenerateRoute: RouteGenerator.generateRoute,
+    );
+  }
+
+  ThemeData _buildTheme() {
+    return ThemeData(
+      scaffoldBackgroundColor: const Color(0xFFFDF8E6),
+      textTheme: GoogleFonts.lexendTextTheme(),
+      navigationBarTheme: NavigationBarThemeData(
+        labelTextStyle: WidgetStateProperty.all(
+          GoogleFonts.lexend(fontSize: 12),
         ),
       ),
-      initialRoute: "",
-      // routes of different pages
-      routes: {
-        '/': (context) => const Homepage(),
-        '/signUp': (context) => const SignupPage(),
-        '/signUpInterests': (context) => const SignUpInterests(),
-        '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
-        '/homepage': (context) => const Homepage(),
-      },
-      // home: const Banner(
-      //   message: 'Navigation Bar',
-      //   location: BannerLocation.bottomStart,
-      //   child: MainWrapper(),
-      // ),
     );
   }
 }

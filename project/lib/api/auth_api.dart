@@ -29,6 +29,24 @@ class FirebaseAuthApi {
     }
   }
 
+  Future<Map<String, dynamic>> getEmail(String username) async {
+    try {
+      QuerySnapshot snapshot =
+          await _firestore
+              .collection('users')
+              .where('username', isEqualTo: username)
+              .get();
+      if (snapshot.docs.isNotEmpty) {
+        String email = snapshot.docs[0]['email'];
+        return {'status': true, 'email': email};
+      } else {
+        return {'status': false, 'error': 'Username not found'};
+      }
+    } catch (e) {
+      return {'status': false, 'error': e.toString()};
+    }
+  }
+
   // Sign up with email/password
   Future<User?> signUp(
     String email,
