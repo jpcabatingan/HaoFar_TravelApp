@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project/providers/auth_provider.dart';
-import 'package:project/screens/home_page.dart';
+import 'package:project/screens/old-files-to-be-removed/home_page.dart';
 import 'package:project/screens/old-files-to-be-removed/les/signin_page.dart';
 import 'package:project/screens/auth/signup_page.dart';
 import 'package:provider/provider.dart';

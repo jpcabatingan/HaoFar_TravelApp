@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project/screens/home_page.dart';
+import 'package:project/screens/old-files-to-be-removed/home_page.dart';
 
 import 'package:project/screens/profile/profile.dart';
 import 'package:project/screens/friends/friends.dart';
