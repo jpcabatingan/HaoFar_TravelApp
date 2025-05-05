@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
-// import 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
 // import 'package:my_app/providers/auth_provider.dart' as authprov;
+import 'package:project/providers/travel_plan_provider.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -94,6 +95,7 @@ class _HomepageState extends State<Homepage> {
             const SizedBox(height: 24),
             GestureDetector(
               onTap: () {
+                context.read<TravelPlanProvider>().setFilterCategory("none");
                 Navigator.pushNamed(context, '/travelPlans');
               },
               child: Row(
@@ -110,11 +112,13 @@ class _HomepageState extends State<Homepage> {
 
             const SizedBox(height: 16),
             _verticalPlanCard('MY PLANS', () {
-              Navigator.pushNamed(context, '/myPlans');
+              context.read<TravelPlanProvider>().setFilterCategory("my");
+              Navigator.pushNamed(context, '/travelPlans');
             }),
             const SizedBox(height: 16),
             _verticalPlanCard('SHARED WITH ME', () {
-              Navigator.pushNamed(context, '/sharedPlans');
+              context.read<TravelPlanProvider>().setFilterCategory("shared");
+              Navigator.pushNamed(context, '/travelPlans');
             }),
           ],
         ),

@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 // other pubs
 import 'package:google_fonts/google_fonts.dart';
+import 'package:project/providers/travel_plan_provider.dart';
 import 'package:project/screens/sign_up_travel_styles.dart';
 
 // providers
@@ -31,7 +32,10 @@ Future<void> main() async {
   // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
-    const MyApp()
+     MultiProvider(
+      providers: [ChangeNotifierProvider(create: (context) => TravelPlanProvider())],
+      child: const MyApp(),
+    ),
     // MultiProvider(
     //   providers: [
     //     ChangeNotifierProvider(create: (_) => authprov.AuthProvider()),

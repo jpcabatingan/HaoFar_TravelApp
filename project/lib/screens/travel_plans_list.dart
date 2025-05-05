@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:project/providers/travel_plan_provider.dart';
 
 class TravelPlan {
   final String title;
@@ -23,71 +25,33 @@ class TravelPlans extends StatefulWidget {
 }
 
 class _TravelPlansState extends State<TravelPlans> {
-  //  app colors
+  String get selectedCategory => context.watch<TravelPlanProvider>().planCategory;
+
   final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColorContinue = const Color.fromARGB(255, 163, 181, 101);
-
   final Color _cardMyColor = const Color.fromARGB(255, 241, 100, 46);
   final Color _textMyColor = const Color.fromARGB(255, 255, 255, 255);
   final Color _cardSharedColor = const Color.fromARGB(255, 252, 221, 157);
 
   final formkey = GlobalKey<FormState>();
-  String selectedCategory = "my";
 
   final List<TravelPlan> allPlans = [
-    TravelPlan(
-      title: 'Plan 1',
-      date: DateTime(2025, 5, 6),
-      location: 'Pansol',
-      category: 'my',
-    ),
-    TravelPlan(
-      title: 'Plan 2',
-      date: DateTime(2025, 5, 9),
-      location: 'Ubec',
-      category: 'my',
-    ),
-    TravelPlan(
-      title: 'Plan 3',
-      date: DateTime(2025, 5, 15),
-      location: 'Siargao',
-      category: 'my',
-    ),
-    TravelPlan(
-      title: 'Plan 4',
-      date: DateTime(2025, 5, 6),
-      location: 'Kahit saan',
-      category: 'shared',
-    ),
-    TravelPlan(
-      title: 'Plan 5',
-      date: DateTime(2025, 5, 9),
-      location: 'BGC',
-      category: 'shared',
-    ),
-    TravelPlan(
-      title: 'Plan 6',
-      date: DateTime(2025, 5, 15),
-      location: 'Baguio',
-      category: 'shared',
-    ),
-    TravelPlan(
-      title: 'Plan 7',
-      date: DateTime(2025, 4, 6),
-      location: 'Ewan',
-      category: 'done',
-    ),
-    TravelPlan(
-      title: 'Plan 8',
-      date: DateTime(2025, 4, 9),
-      location: 'Dorm',
-      category: 'done',
-    ),
+    TravelPlan(title: 'Plan 1', date: DateTime(2025, 5, 6), location: 'Pansol', category: 'my'),
+    TravelPlan(title: 'Plan 2', date: DateTime(2025, 5, 9), location: 'Ubec', category: 'my'),
+    TravelPlan(title: 'Plan 3', date: DateTime(2025, 5, 15), location: 'Siargao', category: 'my'),
+    TravelPlan(title: 'Plan 4', date: DateTime(2025, 5, 6), location: 'Kahit saan', category: 'shared'),
+    TravelPlan(title: 'Plan 5', date: DateTime(2025, 5, 9), location: 'BGC', category: 'shared'),
+    TravelPlan(title: 'Plan 6', date: DateTime(2025, 5, 15), location: 'Baguio', category: 'shared'),
+    TravelPlan(title: 'Plan 7', date: DateTime(2025, 4, 6), location: 'Ewan', category: 'done'),
+    TravelPlan(title: 'Plan 8', date: DateTime(2025, 4, 9), location: 'Dorm', category: 'done'),
   ];
 
   List<TravelPlan> getFilteredPlans(String category) {
+    if (category == 'none') {
+      return List<TravelPlan>.from(allPlans)..sort((a, b) => a.date.compareTo(b.date));
+    }
     return allPlans.where((plan) => plan.category == category).toList()
       ..sort((a, b) => a.date.compareTo(b.date));
   }
@@ -95,9 +59,7 @@ class _TravelPlansState extends State<TravelPlans> {
   List<TravelPlan> getSoonPlans(List<TravelPlan> plans) {
     final now = DateTime.now();
     final soon = now.add(const Duration(days: 7));
-    return plans
-        .where((p) => p.date.isAfter(now) && p.date.isBefore(soon))
-        .toList();
+    return plans.where((p) => p.date.isAfter(now) && p.date.isBefore(soon)).toList();
   }
 
   List<TravelPlan> getLaterPlans(List<TravelPlan> plans) {
@@ -113,13 +75,17 @@ class _TravelPlansState extends State<TravelPlans> {
   Widget _createBody(BuildContext context) {
     final filteredPlans = getFilteredPlans(selectedCategory);
     final isDone = selectedCategory == "done";
+    final isAll = selectedCategory == "none";
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6EEF8),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF6EEF8),
         elevation: 0,
-        leading: BackButton(color: Colors.black, onPressed: () => Navigator.pushNamed(context, '/homepage'),),
+        leading: BackButton(
+          color: Colors.black,
+          onPressed: () => Navigator.pushNamed(context, '/homepage'),
+        ),
         title: const Text(
           'Traveler',
           style: TextStyle(
@@ -132,9 +98,9 @@ class _TravelPlansState extends State<TravelPlans> {
       ),
       body: Column(
         children: [
-          SizedBox(height: 25,),
+          const SizedBox(height: 25),
           Padding(
-            padding: EdgeInsets.only(left: 20, right: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
                 SizedBox(
@@ -143,8 +109,10 @@ class _TravelPlansState extends State<TravelPlans> {
                     selectedCategory == "my"
                         ? "My Plans"
                         : selectedCategory == "shared"
-                        ? "Shared with me"
-                        : "Done",
+                            ? "Shared with me"
+                            : selectedCategory == "done"
+                                ? "Done"
+                                : "All Plans",
                     style: const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.w600,
@@ -166,17 +134,15 @@ class _TravelPlansState extends State<TravelPlans> {
               ],
             ),
           ),
-
           const SizedBox(height: 15),
           _buildCategoryChips(),
           const SizedBox(height: 8),
-          
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 if (!isDone && getSoonPlans(filteredPlans).isNotEmpty) ...[
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10),
                   const Text(
                     "Soon!",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
@@ -186,7 +152,7 @@ class _TravelPlansState extends State<TravelPlans> {
                   const SizedBox(height: 16),
                 ],
                 if (!isDone && getLaterPlans(filteredPlans).isNotEmpty) ...[
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10),
                   const Text(
                     "Later...",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
@@ -194,7 +160,7 @@ class _TravelPlansState extends State<TravelPlans> {
                   const SizedBox(height: 8),
                   ...getLaterPlans(filteredPlans).map(_buildPlanTile),
                 ],
-                if (isDone) ...filteredPlans.map(_buildPlanTile),
+                if (isDone || isAll) ...filteredPlans.map(_buildPlanTile),
               ],
             ),
           ),
@@ -209,8 +175,9 @@ class _TravelPlansState extends State<TravelPlans> {
       child: Wrap(
         spacing: 8,
         children: [
+          _chipButton("All", "none", Colors.blue),
           _chipButton("My Plans", "my", Colors.green),
-          _chipButton("Shared with me", "shared", Colors.green),
+          _chipButton("Shared", "shared", Colors.green),
           _chipButton("Done", "done", Colors.red),
         ],
       ),
@@ -222,8 +189,8 @@ class _TravelPlansState extends State<TravelPlans> {
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
-      onSelected: (_) => setState(() => selectedCategory = value),
-      selectedColor: activeColor.withOpacity(0.2),
+      onSelected: (_) => context.read<TravelPlanProvider>().setFilterCategory(value),
+      selectedColor: isSelected ? activeColor.withOpacity(0.2) : null,
       backgroundColor: Colors.white,
       labelStyle: TextStyle(
         color: isSelected ? Colors.black : Colors.black54,
