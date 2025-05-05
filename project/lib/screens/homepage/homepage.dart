@@ -31,105 +31,125 @@ class _HomepageState extends State<Homepage> {
   }
 
   Widget _createBody(BuildContext context) {
-    return Form(
-      key: formkey,
-      child: Center(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6EEF8),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF6EEF8),
+        elevation: 0,
+        title: const Text(
+          'Traveler',
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          // spacing: 20,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.all(50.0),
-              child: Text(
-                "Travel App",
-                style: GoogleFonts.boogaloo(
-                  textStyle: TextStyle(
-                    fontSize: 60,
-                    fontWeight: FontWeight.bold,
-                    color: _titleColor,
-                    letterSpacing: 1,
-                    height: 1,
-                  ),
-                ),
-              ),
+            const SizedBox(height: 16),
+            const Text(
+              'Hey there, JC!',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-
-            SizedBox(
-              width: double.infinity,
-              child: Padding(
-              padding: EdgeInsets.all(60.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Hey there, JC!",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: _titleColor,
-                      letterSpacing: 1,
-                      height: 1,
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                height: 160,
+                width: double.infinity,
+                decoration: const BoxDecoration(color: Colors.grey),
+                child: Stack(
+                  children: const [
+                    Center(
+                      child: Icon(Icons.image, size: 80, color: Colors.white70),
                     ),
-                  ),
-                  Text("Check out your latest travel plans below."),
-                ],
-              ),
-            ),
-            ),
-
-            Card(
-              color: _cardMyColor,
-              elevation: 8,
-              clipBehavior: Clip.hardEdge,
-              child: InkWell(
-                onTap: () {
-                  print('Clicked my plans.');
-                },
-                child: SizedBox(
-                  width: 400,
-                  child: Padding(
-                    padding: EdgeInsets.all(30.0),
-                    child: Text(
-                      "MY PLANS",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: _textMyColor,
-                        letterSpacing: 1,
-                        height: 1,
+                    Positioned(
+                      left: 16,
+                      bottom: 16,
+                      child: Text(
+                        'Top Travel Destinations in 2025',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 4,
+                              color: Colors.black45,
+                              offset: Offset(0, 1),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
-
-            Card(
-              color: _cardSharedColor,
-              elevation: 8,
-              clipBehavior: Clip.hardEdge,
-              child: InkWell(
-                onTap: () {
-                  print('Clicked shared plans.');
-                },
-                child: SizedBox(
-                  width: 400,
-                  child: Padding(
-                    padding: EdgeInsets.all(30.0),
-                    child: Text(
-                      "Shared with me",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: _cardMyColor,
-                        letterSpacing: 1,
-                        height: 1,
-                      ),
-                    ),
-                  ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Text(
+                  'See all travel plans',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
+                Icon(Icons.arrow_forward_ios, size: 16),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _verticalPlanCard('MY PLANS', () {
+              Navigator.pushNamed(context, '/myPlans');
+            }),
+            const SizedBox(height: 16),
+            _verticalPlanCard('SHARED WITH ME', () {
+              Navigator.pushNamed(context, '/sharedPlans');
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _verticalPlanCard(String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 100,
+        decoration: BoxDecoration(
+          color: const Color(0xFFEDE0F4),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Row(
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.change_history, size: 24, color: Colors.grey),
+                    SizedBox(height: 4),
+                    Icon(Icons.square, size: 20, color: Colors.grey),
+                  ],
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.circle, size: 28, color: Colors.grey),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.black87,
               ),
             ),
           ],

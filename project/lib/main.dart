@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color.fromARGB(255, 253,248,226),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
         textTheme: GoogleFonts.lexendTextTheme(), // imported google fonts
         inputDecorationTheme: InputDecorationTheme(
           labelStyle: GoogleFonts.lexend(
@@ -62,19 +62,19 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: "/",
       // routes of different pages
-      // routes: {
-      //   '/': (context) => const SignIn(),
-      //   '/signIn': (context) => const SignIn(),
-      //   '/signUp': (context) => const SignUp(),
-      //   '/signUpInterests': (context) => const SignUpInterests(),
-      //   '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
-      //   '/homepage': (context) => const Homepage(),
-      // },
-      home: const Banner(
-        message: 'Navigation Bar',
-        location: BannerLocation.bottomStart,
-        child: MainWrapper(),
-      ),
+      routes: {
+        '/': (context) => const Homepage(),
+        '/signIn': (context) => const SignIn(),
+        '/signUp': (context) => const SignUp(),
+        '/signUpInterests': (context) => const SignUpInterests(),
+        '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
+        // '/homepage': (context) => const Homepage(),
+      },
+      // home: const Banner(
+      //   message: 'Navigation Bar',
+      //   location: BannerLocation.bottomStart,
+      //   child: MainWrapper(),
+      // ),
     );
   }
 }
