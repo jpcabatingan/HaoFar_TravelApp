@@ -18,6 +18,8 @@ import 'package:project/screens/sign_up.dart';
 import 'package:project/screens/sign_up_interests.dart';
 
 import 'package:project/screens/homepage/homepage.dart';
+import 'package:project/screens/travel_plans_list.dart';
+
 import 'package:project/screens/profile/profile.dart';
 import 'package:project/screens/friends/friends.dart';
 
@@ -63,12 +65,13 @@ class MyApp extends StatelessWidget {
       initialRoute: "/",
       // routes of different pages
       routes: {
-        '/': (context) => const Homepage(),
+        '/': (context) => const TravelPlans(),
         '/signIn': (context) => const SignIn(),
         '/signUp': (context) => const SignUp(),
         '/signUpInterests': (context) => const SignUpInterests(),
         '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
-        // '/homepage': (context) => const Homepage(),
+        '/homepage': (context) => const Homepage(),
+        '/travelPlans': (context) => const TravelPlans(),
       },
       // home: const Banner(
       //   message: 'Navigation Bar',

@@ -92,16 +92,22 @@ class _HomepageState extends State<Homepage> {
               ),
             ),
             const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
-                  'See all travel plans',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                Icon(Icons.arrow_forward_ios, size: 16),
-              ],
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/travelPlans');
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text(
+                    'See all travel plans',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  Icon(Icons.arrow_forward_ios, size: 16),
+                ],
+              ),
             ),
+
             const SizedBox(height: 16),
             _verticalPlanCard('MY PLANS', () {
               Navigator.pushNamed(context, '/myPlans');
