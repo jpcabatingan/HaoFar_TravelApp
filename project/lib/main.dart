@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 // other pubs
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project/providers/travel_plan_provider.dart';
+import 'package:project/screens/edit_plan.dart';
 import 'package:project/screens/new_plan.dart';
 import 'package:project/screens/new_plan_extra.dart';
 import 'package:project/screens/sign_up_travel_styles.dart';
@@ -21,7 +22,6 @@ import 'package:project/screens/sign_up.dart';
 import 'package:project/screens/sign_up_interests.dart';
 
 import 'package:project/screens/homepage/homepage.dart';
-import 'package:project/screens/travel_plans_list.dart';
 
 import 'package:project/screens/profile/profile.dart';
 import 'package:project/screens/friends/friends.dart';
@@ -78,10 +78,10 @@ class MyApp extends StatelessWidget {
         '/signUpInterests': (context) => const SignUpInterests(),
         '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
         '/homepage': (context) => const MainWrapper(),
-        '/travelPlans': (context) => const TravelPlans(),
         '/newPlan': (context) => const NewPlan(),
         '/newPlanExtra': (context) => const NewPlanExtra(),
         '/planDetails': (context) => const PlanDetails(),
+        '/editPlan': (context) => const EditPlan(),
       },
     );
   }

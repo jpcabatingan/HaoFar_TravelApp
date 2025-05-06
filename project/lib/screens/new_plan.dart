@@ -55,55 +55,7 @@ class _NewPlanState extends State<NewPlan> {
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
-            const Text(
-              'Create new plan',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ListTile(
-              title: Text(
-                _selectedDate == null
-                    ? 'Select Date'
-                    : DateFormat.yMMMMd().format(_selectedDate!),
-              ),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: _pickDate,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _locationController,
-              decoration: InputDecoration(
-                labelText: 'Location',
-                suffixIcon: const Icon(Icons.location_on),
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () {
-                _addMoreInfo(context);
-                print("Adding more info");
-                Navigator.pushNamed(context, '/newPlanExtra');
-              },
-              child: const Text(
-                'Add more info',
-                style: TextStyle(decoration: TextDecoration.underline),
-              ),
-            ),
-            const SizedBox(height: 20),
-            _createDoneButton(context),
+            
           ],
         ),
       ),

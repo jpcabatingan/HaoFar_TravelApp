@@ -84,6 +84,9 @@ class PlanDetails extends StatelessWidget {
                 child: TextButton(
                   onPressed: () {
                     print("Want to edit");
+                    context.read<TravelPlanProvider>().setSelectedPlan(plan);
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/editPlan');
                   },
                   child: const Text(
                     'Edit Details',

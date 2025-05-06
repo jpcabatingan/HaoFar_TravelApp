@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:project/screens/homepage/homepage.dart';
-import 'package:project/screens/travel_plans_list.dart';
 import 'package:project/screens/profile/profile.dart';
 
 class MainWrapper extends StatefulWidget {

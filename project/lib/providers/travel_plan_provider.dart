@@ -92,6 +92,17 @@ class TravelPlanProvider with ChangeNotifier {
     allPlans.removeWhere((p) => p.title == title);
     notifyListeners();
   }
+
+  void updatePlan(TravelPlanModel updatedPlan) {
+    final index = allPlans.indexWhere(
+      (plan) => plan.title == selectedPlan.title,
+    );
+    if (index != -1) {
+      allPlans[index] = updatedPlan;
+      selectedPlan = updatedPlan;
+      notifyListeners();
+    }
+  }
 }
 
 // context.read<TravelPlanProvider>().setFilterCategory("");
