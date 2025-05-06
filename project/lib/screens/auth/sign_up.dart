@@ -224,7 +224,7 @@ class _SignUpState extends State<SignUp> {
                 _firstNameController.text.trim(),
                 _lastNameController.text.trim(),
               );
-              Navigator.pushNamed(context, '/travel-list');
+              Navigator.pushNamed(context, '/sign-up-interests');
             } catch (e) {
               ScaffoldMessenger.of(
                 context,

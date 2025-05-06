@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
+import 'package:project/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
 // import 'package:my_app/providers/auth_provider.dart' as authprov;
 
@@ -48,7 +50,7 @@ class _SignUpInterestsState extends State<SignUpInterests> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _createBody(context));
+    return Scaffold(body: _createBody(context), backgroundColor: Colors.white);
   }
 
   Widget _createBody(BuildContext context) {
@@ -60,59 +62,77 @@ class _SignUpInterestsState extends State<SignUpInterests> {
           crossAxisAlignment: CrossAxisAlignment.center,
           // spacing: 20,
           children: [
-            Padding(
-              padding: EdgeInsets.all(0.0),
-              child: Text(
-                "Interests",
-                style: TextStyle(
-                  fontSize: 60,
-                  fontWeight: FontWeight.bold,
-                  color: _titleColor,
-                  letterSpacing: 1,
-                  height: 1,
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 60.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(0.0),
+                      child: Text(
+                        "Interests",
+                        style: TextStyle(
+                          fontSize: 60,
+                          fontWeight: FontWeight.bold,
+                          color: _titleColor,
+                          letterSpacing: 1,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    Text("Select what you're interested in."),
+                  ],
                 ),
               ),
             ),
-            Text("Select what you're interested in."),
-            Padding(
-              padding: EdgeInsets.all(60.0),
-              child: Wrap(
-                spacing: 15,
-                runSpacing: 15,
-                children:
-                    _interests.map((interest) {
-                      final isSelected = _selectedInterests.contains(interest);
-                      return GestureDetector(
-                        onTap: () => toggleSelection(interest),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                isSelected
-                                    ? _selectedColor
-                                    : Colors.transparent, // ← FILL COLOR
-                            border: Border.all(
+
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: EdgeInsets.all(60.0),
+                child: Wrap(
+                  spacing: 15,
+                  runSpacing: 15,
+                  children:
+                      _interests.map((interest) {
+                        final isSelected = _selectedInterests.contains(
+                          interest,
+                        );
+                        return GestureDetector(
+                          onTap: () => toggleSelection(interest),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
                               color:
                                   isSelected
                                       ? _selectedColor
-                                      : Colors.black54, // ← BORDER COLOR
-                              width: 1.5,
+                                      : Colors.transparent, // ← FILL COLOR
+                              border: Border.all(
+                                color:
+                                    isSelected
+                                        ? _selectedColor
+                                        : Colors.black54, // ← BORDER COLOR
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
                             ),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Text(
-                            interest,
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black87,
-                              fontWeight: FontWeight.w500,
+                            child: Text(
+                              interest,
+                              style: TextStyle(
+                                color:
+                                    isSelected ? Colors.white : Colors.black87,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }).toList(),
+                ),
               ),
             ),
 
@@ -153,7 +173,7 @@ class _SignUpInterestsState extends State<SignUpInterests> {
         ),
         onPressed: () {
           print("Skip button pressed");
-          Navigator.pushNamed(context, '/signUpTravelStyles');
+          Navigator.pushNamed(context, '/sign-up-travel-styles');
         },
         child: const Text("SKIP"),
       ),
@@ -182,7 +202,11 @@ class _SignUpInterestsState extends State<SignUpInterests> {
         ),
         onPressed: () {
           print("Continue button pressed");
-          Navigator.pushNamed(context, '/signUpTravelStyles');
+          Provider.of<AuthProvider>(
+            context,
+            listen: false,
+          ).updateInterests(_selectedInterests.toList());
+          Navigator.pushNamed(context, '/sign-up-travel-styles');
         },
         child: const Text("CONTINUE"),
       ),

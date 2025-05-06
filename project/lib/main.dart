@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:project/api/travel_plan_api.dart';
 import 'package:project/providers/auth_provider.dart';
+import 'package:project/providers/travel_plan_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -12,7 +14,12 @@ void main() async {
 
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (_) => TravelPlanProvider(FirebaseTravelPlanApi()),
+        ),
+      ],
       child: const MyApp(),
     ),
   );

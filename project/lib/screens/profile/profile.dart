@@ -11,14 +11,7 @@ class Profile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            CupertinoButton(
-              color: const Color.fromARGB(255, 210, 52, 52),
-              borderRadius: BorderRadius.circular(15),
-              child: const Text("Go To Details Wishlist"),
-              onPressed: () => {
-                print("Clicked Button")
-              },
-            ),
+            Text("Soon...")
           ],
         ),
       ),

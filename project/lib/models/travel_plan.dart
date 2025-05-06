@@ -4,9 +4,10 @@ class TravelPlan {
   final String planId;
   final String createdBy;
   final String name;
-  final Map<String, dynamic> date; // {start: Timestamp, end: Timestamp}
+  final DateTime startDate;
+  final DateTime endDate;
   final String location;
-  final Map<String, dynamic>? additionalInfo;
+  final Map<String, dynamic> additionalInfo;
   final List<Map<String, dynamic>> itinerary;
   final List<String> sharedWith;
   final String? qrCodeData;
@@ -15,37 +16,41 @@ class TravelPlan {
     required this.planId,
     required this.createdBy,
     required this.name,
-    required this.date,
+    required this.startDate,
+    required this.endDate,
     required this.location,
-    this.additionalInfo,
+    this.additionalInfo = const {},
     this.itinerary = const [],
     this.sharedWith = const [],
     this.qrCodeData,
   });
 
-  // Convert Firestore Document to TravelPlan
   factory TravelPlan.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>;
+    final dateMap = data['date'] as Map<String, dynamic>;
+
     return TravelPlan(
-      planId: data['planId'] ?? doc.id,
+      planId: doc.id,
       createdBy: data['createdBy'] ?? '',
       name: data['name'] ?? '',
-      date: Map<String, dynamic>.from(data['date'] ?? {}),
+      startDate: DateTime.parse(dateMap['start'] as String),
+      endDate: DateTime.parse(dateMap['end'] as String),
       location: data['location'] ?? '',
       additionalInfo: Map<String, dynamic>.from(data['additionalInfo'] ?? {}),
       itinerary: List<Map<String, dynamic>>.from(data['itinerary'] ?? []),
       sharedWith: List<String>.from(data['sharedWith'] ?? []),
-      qrCodeData: data['qrCodeData'],
+      qrCodeData: data['qrCodeData'] as String?,
     );
   }
 
-  // Convert TravelPlan to Firestore Map
   Map<String, dynamic> toFirestore() {
     return {
-      'planId': planId,
       'createdBy': createdBy,
       'name': name,
-      'date': date,
+      'date': {
+        'start': startDate.toIso8601String(),
+        'end': endDate.toIso8601String(),
+      },
       'location': location,
       'additionalInfo': additionalInfo,
       'itinerary': itinerary,
