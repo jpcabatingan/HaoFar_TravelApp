@@ -7,6 +7,8 @@ import 'package:firebase_core/firebase_core.dart';
 // other pubs
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project/providers/travel_plan_provider.dart';
+import 'package:project/screens/new_plan.dart';
+import 'package:project/screens/new_plan_extra.dart';
 import 'package:project/screens/sign_up_travel_styles.dart';
 
 // providers
@@ -23,6 +25,7 @@ import 'package:project/screens/travel_plans_list.dart';
 
 import 'package:project/screens/profile/profile.dart';
 import 'package:project/screens/friends/friends.dart';
+import 'package:project/screens/plan_details.dart';
 
 import 'package:project/mainwrapper.dart';
 
@@ -69,19 +72,17 @@ class MyApp extends StatelessWidget {
       initialRoute: "/",
       // routes of different pages
       routes: {
-        '/': (context) => const TravelPlans(),
+        '/': (context) => const MainWrapper(),
         '/signIn': (context) => const SignIn(),
         '/signUp': (context) => const SignUp(),
         '/signUpInterests': (context) => const SignUpInterests(),
         '/signUpTravelStyles': (context) => const SignUpTravelStyles(),
-        '/homepage': (context) => const Homepage(),
+        '/homepage': (context) => const MainWrapper(),
         '/travelPlans': (context) => const TravelPlans(),
+        '/newPlan': (context) => const NewPlan(),
+        '/newPlanExtra': (context) => const NewPlanExtra(),
+        '/planDetails': (context) => const PlanDetails(),
       },
-      // home: const Banner(
-      //   message: 'Navigation Bar',
-      //   location: BannerLocation.bottomStart,
-      //   child: MainWrapper(),
-      // ),
     );
   }
 }

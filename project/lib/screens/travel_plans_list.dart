@@ -2,20 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:project/providers/travel_plan_provider.dart';
-
-class TravelPlan {
-  final String title;
-  final DateTime date;
-  final String location;
-  final String category;
-
-  TravelPlan({
-    required this.title,
-    required this.date,
-    required this.location,
-    required this.category,
-  });
-}
+import 'package:project/models/travel_plan.dart';
 
 class TravelPlans extends StatefulWidget {
   const TravelPlans({super.key});
@@ -25,44 +12,39 @@ class TravelPlans extends StatefulWidget {
 }
 
 class _TravelPlansState extends State<TravelPlans> {
-  String get selectedCategory => context.watch<TravelPlanProvider>().planCategory;
+  String get selectedCategory =>
+      context.watch<TravelPlanProvider>().planCategory;
 
-  final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
-  final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
-  final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
-  final Color _btnColorContinue = const Color.fromARGB(255, 163, 181, 101);
-  final Color _cardMyColor = const Color.fromARGB(255, 241, 100, 46);
-  final Color _textMyColor = const Color.fromARGB(255, 255, 255, 255);
-  final Color _cardSharedColor = const Color.fromARGB(255, 252, 221, 157);
+  // final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
+  // final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
+  // final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
+  // final Color _btnColorContinue = const Color.fromARGB(255, 163, 181, 101);
+  // final Color _cardMyColor = const Color.fromARGB(255, 241, 100, 46);
+  // final Color _textMyColor = const Color.fromARGB(255, 255, 255, 255);
+  // final Color _cardSharedColor = const Color.fromARGB(255, 252, 221, 157);
 
   final formkey = GlobalKey<FormState>();
 
-  final List<TravelPlan> allPlans = [
-    TravelPlan(title: 'Plan 1', date: DateTime(2025, 5, 6), location: 'Pansol', category: 'my'),
-    TravelPlan(title: 'Plan 2', date: DateTime(2025, 5, 9), location: 'Ubec', category: 'my'),
-    TravelPlan(title: 'Plan 3', date: DateTime(2025, 5, 15), location: 'Siargao', category: 'my'),
-    TravelPlan(title: 'Plan 4', date: DateTime(2025, 5, 6), location: 'Kahit saan', category: 'shared'),
-    TravelPlan(title: 'Plan 5', date: DateTime(2025, 5, 9), location: 'BGC', category: 'shared'),
-    TravelPlan(title: 'Plan 6', date: DateTime(2025, 5, 15), location: 'Baguio', category: 'shared'),
-    TravelPlan(title: 'Plan 7', date: DateTime(2025, 4, 6), location: 'Ewan', category: 'done'),
-    TravelPlan(title: 'Plan 8', date: DateTime(2025, 4, 9), location: 'Dorm', category: 'done'),
-  ];
+  late final allPlans = context.watch<TravelPlanProvider>().allPlans;
 
-  List<TravelPlan> getFilteredPlans(String category) {
+  List<TravelPlanModel> getFilteredPlans(String category) {
     if (category == 'none') {
-      return List<TravelPlan>.from(allPlans)..sort((a, b) => a.date.compareTo(b.date));
+      return List<TravelPlanModel>.from(allPlans)
+        ..sort((a, b) => a.date.compareTo(b.date));
     }
     return allPlans.where((plan) => plan.category == category).toList()
       ..sort((a, b) => a.date.compareTo(b.date));
   }
 
-  List<TravelPlan> getSoonPlans(List<TravelPlan> plans) {
+  List<TravelPlanModel> getSoonPlans(List<TravelPlanModel> plans) {
     final now = DateTime.now();
     final soon = now.add(const Duration(days: 7));
-    return plans.where((p) => p.date.isAfter(now) && p.date.isBefore(soon)).toList();
+    return plans
+        .where((p) => p.date.isAfter(now) && p.date.isBefore(soon))
+        .toList();
   }
 
-  List<TravelPlan> getLaterPlans(List<TravelPlan> plans) {
+  List<TravelPlanModel> getLaterPlans(List<TravelPlanModel> plans) {
     final soon = DateTime.now().add(const Duration(days: 7));
     return plans.where((p) => p.date.isAfter(soon)).toList();
   }
@@ -109,10 +91,10 @@ class _TravelPlansState extends State<TravelPlans> {
                     selectedCategory == "my"
                         ? "My Plans"
                         : selectedCategory == "shared"
-                            ? "Shared with me"
-                            : selectedCategory == "done"
-                                ? "Done"
-                                : "All Plans",
+                        ? "Shared with me"
+                        : selectedCategory == "done"
+                        ? "Done"
+                        : "All Plans",
                     style: const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.w600,
@@ -128,7 +110,9 @@ class _TravelPlansState extends State<TravelPlans> {
                       color: Colors.black,
                       size: 40,
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/newPlan');
+                    },
                   ),
                 ),
               ],
@@ -160,7 +144,7 @@ class _TravelPlansState extends State<TravelPlans> {
                   const SizedBox(height: 8),
                   ...getLaterPlans(filteredPlans).map(_buildPlanTile),
                 ],
-                if (isDone || isAll) ...filteredPlans.map(_buildPlanTile),
+                if (isDone) ...filteredPlans.map(_buildPlanTile),
               ],
             ),
           ),
@@ -189,7 +173,8 @@ class _TravelPlansState extends State<TravelPlans> {
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
-      onSelected: (_) => context.read<TravelPlanProvider>().setFilterCategory(value),
+      onSelected:
+          (_) => context.read<TravelPlanProvider>().setFilterCategory(value),
       selectedColor: isSelected ? activeColor.withOpacity(0.2) : null,
       backgroundColor: Colors.white,
       labelStyle: TextStyle(
@@ -200,36 +185,44 @@ class _TravelPlansState extends State<TravelPlans> {
     );
   }
 
-  Widget _buildPlanTile(TravelPlan plan) {
+  Widget _buildPlanTile(TravelPlanModel plan) {
     final dateStr = DateFormat.yMMMMd().format(plan.date);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.black12)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.image, size: 48, color: Colors.grey),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  plan.title,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Text("Date: $dateStr", style: const TextStyle(fontSize: 12)),
-                Text(
-                  "Location: ${plan.location}",
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+    return GestureDetector(
+      onTap: () {
+        context.read<TravelPlanProvider>().setSelectedPlan(plan);
+        Navigator.pushNamed(context, '/planDetails');
+        
+        print("${plan.title} selected");
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.black12)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.image, size: 48, color: Colors.grey),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    plan.title,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                  Text("Date: $dateStr", style: const TextStyle(fontSize: 12)),
+                  Text(
+                    "Location: ${plan.location}",
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
