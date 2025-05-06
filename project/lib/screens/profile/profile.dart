@@ -1,7 +1,12 @@
+// screens/profile.dart
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:project/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:project/providers/user_provider.dart';
 import 'edit_profile_screen.dart';
 
 class Profile extends StatefulWidget {
@@ -15,32 +20,205 @@ class _ProfileState extends State<Profile> {
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
 
-  // TODO: replace with dynamic values from the backend
-  String username = 'johndoe123'; // <-- hardcoded
-  String fullName = 'John Doe'; // <-- hardcoded
-  String email = 'john.doe@example.com'; // <-- hardcoded
-  String phoneNumber = '+639123456789'; // <-- hardcoded
-  String bio =
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit...'; // <-- hardcoded
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = context.watch<UserProvider>();
+    final user = userProvider.user;
 
-  List<String> interests = [
-    // <-- hardcoded
-    'Solo Travel',
-    'Backpacking',
-    'City Tours',
-    'Adventure',
-    'Coding',
-  ];
+    if (userProvider.isLoading || user == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
-  List<String> travelStyles = [
-    // <-- hardcoded
-    'Solo Travel',
-    'Backpacking',
-    'City Tours',
-    'Adventure',
-  ];
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: Text('Profile', style: GoogleFonts.lexend(color: Colors.black)),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            Center(
+              child: GestureDetector(
+                onTap: _showImageSourceActionSheet,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 60,
+                      backgroundImage:
+                          _imageFile != null
+                              ? FileImage(_imageFile!)
+                              : NetworkImage(
+                                    user.profilePicture ??
+                                        'https://picsum.photos/200',
+                                  )
+                                  as ImageProvider,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: const Color(0xFFA3B565),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _visibilityToggle(userProvider),
+            const SizedBox(height: 12),
+            Text(
+              user.username,
+              style: GoogleFonts.lexend(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${user.firstName} ${user.lastName}',
+              style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                user.bio ?? 'No bio yet.',
+                style: GoogleFonts.lexend(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _sectionLabel('Email'),
+            _sectionText(user.email),
+            const SizedBox(height: 12),
+            _sectionLabel('Phone Number'),
+            _sectionText(user.phoneNumber ?? 'Not set'),
+            const SizedBox(height: 20),
+            _sectionLabel('Interests'),
+            const SizedBox(height: 6),
+            _chipWrap(user.interests, const Color(0xFFFCDD9D)),
+            const SizedBox(height: 20),
+            _sectionLabel('Preferred Travel Styles'),
+            const SizedBox(height: 6),
+            _chipWrap(user.travelStyles, const Color(0xFFFCDD9D)),
+            const SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EditProfileScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFA3B565),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      side: const BorderSide(color: Colors.black26, width: 1),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  child: Text('Edit Profile', style: GoogleFonts.lexend()),
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton(
+                onPressed: () async {
+                  try {
+                    await context.read<AuthProvider>().signOut();
+                    Navigator.pushReplacementNamed(context, '/');
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Logout failed: $e')),
+                    );
+                  }
+                },
+                backgroundColor: Colors.red,
+                child: const Icon(Icons.logout),
+                tooltip: 'Logout',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-  bool isPublic = true; // TODO: fetch actual profile visibility from backend
+  Widget _visibilityToggle(UserProvider provider) {
+    final user = provider.user!;
+
+    return GestureDetector(
+      onTap: () async {
+        await provider.updateProfile({
+          'isProfilePublic': !user.isProfilePublic,
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color:
+              user.isProfilePublic
+                  ? const Color(0xFFF1642E).withOpacity(0.2)
+                  : Colors.grey.shade300,
+          border: Border.all(color: Colors.black12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              user.isProfilePublic ? Icons.visibility : Icons.visibility_off,
+              size: 18,
+              color:
+                  user.isProfilePublic
+                      ? const Color(0xFFF1642E)
+                      : Colors.grey.shade600,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              user.isProfilePublic ? 'Public Profile' : 'Private Profile',
+              style: GoogleFonts.lexend(
+                fontSize: 12,
+                color:
+                    user.isProfilePublic
+                        ? const Color(0xFFF1642E)
+                        : Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.swap_horiz, size: 18, color: Colors.black54),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(
@@ -51,7 +229,8 @@ class _ProfileState extends State<Profile> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
-      // TODO: upload picked image to firebase Storage and save its URL
+
+      // TODO: Implement Firebase Storage upload and updateProfilePicture
     }
   }
 
@@ -85,176 +264,6 @@ class _ProfileState extends State<Profile> {
           ),
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final Color buttonColor = const Color.fromARGB(255, 163, 181, 101);
-    final Color chipColor = const Color(0xFFFCDD9D);
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: Text('Profile', style: GoogleFonts.lexend(color: Colors.black)),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Center(
-              child: GestureDetector(
-                onTap: _showImageSourceActionSheet,
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundImage:
-                          _imageFile != null
-                              ? FileImage(_imageFile!)
-                              : const AssetImage(
-                                    'assets/avatar_placeholder.png',
-                                  )
-                                  as ImageProvider,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundColor: buttonColor,
-                        child: const Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _visibilityToggle(),
-            const SizedBox(height: 12),
-            Text(
-              username, // <-- from variable
-              style: GoogleFonts.lexend(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              fullName, // <-- from variable
-              style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                bio,
-                style: GoogleFonts.lexend(),
-              ), // <-- from variable
-            ),
-            const SizedBox(height: 20),
-            _sectionLabel('Email'),
-            _sectionText(email), // <-- from variable
-            const SizedBox(height: 12),
-            _sectionLabel('Phone Number'),
-            _sectionText(phoneNumber), // <-- from variable
-            const SizedBox(height: 20),
-            _sectionLabel('Interests'),
-            const SizedBox(height: 6),
-            _chipWrap(interests, chipColor),
-            const SizedBox(height: 20),
-            _sectionLabel('Preferred Travel Styles'),
-            const SizedBox(height: 6),
-            _chipWrap(travelStyles, chipColor),
-            const SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const EditProfileScreen(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: buttonColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: const BorderSide(color: Colors.black26, width: 1),
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
-                    elevation: 2,
-                  ),
-                  child: Text('Edit Profile', style: GoogleFonts.lexend()),
-                ),
-              ),
-            ),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _visibilityToggle() {
-    final Color activeColor = const Color(0xFFF1642E);
-    final Color inactiveColor = const Color(0xFFFCDD9D);
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isPublic = !isPublic;
-          // TODO: save new visibility state to backend
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: isPublic ? inactiveColor : Colors.grey.shade300,
-          border: Border.all(color: Colors.black12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isPublic ? Icons.visibility : Icons.visibility_off,
-              size: 18,
-              color: isPublic ? activeColor : Colors.grey.shade600,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              isPublic ? 'Public Profile' : 'Private Profile',
-              style: GoogleFonts.lexend(
-                fontSize: 12,
-                color: isPublic ? activeColor : Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.swap_horiz, size: 18, color: Colors.black54),
-          ],
-        ),
-      ),
     );
   }
 
