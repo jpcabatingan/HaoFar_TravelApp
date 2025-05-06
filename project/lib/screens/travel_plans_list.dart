@@ -11,7 +11,21 @@ class TravelPlans extends StatefulWidget {
   State<TravelPlans> createState() => _TravelPlansState();
 }
 
+enum AnimationStyles { defaultStyle, custom, none }
+
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
+    ];
+
 class _TravelPlansState extends State<TravelPlans> {
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle,
+  };
+  AnimationStyle? _animationStyle;
+
   String get selectedCategory =>
       context.watch<TravelPlanProvider>().planCategory;
 
@@ -75,7 +89,7 @@ class _TravelPlansState extends State<TravelPlans> {
           onPressed: () => Navigator.pushNamed(context, '/homepage'),
         ),
         title: const Text(
-          'Traveler',
+          'HaoFar Can I Go',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.w600,
@@ -108,19 +122,6 @@ class _TravelPlansState extends State<TravelPlans> {
                     ),
                   ),
                 ),
-                // SizedBox(
-                //   width: 70,
-                //   child: IconButton(
-                //     icon: const Icon(
-                //       Icons.add_circle_outline,
-                //       color: Colors.black,
-                //       size: 40,
-                //     ),
-                //     onPressed: () {
-                //       Navigator.pushNamed(context, '/newPlan');
-                //     },
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -195,11 +196,72 @@ class _TravelPlansState extends State<TravelPlans> {
     final dateStr = DateFormat.yMMMMd().format(plan.date);
     return GestureDetector(
       onTap: () {
-        context.read<TravelPlanProvider>().setSelectedPlan(plan);
-        Navigator.pushNamed(context, '/planDetails');
+        showModalBottomSheet<void>(
+          context: context,
+          sheetAnimationStyle: _animationStyle,
+          builder: (BuildContext context) {
+            return SizedBox.expand(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      plan.title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Date: $dateStr",
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      "Location: ${plan.location}",
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 20),
 
-        print("${plan.title} selected");
+                    _sectionLabel('FLIGHT DETAILS'),
+                    plan.flight != null ? Text(plan.flight!) : Text("None"),
+
+                    _sectionLabel('ACCOMMODATION'),
+                    plan.accommodation != null
+                        ? Text(plan.accommodation!)
+                        : Text("None"),
+
+                    _sectionLabel('ITINERARY'),
+                    plan.itinerary != null
+                        ? Text(plan.itinerary!)
+                        : Text("None"),
+
+                    _sectionLabel('OTHER NOTES'),
+                    plan.notes != null ? Text(plan.notes!) : Text("None"),
+
+                    ElevatedButton(
+                      child: const Text('Open Full Page'),
+                      onPressed: () {
+                        context.read<TravelPlanProvider>().setSelectedPlan(
+                          plan,
+                        );
+                        Navigator.pushNamed(context, '/planDetails');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
       },
+      // onTap: () {
+      //   context.read<TravelPlanProvider>().setSelectedPlan(plan);
+      //   Navigator.pushNamed(context, '/planDetails');
+
+      //   print("${plan.title} selected");
+      // },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -232,4 +294,16 @@ class _TravelPlansState extends State<TravelPlans> {
       ),
     );
   }
+
+  Widget _sectionLabel(String text) => Padding(
+    padding: const EdgeInsets.only(top: 16, bottom: 4),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontWeight: FontWeight.w600,
+        fontSize: 12,
+        letterSpacing: 1.1,
+      ),
+    ),
+  );
 }

@@ -44,7 +44,7 @@ class _HomepageState extends State<Homepage> {
         backgroundColor: const Color(0xFFF6EEF8),
         elevation: 0,
         title: const Text(
-          'Traveler',
+          'HaoFar Can I Go',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.w600,
@@ -79,7 +79,7 @@ class _HomepageState extends State<Homepage> {
                       left: 16,
                       bottom: 16,
                       child: Text(
-                        'Top Travel Destinations in 2025',
+                        'Top HaoLiday Destinations in 2025',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,

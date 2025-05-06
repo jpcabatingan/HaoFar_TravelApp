@@ -20,7 +20,7 @@ class PlanDetails extends StatelessWidget {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: const Text(
-          'Traveler',
+          'HaoFar Can I Go',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w600,

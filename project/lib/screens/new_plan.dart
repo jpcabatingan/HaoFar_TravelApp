@@ -48,7 +48,7 @@ class _NewPlanState extends State<NewPlan> {
         backgroundColor: const Color(0xFFF6EEF8),
         elevation: 0,
         leading: const BackButton(color: Colors.black),
-        title: const Text('Traveler', style: TextStyle(color: Colors.black)),
+        title: const Text('HaoFar Can I Go', style: TextStyle(color: Colors.black)),
         centerTitle: true,
       ),
       body: Padding(
