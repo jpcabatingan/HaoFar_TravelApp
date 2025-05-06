@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Friends extends StatelessWidget {
   const Friends({super.key});
@@ -32,51 +33,66 @@ class Friends extends StatelessWidget {
       }
     ];
 
+    final Color highlightColor = const Color(0xFFF1642E);
+    final Color chipColor = const Color(0xFFFCDD9D);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Find People', style: TextStyle(color: Colors.black)),
+        title: Text('Find People', style: GoogleFonts.lexend(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
           children: [
             TextField(
+              style: GoogleFonts.lexend(),
               decoration: InputDecoration(
                 hintText: 'Search by name or username',
+                hintStyle: GoogleFonts.lexend(),
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerLeft,
               child: ElevatedButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.filter_list),
-                label: const Text("Filter"),
+                label: Text("Filter", style: GoogleFonts.lexend()),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF1642E),
+                  backgroundColor: highlightColor,
                   foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    side: const BorderSide(color: Colors.black26, width: 1),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
                 itemCount: users.length,
                 itemBuilder: (context, index) {
                   final user = users[index];
                   return Card(
-                    margin: const EdgeInsets.only(bottom: 16),
+                    margin: const EdgeInsets.only(bottom: 20),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    elevation: 2,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 3,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
@@ -92,38 +108,46 @@ class Friends extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(user['username'],
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold, fontSize: 14)),
+                                    style: GoogleFonts.lexend(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    )),
                                 Text(user['name'],
-                                    style: const TextStyle(
-                                        fontSize: 12, color: Colors.grey)),
+                                    style: GoogleFonts.lexend(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    )),
                                 const SizedBox(height: 8),
-                                const Text("Interests:",
-                                    style: TextStyle(fontWeight: FontWeight.bold)),
+                                Text("Interests:",
+                                    style: GoogleFonts.lexend(
+                                      fontWeight: FontWeight.bold,
+                                    )),
                                 Wrap(
                                   spacing: 8,
                                   runSpacing: 4,
                                   children: user['interests']
                                       .map<Widget>((item) => Chip(
                                             label: Text(item,
-                                                style: const TextStyle(fontSize: 10)),
-                                            backgroundColor:
-                                                const Color(0xFFFCDD9D),
+                                                style: GoogleFonts.lexend(
+                                                    fontSize: 10)),
+                                            backgroundColor: chipColor,
                                           ))
                                       .toList(),
                                 ),
                                 const SizedBox(height: 8),
-                                const Text("Travel Styles:",
-                                    style: TextStyle(fontWeight: FontWeight.bold)),
+                                Text("Travel Styles:",
+                                    style: GoogleFonts.lexend(
+                                      fontWeight: FontWeight.bold,
+                                    )),
                                 Wrap(
                                   spacing: 8,
                                   runSpacing: 4,
                                   children: user['travelStyles']
                                       .map<Widget>((item) => Chip(
                                             label: Text(item,
-                                                style: const TextStyle(fontSize: 10)),
-                                            backgroundColor:
-                                                const Color(0xFFC4C3E3),
+                                                style: GoogleFonts.lexend(
+                                                    fontSize: 10)),
+                                            backgroundColor: chipColor,
                                           ))
                                       .toList(),
                                 ),
