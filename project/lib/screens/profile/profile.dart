@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'edit_profile_screen.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -14,7 +15,30 @@ class _ProfileState extends State<Profile> {
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
 
-  bool isPublic = true; // future toggle logic
+  // TODO: replace with dynamic values from the backend
+  String username = 'johndoe123'; // <-- hardcoded
+  String fullName = 'John Doe'; // <-- hardcoded
+  String email = 'john.doe@example.com'; // <-- hardcoded
+  String phoneNumber = '+639123456789'; // <-- hardcoded
+  String bio =
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit...'; // <-- hardcoded
+
+  List<String> interests = [ // <-- hardcoded
+    'Solo Travel',
+    'Backpacking',
+    'City Tours',
+    'Adventure',
+    'Coding',
+  ];
+
+  List<String> travelStyles = [ // <-- hardcoded
+    'Solo Travel',
+    'Backpacking',
+    'City Tours',
+    'Adventure',
+  ];
+
+  bool isPublic = true; // TODO: fetch actual profile visibility from backend
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source, imageQuality: 85);
@@ -22,6 +46,7 @@ class _ProfileState extends State<Profile> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
+      // TODO: upload picked image to firebase Storage and save its URL
     }
   }
 
@@ -68,8 +93,8 @@ class _ProfileState extends State<Profile> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text('Profile', style: GoogleFonts.lexend(color: Colors.black)),
         centerTitle: true,
+        title: Text('Profile', style: GoogleFonts.lexend(color: Colors.black)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -100,57 +125,45 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
             _visibilityToggle(),
-
             const SizedBox(height: 12),
-            Text('johndoe123',
+            Text(username, // <-- from variable
                 style: GoogleFonts.lexend(fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 4),
-            Text('John Doe',
+            Text(fullName, // <-- from variable
                 style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey)),
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
-                textAlign: TextAlign.left,
-                style: GoogleFonts.lexend(),
-              ),
+              child: Text(bio, style: GoogleFonts.lexend()), // <-- from variable
             ),
             const SizedBox(height: 20),
             _sectionLabel('Email'),
-            _sectionText('john.doe@example.com'),
+            _sectionText(email), // <-- from variable
             const SizedBox(height: 12),
             _sectionLabel('Phone Number'),
-            _sectionText('+639123456789'),
+            _sectionText(phoneNumber), // <-- from variable
             const SizedBox(height: 20),
             _sectionLabel('Interests'),
             const SizedBox(height: 6),
-            _chipWrap([
-              'Solo Travel',
-              'Backpacking',
-              'City Tours',
-              'Adventure',
-              'Coding',
-            ], chipColor),
+            _chipWrap(interests, chipColor),
             const SizedBox(height: 20),
             _sectionLabel('Preferred Travel Styles'),
             const SizedBox(height: 6),
-            _chipWrap([
-              'Solo Travel',
-              'Backpacking',
-              'City Tours',
-              'Adventure',
-            ], chipColor),
+            _chipWrap(travelStyles, chipColor),
             const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: buttonColor,
                     foregroundColor: Colors.white,
@@ -185,6 +198,7 @@ class _ProfileState extends State<Profile> {
       onTap: () {
         setState(() {
           isPublic = !isPublic;
+          // TODO: save new visibility state to backend
         });
       },
       child: Container(
@@ -218,7 +232,6 @@ class _ProfileState extends State<Profile> {
       ),
     );
   }
-
 
   Widget _sectionLabel(String text) => Align(
         alignment: Alignment.centerLeft,
