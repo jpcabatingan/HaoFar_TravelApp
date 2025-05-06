@@ -5,6 +5,9 @@ import 'package:project/screens/auth/sign_up.dart';
 import 'package:project/screens/auth/sign_up_interests.dart';
 import 'package:project/screens/auth/sign_up_travel_styles.dart';
 import 'package:project/screens/errors/not_found_page.dart';
+import 'package:project/screens/profile/profile.dart';
+import 'package:project/screens/friends/friends.dart';
+
 
 class AppRoutes {
   // Auth
@@ -34,6 +37,10 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const SignUpTravelStyles());
       case AppRoutes.home:
         return MaterialPageRoute(builder: (_) => const AuthWrapper());
+      case AppRoutes.profile:
+        return MaterialPageRoute(builder: (_) => Profile());
+      case AppRoutes.friends:
+        return MaterialPageRoute(builder: (_) => Friends());
       case AppRoutes.notFound:
         return MaterialPageRoute(builder: (_) => const NotFoundPage());
       default:
