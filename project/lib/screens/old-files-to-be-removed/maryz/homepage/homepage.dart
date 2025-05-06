@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
-// import 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
 // import 'package:my_app/providers/auth_provider.dart' as authprov;
+import 'package:project/providers/travel_plan_provider.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -18,8 +19,10 @@ class _HomepageState extends State<Homepage> {
   final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColorContinue = const Color.fromARGB(255, 163, 181, 101);
-  final Color _btnColorSkip = const Color.fromARGB(255, 252, 221, 157);
-  final Color _selectedColor = const Color.fromARGB(255, 241, 100, 46);
+
+  final Color _cardMyColor = const Color.fromARGB(255, 241, 100, 46);
+  final Color _textMyColor = const Color.fromARGB(255, 255, 255, 255);
+  final Color _cardSharedColor = const Color.fromARGB(255, 252, 221, 157);
 
   final formkey = GlobalKey<FormState>();
 
@@ -29,86 +32,138 @@ class _HomepageState extends State<Homepage> {
   }
 
   Widget _createBody(BuildContext context) {
-    return Form(
-      key: formkey,
-      child: Center(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6EEF8),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF6EEF8),
+        elevation: 0,
+        title: const Text(
+          'Traveler',
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          // spacing: 20,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.all(0.0),
-              child: Text(
-                "Travel App",
-                style: GoogleFonts.boogaloo(
-                  textStyle: TextStyle(
-                    fontSize: 60,
-                    fontWeight: FontWeight.bold,
-                    color: _titleColor,
-                    letterSpacing: 1,
-                    height: 1,
-                  ),
-                ),
-              ),
+            const SizedBox(height: 16),
+            const Text(
+              'Hey there, JC!',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            Text("Select travel plans category."),
-
-            // MY PLANS
-            ListTile(
-              title: ListTile(
-                onTap: () {
-                  print("Clicked my plans");
-                },
-                leading: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "My Plans",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: _titleColor,
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                height: 160,
+                width: double.infinity,
+                decoration: const BoxDecoration(color: Colors.grey),
+                child: Stack(
+                  children: const [
+                    Center(
+                      child: Icon(Icons.image, size: 80, color: Colors.white70),
+                    ),
+                    Positioned(
+                      left: 16,
+                      bottom: 16,
+                      child: Text(
+                        'Top Travel Destinations in 2025',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 4,
+                              color: Colors.black45,
+                              offset: Offset(0, 1),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              leading: Icon(Icons.auto_awesome, color: _titleColor),
             ),
-            // SHARED WITH ME
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: () {
+                context.read<TravelPlanProvider>().setFilterCategory("none");
+                Navigator.pushNamed(context, '/travelPlans');
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text(
+                    'See all travel plans',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  Icon(Icons.arrow_forward_ios, size: 16),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+            _verticalPlanCard('MY PLANS', () {
+              context.read<TravelPlanProvider>().setFilterCategory("my");
+              Navigator.pushNamed(context, '/travelPlans');
+            }),
+            const SizedBox(height: 16),
+            _verticalPlanCard('SHARED WITH ME', () {
+              context.read<TravelPlanProvider>().setFilterCategory("shared");
+              Navigator.pushNamed(context, '/travelPlans');
+            }),
           ],
         ),
       ),
     );
   }
 
-  // continue button
-  Widget _createContinueButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _btnColorContinue,
-          foregroundColor: Colors.black,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            side: const BorderSide(color: Colors.black26, width: 1),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-          ),
-          elevation: 2,
+  Widget _verticalPlanCard(String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 100,
+        decoration: BoxDecoration(
+          color: const Color(0xFFEDE0F4),
+          borderRadius: BorderRadius.circular(12),
         ),
-        onPressed: () {
-          print("Continue button pressed");
-          Navigator.pushNamed(context, '/signUpTravelStyles');
-        },
-        child: const Text("CONTINUE"),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Row(
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.change_history, size: 24, color: Colors.grey),
+                    SizedBox(height: 4),
+                    Icon(Icons.square, size: 20, color: Colors.grey),
+                  ],
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.circle, size: 28, color: Colors.grey),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

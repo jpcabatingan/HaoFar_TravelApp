@@ -15,6 +15,9 @@ class MainWrapper extends StatefulWidget {
 }
 
 class MainWrapperState extends State<MainWrapper> {
+  // app colors
+  final Color _navBarColor = const Color.fromARGB(255, 80,78,118);
+  final Color _iconColor = const Color.fromARGB(255, 255, 255, 255);
   int _selectedIndex = 0;
 
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
@@ -43,31 +46,43 @@ class MainWrapperState extends State<MainWrapper> {
         }
       },
       child: Scaffold(
-        bottomNavigationBar: NavigationBar(
-          onDestinationSelected: (int index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          selectedIndex: _selectedIndex,
-          destinations: const [
-            NavigationDestination(
-              selectedIcon: Icon(Icons.home),
-              icon: Icon(Icons.home_outlined),
-              label: 'Home',
-            ),
-            NavigationDestination(
-              selectedIcon: Icon(Icons.people_alt),
-              icon: Icon(Icons.people_alt_outlined),
-              label: 'Friends',
-            ),
-            NavigationDestination(
-              selectedIcon: Icon(Icons.person),
-              icon: Icon(Icons.person_outlined),
-              label: 'Profile',
-            ),
-          ],
+        bottomNavigationBar: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
+              states,
+            ) {
+              return TextStyle(color: _iconColor);
+              // Unselected label color
+            }),
+          ),
+          child: NavigationBar(
+            backgroundColor: _navBarColor,
+            onDestinationSelected: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            selectedIndex: _selectedIndex,
+            destinations: [
+              NavigationDestination(
+                selectedIcon: Icon(Icons.home, color: _navBarColor),
+                icon: Icon(Icons.home_outlined, color: _iconColor),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                selectedIcon: Icon(Icons.people_alt, color: _navBarColor),
+                icon: Icon(Icons.people_alt_outlined, color: _iconColor),
+                label: 'Friends',
+              ),
+              NavigationDestination(
+                selectedIcon: Icon(Icons.person, color: _navBarColor),
+                icon: Icon(Icons.person_outlined, color: _iconColor),
+                label: 'Profile',
+              ),
+            ],
+          ),
         ),
+
         body: SafeArea(
           top: false,
           child: IndexedStack(
