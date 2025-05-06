@@ -4,50 +4,50 @@ import 'package:project/models/travel_plan.dart';
 class TravelPlanProvider with ChangeNotifier {
   String planCategory = "none";
 
-  List<TravelPlanModel> allPlans = [
-    TravelPlanModel(
+  List<TravelPlan> allPlans = [
+    TravelPlan(
       title: 'Plan 1',
       date: DateTime(2025, 5, 10),
       location: 'Pansol',
       category: 'my',
     ),
-    TravelPlanModel(
+    TravelPlan(
       title: 'Plan 2',
       date: DateTime(2025, 5, 9),
       location: 'Ubec',
       category: 'my',
     ),
-    TravelPlanModel(
+    TravelPlan(
       title: 'Plan 3',
       date: DateTime(2025, 5, 15),
       location: 'Siargao',
       category: 'my',
     ),
-    TravelPlanModel(
+    TravelPlan(
       title: 'Plan 4',
       date: DateTime(2025, 5, 12),
       location: 'Kahit saan',
       category: 'shared',
     ),
-    TravelPlanModel(
+    TravelPlan(
       title: 'Plan 5',
       date: DateTime(2025, 5, 9),
       location: 'BGC',
       category: 'shared',
     ),
-    TravelPlanModel(
+    TravelPlan(
       title: 'Plan 6',
       date: DateTime(2025, 5, 15),
       location: 'Baguio',
       category: 'shared',
     ),
-    TravelPlanModel(
+    TravelPlan(
       title: 'Plan 7',
       date: DateTime(2025, 4, 6),
       location: 'Ewan',
       category: 'done',
     ),
-    TravelPlanModel(
+    TravelPlan(
       title: 'Plan 8',
       date: DateTime(2025, 4, 9),
       location: 'Dorm',
@@ -55,13 +55,13 @@ class TravelPlanProvider with ChangeNotifier {
     ),
   ];
 
-  TravelPlanModel currentlyAdding = TravelPlanModel(
+  TravelPlan currentlyAdding = TravelPlan(
     title: '',
     date: DateTime.now(),
     location: '',
     category: '',
   );
-  TravelPlanModel selectedPlan = TravelPlanModel(
+  TravelPlan selectedPlan = TravelPlan(
     title: '',
     date: DateTime.now(),
     location: '',
@@ -73,17 +73,17 @@ class TravelPlanProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setCurrentlyAdding(TravelPlanModel plan) {
+  void setCurrentlyAdding(TravelPlan plan) {
     currentlyAdding = plan;
     notifyListeners();
   }
 
-  void addPlan(TravelPlanModel plan) {
+  void addPlan(TravelPlan plan) {
     allPlans.insert(0, plan);
     notifyListeners();
   }
 
-  void setSelectedPlan(TravelPlanModel plan) {
+  void setSelectedPlan(TravelPlan plan) {
     selectedPlan = plan;
     notifyListeners();
   }
@@ -93,7 +93,7 @@ class TravelPlanProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updatePlan(TravelPlanModel updatedPlan) {
+  void updatePlan(TravelPlan updatedPlan) {
     final index = allPlans.indexWhere(
       (plan) => plan.title == selectedPlan.title,
     );

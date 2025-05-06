@@ -48,14 +48,76 @@ class _NewPlanState extends State<NewPlan> {
         backgroundColor: const Color(0xFFF6EEF8),
         elevation: 0,
         leading: const BackButton(color: Colors.black),
-        title: const Text('HaoFar Can I Go', style: TextStyle(color: Colors.black)),
+        title: const Text(
+          'HaoFar Can I Go',
+          style: TextStyle(color: Colors.black),
+        ),
         centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
-            
+            const Text(
+              'Create new plan',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: 'Title',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              title: Text(
+                _selectedDate == null
+                    ? 'Select Date'
+                    : DateFormat.yMMMMd().format(_selectedDate!),
+              ),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: _pickDate,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: Colors.grey.shade300),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _locationController,
+              decoration: InputDecoration(
+                labelText: 'Location',
+                suffixIcon: const Icon(Icons.location_on),
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: () {
+                if (_titleController.text.isEmpty ||
+                    _selectedDate == null ||
+                    _locationController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please fill all required fields'),
+                    ),
+                  );
+                  return;
+                }
+
+                _addMoreInfo(context);
+                Navigator.pushNamed(context, '/newPlanExtra');
+              },
+
+              child: const Text(
+                'Add more info',
+                style: TextStyle(decoration: TextDecoration.underline),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _createDoneButton(context),
           ],
         ),
       ),
@@ -83,8 +145,15 @@ class _NewPlanState extends State<NewPlan> {
           elevation: 2,
         ),
         onPressed: () {
+          if (_titleController.text.isEmpty ||
+              _selectedDate == null ||
+              _locationController.text.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Please fill all required fields')),
+            );
+            return;
+          }
           _savePlan(context);
-          print("Created new plan");
           Navigator.pushNamed(context, '/homepage');
         },
         child: const Text("DONE"),
@@ -102,7 +171,7 @@ class _NewPlanState extends State<NewPlan> {
       return;
     }
 
-    final newPlan = TravelPlanModel(
+    final newPlan = TravelPlan(
       title: _titleController.text,
       date: _selectedDate!,
       location: _locationController.text,
@@ -127,7 +196,7 @@ class _NewPlanState extends State<NewPlan> {
       return;
     }
 
-    final newPlan = TravelPlanModel(
+    final newPlan = TravelPlan(
       title: _titleController.text,
       date: _selectedDate!,
       location: _locationController.text,

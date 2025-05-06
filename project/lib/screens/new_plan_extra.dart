@@ -51,7 +51,7 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
     final provider = context.read<TravelPlanProvider>();
     final previous = provider.currentlyAdding;
 
-    provider.currentlyAdding = TravelPlanModel(
+    provider.currentlyAdding = TravelPlan(
       title: previous.title,
       date: previous.date,
       location: previous.location,

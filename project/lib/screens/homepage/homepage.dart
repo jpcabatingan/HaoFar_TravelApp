@@ -32,16 +32,16 @@ class _HomepageState extends State<Homepage> {
 
   late final allPlans = context.watch<TravelPlanProvider>().allPlans;
 
-  List<TravelPlanModel> getFilteredPlans(String category) {
+  List<TravelPlan> getFilteredPlans(String category) {
     if (category == 'none') {
-      return List<TravelPlanModel>.from(allPlans)
+      return List<TravelPlan>.from(allPlans)
         ..sort((a, b) => a.date.compareTo(b.date));
     }
     return allPlans.where((plan) => plan.category == category).toList()
       ..sort((a, b) => a.date.compareTo(b.date));
   }
 
-  List<TravelPlanModel> getSoonPlans(List<TravelPlanModel> plans) {
+  List<TravelPlan> getSoonPlans(List<TravelPlan> plans) {
     final now = DateTime.now();
     final soon = now.add(const Duration(days: 7));
     return plans
@@ -49,7 +49,7 @@ class _HomepageState extends State<Homepage> {
         .toList();
   }
 
-  List<TravelPlanModel> getLaterPlans(List<TravelPlanModel> plans) {
+  List<TravelPlan> getLaterPlans(List<TravelPlan> plans) {
     final soon = DateTime.now().add(const Duration(days: 7));
     return plans.where((p) => p.date.isAfter(soon)).toList();
   }
@@ -220,7 +220,7 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  Widget _buildPlanTile(TravelPlanModel plan) {
+  Widget _buildPlanTile(TravelPlan plan) {
     final dateStr = DateFormat.yMMMMd().format(plan.date);
     return GestureDetector(
       onTap: () {

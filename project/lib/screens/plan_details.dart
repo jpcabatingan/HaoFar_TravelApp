@@ -9,7 +9,7 @@ class PlanDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TravelPlanModel plan =
+    final TravelPlan plan =
         context.watch<TravelPlanProvider>().selectedPlan!;
     final dateStr = DateFormat.yMMMMd().format(plan.date);
 

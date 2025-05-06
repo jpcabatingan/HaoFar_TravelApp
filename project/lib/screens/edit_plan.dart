@@ -77,7 +77,7 @@ class _EditPlanState extends State<EditPlan> {
   void _saveInfo() {
     final provider = context.read<TravelPlanProvider>();
 
-    final editedPlan = TravelPlanModel(
+    final editedPlan = TravelPlan(
       title: _titleController.text,
       date: _selectedDate!,
       location: _locationController.text,

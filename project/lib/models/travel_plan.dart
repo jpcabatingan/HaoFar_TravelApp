@@ -1,6 +1,6 @@
 import 'package:project/models/checklist_item.dart';
 
-class TravelPlanModel {
+class TravelPlan {
   final String title;
   final DateTime date;
   final String location;
@@ -12,7 +12,7 @@ class TravelPlanModel {
   final String? notes;
   final List<ChecklistItem>? checklist;
 
-  TravelPlanModel({
+  TravelPlan({
     required this.title,
     required this.date,
     required this.location,
