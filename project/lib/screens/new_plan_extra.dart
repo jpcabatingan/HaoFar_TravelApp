@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project/models/travel_plan.dart';
 import 'package:project/providers/travel_plan_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:project/models/checklist_item.dart';
 
 class NewPlanExtra extends StatefulWidget {
   const NewPlanExtra({super.key});
@@ -19,24 +20,24 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
   late TextEditingController _notesController;
   final TextEditingController _checklistItemController = TextEditingController();
 
-  List<String> checklist = [];
+  List<ChecklistItem> checklist = [];
 
   @override
   void initState() {
     super.initState();
     final plan = context.read<TravelPlanProvider>().currentlyAdding;
 
-    _flightController = TextEditingController(text: plan?.flight ?? '');
-    _accommodationController = TextEditingController(text: plan?.accommodation ?? '');
-    _itineraryController = TextEditingController(text: plan?.itinerary ?? '');
-    _notesController = TextEditingController(text: plan?.notes ?? '');
-    checklist = List<String>.from(plan?.checklist ?? []);
+    _flightController = TextEditingController(text: plan.flight ?? '');
+    _accommodationController = TextEditingController(text: plan.accommodation ?? '');
+    _itineraryController = TextEditingController(text: plan.itinerary ?? '');
+    _notesController = TextEditingController(text: plan.notes ?? '');
+    checklist = List<ChecklistItem>.from(plan.checklist ?? []);
   }
 
   void _addChecklistItem() {
     if (_checklistItemController.text.isNotEmpty) {
       setState(() {
-        checklist.add(_checklistItemController.text);
+        checklist.add(ChecklistItem(text: _checklistItemController.text));
         _checklistItemController.clear();
       });
     }
@@ -51,7 +52,7 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
     final previous = provider.currentlyAdding;
 
     provider.currentlyAdding = TravelPlanModel(
-      title: previous!.title,
+      title: previous.title,
       date: previous.date,
       location: previous.location,
       category: previous.category,
@@ -62,7 +63,7 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
       checklist: checklist,
     );
 
-    context.read<TravelPlanProvider>().addPlan(provider.currentlyAdding);
+    provider.addPlan(provider.currentlyAdding);
 
     Navigator.pop(context);
   }
@@ -109,15 +110,23 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
               ],
             ),
             const SizedBox(height: 10),
-            ...checklist.asMap().entries.map((entry) => ListTile(
-              title: Text(entry.value),
-              trailing: IconButton(
-                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-                onPressed: () => _removeChecklistItem(entry.key),
-              ),
-            )),
+            ...checklist.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return CheckboxListTile(
+                title: Text(item.text),
+                value: item.isChecked,
+                onChanged: (val) {
+                  setState(() => item.isChecked = val ?? false);
+                },
+                secondary: IconButton(
+                  icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                  onPressed: () => _removeChecklistItem(index),
+                ),
+              );
+            }),
             const SizedBox(height: 20),
-            _createDoneButton(context)
+            _createDoneButton(context),
           ],
         ),
       ),

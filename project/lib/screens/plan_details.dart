@@ -28,7 +28,6 @@ class PlanDetails extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -64,7 +63,21 @@ class PlanDetails extends StatelessWidget {
               _infoBox(plan.notes),
 
               _sectionLabel('CHECKLIST'),
-
+              Column(
+                children:
+                    plan.checklist?.map((item) {
+                      return Row(
+                        children: [
+                          Checkbox(
+                            value: item.isChecked,
+                            onChanged: null,
+                          ),
+                          Expanded(child: Text(item.text)),
+                        ],
+                      );
+                    }).toList() ??
+                    [const Text("No checklist items.")],
+              ),
 
               const SizedBox(height: 20),
               Center(

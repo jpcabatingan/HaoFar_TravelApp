@@ -1,3 +1,5 @@
+import 'package:project/models/checklist_item.dart';
+
 class TravelPlanModel {
   final String title;
   final DateTime date;
@@ -8,7 +10,7 @@ class TravelPlanModel {
   final String? accommodation;
   final String? itinerary;
   final String? notes;
-  final List<String>? checklist;
+  final List<ChecklistItem>? checklist;
 
   TravelPlanModel({
     required this.title,
