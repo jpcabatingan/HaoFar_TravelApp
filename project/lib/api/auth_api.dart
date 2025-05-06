@@ -93,4 +93,27 @@ class FirebaseAuthApi {
       throw e.toString();
     }
   }
+
+  Future<void> updateInterests(String userId, List<String> interests) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'interests': interests,
+      });
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<void> updateTravelStyles(
+    String userId,
+    List<String> travelStyles,
+  ) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'travelStyles': travelStyles,
+      });
+    } catch (e) {
+      throw e.toString();
+    }
+  }
 }

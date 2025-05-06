@@ -1,9 +1,8 @@
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
-// import 'package:provider/provider.dart';
-// import 'package:my_app/providers/auth_provider.dart' as authprov;
+import 'package:project/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class SignUpTravelStyles extends StatefulWidget {
   const SignUpTravelStyles({super.key});
@@ -169,7 +168,7 @@ class _SignUpTravelStylesState extends State<SignUpTravelStyles> {
         ),
         onPressed: () {
           print("Skip button pressed");
-          Navigator.pushNamed(context, '/homepage');
+          Navigator.pushNamed(context, '/');
         },
         child: const Text("SKIP"),
       ),
@@ -198,7 +197,11 @@ class _SignUpTravelStylesState extends State<SignUpTravelStyles> {
         ),
         onPressed: () {
           print("Finished sign up!");
-          Navigator.pushNamed(context, '/homepage');
+          Provider.of<AuthProvider>(
+            context,
+            listen: false,
+          ).updateTravelStyles(_selectedTravelStyles.toList());
+          Navigator.pushNamed(context, '/');
         },
         child: const Text(
           "Finish Sign Up",

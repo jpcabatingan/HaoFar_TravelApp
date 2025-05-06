@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
+import 'package:project/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
 // import 'package:my_app/providers/auth_provider.dart' as authprov;
 
@@ -171,7 +173,7 @@ class _SignUpInterestsState extends State<SignUpInterests> {
         ),
         onPressed: () {
           print("Skip button pressed");
-          Navigator.pushNamed(context, '/signUpTravelStyles');
+          Navigator.pushNamed(context, '/sign-up-travel-styles');
         },
         child: const Text("SKIP"),
       ),
@@ -200,7 +202,11 @@ class _SignUpInterestsState extends State<SignUpInterests> {
         ),
         onPressed: () {
           print("Continue button pressed");
-          Navigator.pushNamed(context, '/signUpTravelStyles');
+          Provider.of<AuthProvider>(
+            context,
+            listen: false,
+          ).updateInterests(_selectedInterests.toList());
+          Navigator.pushNamed(context, '/sign-up-travel-styles');
         },
         child: const Text("CONTINUE"),
       ),

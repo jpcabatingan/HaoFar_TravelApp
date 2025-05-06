@@ -71,4 +71,24 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> updateInterests(List<String> interests) async {
+    try {
+      if (user == null) throw 'User not logged in';
+      await _authService.updateInterests(user!.uid, interests);
+      await fetchUser();
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<void> updateTravelStyles(List<String> travelStyles) async {
+    try {
+      if (user == null) throw 'User not logged in';
+      await _authService.updateTravelStyles(user!.uid, travelStyles);
+      await fetchUser();
+    } catch (e) {
+      throw e.toString();
+    }
+  }
 }

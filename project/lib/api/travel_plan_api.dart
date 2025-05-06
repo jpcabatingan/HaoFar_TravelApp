@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project/models/travel_plan.dart';
+import 'package:async/async.dart';
 
 class FirebaseTravelPlanApi {
   static final _db = FirebaseFirestore.instance;
@@ -10,7 +11,6 @@ class FirebaseTravelPlanApi {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
 
-    // Get both created and shared plans
     final createdStream =
         _db
             .collection('travelPlans')
@@ -23,87 +23,55 @@ class FirebaseTravelPlanApi {
             .where('sharedWith', arrayContains: user.uid)
             .snapshots();
 
-    return createdStream.asyncExpand((createdSnapshot) {
-      return sharedStream.map((sharedSnapshot) {
-        final allDocs = [...createdSnapshot.docs, ...sharedSnapshot.docs];
-        // Remove duplicates
-        final uniqueDocs =
-            allDocs
-                .fold<Map<String, DocumentSnapshot>>(
-                  {},
-                  (map, doc) => map..[doc.id] = doc,
-                )
-                .values
-                .toList();
+    return StreamZip([createdStream, sharedStream])
+        .map((snapshots) {
+          final createdSnapshot = snapshots[0] as QuerySnapshot;
+          final sharedSnapshot = snapshots[1] as QuerySnapshot;
 
-        return uniqueDocs.map((doc) => TravelPlan.fromFirestore(doc)).toList();
-      });
-    });
+          final allDocs = <DocumentSnapshot>[
+            ...createdSnapshot.docs,
+            ...sharedSnapshot.docs,
+          ];
+
+          final uniquePlans = <String, DocumentSnapshot>{};
+
+          for (var doc in allDocs) {
+            uniquePlans[doc.id] = doc;
+          }
+
+          return uniquePlans.values
+              .map((doc) => TravelPlan.fromFirestore(doc))
+              .toList();
+        })
+        .handleError((e) {
+          throw Exception('Failed to fetch travel plans: $e');
+        });
   }
 
-  // Define methods to interact with Firebase for travel plans
   Future<String> createTravelPlan(TravelPlan travelPlan) async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) throw Exception('Authentication required');
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
 
-      final docRef = await _db.collection('travelPlans').add({
-        'createdBy': user.uid,
-        'name': travelPlan.name,
-        'date': travelPlan.date,
-        'location': travelPlan.location,
-        'additionalInfo': travelPlan.additionalInfo,
-        'itinerary': travelPlan.itinerary,
-        'sharedWith': travelPlan.sharedWith,
-        'qrCodeData': travelPlan.qrCodeData,
-      });
-
-      return docRef.id;
-    } catch (e) {
-      throw Exception('Failed to create plan: ${e.toString()}');
-    }
-  }
-
-  Future<TravelPlan?> getTravelPlan(String id) async {
-    try {
-      final doc = await _db.collection('travelPlans').doc(id).get();
-      if (doc.exists) {
-        return TravelPlan.fromFirestore(doc);
-      } else {
-        return null;
-      }
-    } catch (e) {
-      throw Exception('Failed to fetch plan: ${e.toString()}');
-    }
+    final docRef = await _db
+        .collection('travelPlans')
+        .add(travelPlan.toFirestore());
+    return docRef.id;
   }
 
   Future<void> updateTravelPlan(TravelPlan travelPlan) async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) throw Exception('Authentication required');
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
 
-      await _db.collection('travelPlans').doc(travelPlan.planId).update({
-        'name': travelPlan.name,
-        'date': travelPlan.date,
-        'location': travelPlan.location,
-        'additionalInfo': travelPlan.additionalInfo,
-        'itinerary': travelPlan.itinerary,
-        'sharedWith': travelPlan.sharedWith,
-        'qrCodeData': travelPlan.qrCodeData,
-      });
-    } catch (e) {
-      throw Exception('Failed to update plan: ${e.toString()}');
-    }
+    await _db
+        .collection('travelPlans')
+        .doc(travelPlan.planId)
+        .update(travelPlan.toFirestore());
   }
 
   Future<void> deleteTravelPlan(String id) async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) throw Exception('Authentication required');
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
 
-      await _db.collection('travelPlans').doc(id).delete();
-    } catch (e) {
-      throw Exception('Failed to delete plan: ${e.toString()}');
-    }
+    await _db.collection('travelPlans').doc(id).delete();
   }
 }
