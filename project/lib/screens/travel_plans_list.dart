@@ -60,6 +60,12 @@ class _TravelPlansState extends State<TravelPlans> {
     final isAll = selectedCategory == "none";
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/newPlan');
+        },
+        child: const Icon(Icons.add),
+      ),
       backgroundColor: const Color(0xFFF6EEF8),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF6EEF8),
@@ -102,19 +108,19 @@ class _TravelPlansState extends State<TravelPlans> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  width: 70,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.add_circle_outline,
-                      color: Colors.black,
-                      size: 40,
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/newPlan');
-                    },
-                  ),
-                ),
+                // SizedBox(
+                //   width: 70,
+                //   child: IconButton(
+                //     icon: const Icon(
+                //       Icons.add_circle_outline,
+                //       color: Colors.black,
+                //       size: 40,
+                //     ),
+                //     onPressed: () {
+                //       Navigator.pushNamed(context, '/newPlan');
+                //     },
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -191,7 +197,7 @@ class _TravelPlansState extends State<TravelPlans> {
       onTap: () {
         context.read<TravelPlanProvider>().setSelectedPlan(plan);
         Navigator.pushNamed(context, '/planDetails');
-        
+
         print("${plan.title} selected");
       },
       child: Container(

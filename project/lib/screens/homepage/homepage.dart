@@ -33,6 +33,12 @@ class _HomepageState extends State<Homepage> {
 
   Widget _createBody(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/newPlan');
+        },
+        child: const Icon(Icons.add),
+      ),
       backgroundColor: const Color(0xFFF6EEF8),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF6EEF8),
