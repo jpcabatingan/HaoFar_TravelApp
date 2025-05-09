@@ -38,7 +38,7 @@ class _TravelPlansState extends State<TravelPlans> {
         elevation: 0,
         leading: BackButton(
           color: Colors.black,
-          onPressed: () => Navigator.pushNamed(context, '/homepage'),
+          onPressed: () => Navigator.pushNamed(context, '/'),
         ),
         title: const Text(
           'Traveler',
@@ -80,7 +80,7 @@ class _TravelPlansState extends State<TravelPlans> {
                   FloatingActionButton.small(
                     backgroundColor: _btnColorContinue,
                     onPressed: () {
-                      Navigator.pushNamed(context, '/create-travel-plan');
+                      Navigator.pushNamed(context, '/new-travel-list');
                     },
                     child: const Icon(Icons.add),
                   ),

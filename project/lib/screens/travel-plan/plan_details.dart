@@ -74,7 +74,7 @@ class PlanDetails extends StatelessWidget {
                   onPressed: () {
                     Navigator.pushNamed(
                       context,
-                      '/edit-travel-plan',
+                      '/travel-list-details-edit',
                       arguments: plan,
                     );
                   },

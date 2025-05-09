@@ -21,6 +21,7 @@ class AppRoutes {
   static const String travelListDetails = '/travel-list-details';
   static const String travelListDetailsEdit = '/travel-list-details-edit';
   static const String createTravelPlan = '/new-travel-list';
+  static const String createTravelPlanExtra = '/new-travel-list-extra';
   static const String friends = '/friends';
   static const String profile = '/profile';
   static const String notFound = '/not-found';

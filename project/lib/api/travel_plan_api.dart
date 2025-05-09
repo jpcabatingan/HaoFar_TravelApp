@@ -48,15 +48,19 @@ class FirebaseTravelPlanApi {
         });
   }
 
-  Future<String> createTravelPlan(TravelPlan travelPlan) async {
-    final user = _auth.currentUser;
+  Future<void> createTravelPlan(TravelPlan travelPlan) async {
+    final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
-    // Ensure planId is used as document ID
-    final docRef = _db.collection('travelPlans').doc(travelPlan.planId);
-    await docRef.set(travelPlan.toFirestore());
+    // ✅ Ensure planId is not empty
+    if (travelPlan.planId.isEmpty) {
+      throw Exception('planId cannot be empty');
+    }
 
-    return docRef.id;
+    await _db
+        .collection('travelPlans')
+        .doc(travelPlan.planId)
+        .set(travelPlan.toFirestore());
   }
 
   Future<void> updateTravelPlan(TravelPlan travelPlan) async {

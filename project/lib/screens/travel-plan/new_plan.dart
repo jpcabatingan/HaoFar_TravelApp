@@ -78,7 +78,7 @@ class _NewPlanState extends State<NewPlan> {
 
     provider.createPlan(newPlan);
 
-    Navigator.pushReplacementNamed(context, '/homepage');
+    Navigator.pushNamed(context, '/travel-list');
   }
 
   void _navigateToExtraInfo(BuildContext context) {
@@ -93,21 +93,25 @@ class _NewPlanState extends State<NewPlan> {
       return;
     }
 
+    // ✅ Generate planId here
+    final String planId =
+        FirebaseFirestore.instance.collection('travelPlans').doc().id;
+
     final draftPlan = TravelPlan(
-      planId: '',
-      createdBy: '',
+      planId: planId,
+      createdBy: '', // Will be filled later
       name: _titleController.text,
       startDate: _startDate!,
       endDate: _endDate ?? _startDate!.add(const Duration(days: 1)),
       location: _locationController.text,
-      additionalInfo: _additionalInfo,
+      additionalInfo: {},
       itinerary: [],
       sharedWith: [],
       qrCodeData: null,
     );
 
     provider.setDraftPlan(draftPlan);
-    Navigator.pushNamed(context, '/newPlanExtra');
+    Navigator.pushNamed(context, '/new-travel-list-extra');
   }
 
   @override
@@ -179,34 +183,7 @@ class _NewPlanState extends State<NewPlan> {
             ),
             const SizedBox(height: 10),
             TextButton(
-              onPressed: () {
-                if (_titleController.text.isEmpty ||
-                    _startDate == null ||
-                    _locationController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please fill all required fields'),
-                    ),
-                  );
-                  return;
-                }
-
-                final draftPlan = TravelPlan(
-                  planId: '', // Empty for now; will be generated on save
-                  createdBy: '', // Will be set by provider
-                  name: _titleController.text,
-                  startDate: _startDate!,
-                  endDate: _endDate ?? _startDate!.add(const Duration(days: 1)),
-                  location: _locationController.text,
-                  additionalInfo: _additionalInfo,
-                  itinerary: [],
-                  sharedWith: [],
-                  qrCodeData: null,
-                );
-
-                context.read<TravelPlanProvider>().setDraftPlan(draftPlan);
-                Navigator.pushNamed(context, '/newPlanExtra');
-              },
+              onPressed: () => _navigateToExtraInfo(context),
               child: const Text(
                 'Add more info',
                 style: TextStyle(decoration: TextDecoration.underline),

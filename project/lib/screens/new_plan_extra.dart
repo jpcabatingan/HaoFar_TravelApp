@@ -74,7 +74,7 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
     });
   }
 
-  void _savePlan(BuildContext context) {
+  void _savePlan(BuildContext context) async {
     final provider = context.read<TravelPlanProvider>();
     final draftPlan = provider.draftPlan;
 
@@ -99,15 +99,32 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
       'checklist': _checklist,
     };
 
-    // Update the draft plan in provider
     final updatedPlan = draftPlan.copyWith(additionalInfo: updatedInfo);
-    provider.updateDraftAdditionalInfo(updatedPlan.additionalInfo);
 
-    // Create the plan in Firestore
-    provider.createPlan(updatedPlan);
+    try {
+      await provider.createPlan(updatedPlan);
+      provider.clearDraftPlan();
 
-    // Navigate back
-    Navigator.pushNamed(context, '/homepage');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Plan saved successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/travel-list',
+        (route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save plan: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override

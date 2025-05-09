@@ -69,6 +69,10 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Future<void> createPlan(TravelPlan plan) async {
+    if (plan.planId.isEmpty) {
+      throw Exception("planId cannot be empty");
+    }
+
     try {
       await _travelPlanApi.createTravelPlan(plan);
     } catch (e) {
@@ -124,6 +128,11 @@ class TravelPlanProvider with ChangeNotifier {
     if (_draftPlan != null) {
       _draftPlan = _draftPlan!.copyWith(additionalInfo: info);
     }
+    notifyListeners();
+  }
+
+  void clearDraftPlan() {
+    _draftPlan = null;
     notifyListeners();
   }
 }
