@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:project/app/routes.dart';
 import 'package:project/screens/errors/not_found_page.dart';
 import 'package:project/screens/friends/friends.dart';
+import 'package:project/screens/travel-plan/new_plan.dart';
 import 'package:project/screens/profile/profile.dart';
+import 'package:project/screens/travel-plan/edit_plan.dart';
+import 'package:project/screens/travel-plan/plan_details.dart';
 import 'package:project/screens/travel-plan/travel_plans_list.dart';
 
 class AppLayout extends StatefulWidget {
@@ -61,6 +64,12 @@ class AppLayoutState extends State<AppLayout> {
     switch (settings.name) {
       case AppRoutes.travelList:
         return const TravelPlans();
+      case AppRoutes.travelListDetails:
+        return const PlanDetails();
+      case AppRoutes.travelListDetailsEdit:
+        return const EditPlan();
+      case AppRoutes.createTravelPlan:
+        return const NewPlan();
       case AppRoutes.friends:
         return const Friends();
       case AppRoutes.profile:

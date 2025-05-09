@@ -8,7 +8,6 @@ import 'package:project/screens/errors/not_found_page.dart';
 import 'package:project/screens/profile/profile.dart';
 import 'package:project/screens/friends/friends.dart';
 
-
 class AppRoutes {
   // Auth
   static const String signIn = '/sign-in';
@@ -19,6 +18,9 @@ class AppRoutes {
   // Main App
   static const String home = '/';
   static const String travelList = '/travel-list';
+  static const String travelListDetails = '/travel-list-details';
+  static const String travelListDetailsEdit = '/travel-list-details-edit';
+  static const String createTravelPlan = '/new-travel-list';
   static const String friends = '/friends';
   static const String profile = '/profile';
   static const String notFound = '/not-found';

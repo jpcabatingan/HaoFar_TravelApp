@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:project/providers/travel_plan_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:project/models/travel_plan.dart';
+import 'package:project/providers/travel_plan_provider.dart';
 
 class PlanDetails extends StatelessWidget {
   const PlanDetails({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final TravelPlan plan =
-        context.watch<TravelPlanProvider>().selectedPlan!;
-    final dateStr = DateFormat.yMMMMd().format(plan.date);
+    final provider = context.watch<TravelPlanProvider>();
+    final plan = provider.selectedPlan;
+
+    if (plan == null) {
+      return const Scaffold(body: Center(child: Text("Plan not found")));
+    }
+
+    final dateFormatter = DateFormat.yMMMMd();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6EEF8),
@@ -36,57 +41,42 @@ class PlanDetails extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                plan.title,
+                plan.name,
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              Text("Date: $dateStr", style: const TextStyle(fontSize: 14)),
-              Text(
-                "Location: ${plan.location}",
-                style: const TextStyle(fontSize: 14),
-              ),
+              Text("Start: ${dateFormatter.format(plan.startDate)}"),
+              Text("End: ${dateFormatter.format(plan.endDate)}"),
+              Text("Location: ${plan.location}"),
               const SizedBox(height: 20),
 
               _sectionLabel('FLIGHT DETAILS'),
-              _infoBox(plan.flight),
+              _infoBox(plan.flightDetails),
 
               _sectionLabel('ACCOMMODATION'),
               _infoBox(plan.accommodation),
 
               _sectionLabel('ITINERARY'),
-              _infoBox(plan.itinerary),
+              _buildItinerary(plan.itinerary),
 
               _sectionLabel('OTHER NOTES'),
-              _infoBox(plan.notes),
+              _buildNotes(plan.notes),
 
               _sectionLabel('CHECKLIST'),
-              Column(
-                children:
-                    plan.checklist?.map((item) {
-                      return Row(
-                        children: [
-                          Checkbox(
-                            value: item.isChecked,
-                            onChanged: null,
-                          ),
-                          Expanded(child: Text(item.text)),
-                        ],
-                      );
-                    }).toList() ??
-                    [const Text("No checklist items.")],
-              ),
+              _buildChecklist(plan.checklist),
 
               const SizedBox(height: 20),
               Center(
                 child: TextButton(
                   onPressed: () {
-                    print("Want to edit");
-                    context.read<TravelPlanProvider>().setSelectedPlan(plan);
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/editPlan');
+                    Navigator.pushNamed(
+                      context,
+                      '/edit-travel-plan',
+                      arguments: plan,
+                    );
                   },
                   child: const Text(
                     'Edit Details',
@@ -97,18 +87,22 @@ class PlanDetails extends StatelessWidget {
                   ),
                 ),
               ),
-
               Center(
                 child: TextButton(
-                  onPressed: () {
-                    print("Delete Plan");
-                    context.read<TravelPlanProvider>().removePlan(plan.title);
-                    Navigator.pop(context);
+                  onPressed: () async {
+                    try {
+                      await provider.deletePlan(plan.planId);
+                      Navigator.pop(context);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Failed to delete plan: $e")),
+                      );
+                    }
                   },
                   child: const Text(
                     'Delete Plan',
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: Colors.red,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -133,7 +127,7 @@ class PlanDetails extends StatelessWidget {
     ),
   );
 
-  Widget _infoBox(String? content) => Container(
+  Widget _infoBox(String content) => Container(
     width: double.infinity,
     padding: const EdgeInsets.all(12),
     margin: const EdgeInsets.only(bottom: 8),
@@ -142,6 +136,46 @@ class PlanDetails extends StatelessWidget {
       borderRadius: BorderRadius.circular(6),
       border: Border.all(color: Colors.black12),
     ),
-    child: Text(content ?? '', style: const TextStyle(fontSize: 14)),
+    child: Text(content, style: const TextStyle(fontSize: 14)),
   );
+
+  Widget _buildItinerary(List<Map<String, dynamic>> itinerary) {
+    return itinerary.isEmpty
+        ? const Text("No itinerary items.")
+        : ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: itinerary.length,
+          itemBuilder: (context, index) {
+            final day = itinerary[index];
+            final activities = List<Map<String, dynamic>>.from(
+              day['activities'] ?? [],
+            );
+            return ExpansionTile(
+              title: Text("Day ${day['day']}"),
+              children:
+                  activities
+                      .map(
+                        (act) => ListTile(
+                          title: Text("${act['time']} - ${act['activity']}"),
+                        ),
+                      )
+                      .toList(),
+            );
+          },
+        );
+  }
+
+  Widget _buildNotes(List<String> notes) {
+    if (notes.isEmpty) return const Text("No notes.");
+    return Column(children: notes.map((note) => Text("• $note")).toList());
+  }
+
+  Widget _buildChecklist(List<String> checklist) {
+    if (checklist.isEmpty) return const Text("No checklist items.");
+    return Column(
+      children:
+          checklist.map((item) => ListTile(title: Text("☐ $item"))).toList(),
+    );
+  }
 }

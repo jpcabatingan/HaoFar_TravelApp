@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project/models/travel_plan.dart';
-import 'package:project/screens/travel-plan/dummy_data.dart';
 import 'package:provider/provider.dart';
 import 'package:project/providers/travel_plan_provider.dart';
 
@@ -21,19 +20,12 @@ class _TravelPlansState extends State<TravelPlans> {
   final Color _textMyColor = const Color.fromARGB(255, 255, 255, 255);
   final Color _cardSharedColor = const Color.fromARGB(255, 252, 221, 157);
 
-  final formkey = GlobalKey<FormState>();
   final DateFormat _dateFormatter = DateFormat.yMMMMd();
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<TravelPlanProvider>();
     final filteredPlans = provider.filteredPlans;
-
-    // Show dummy data only if provider has no plans and is not loading
-    final List<TravelPlan> displayPlans =
-        filteredPlans.isEmpty && !provider.isLoading
-            ? getDummyPlans()
-            : filteredPlans;
 
     final selectedCategory = provider.planCategory;
     final isDone = selectedCategory == "done";
@@ -58,88 +50,107 @@ class _TravelPlansState extends State<TravelPlans> {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 25),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 300,
-                  child: Text(
-                    selectedCategory == "my"
-                        ? "My Plans"
-                        : selectedCategory == "shared"
-                        ? "Shared with me"
-                        : selectedCategory == "done"
-                        ? "Done"
-                        : "All Plans",
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 30,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 70,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.add_circle_outline,
-                      color: Colors.black,
-                      size: 40,
-                    ),
-                    onPressed: () {
-                      // TODO: Navigate to create screen
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 15),
-          _buildCategoryChips(),
-          const SizedBox(height: 8),
-          if (provider.isLoading)
-            const Center(child: CircularProgressIndicator())
-          else if (provider.error != null)
-            Text("Error: ${provider.error}")
-          else
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          provider.refresh();
+        },
+        child: Column(
+          children: [
+            const SizedBox(height: 25),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
                 children: [
-                  if (!isDone && getSoonPlans(displayPlans).isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    const Text(
-                      "Soon!",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                  Expanded(
+                    child: Text(
+                      selectedCategory == "my"
+                          ? "My Plans"
+                          : selectedCategory == "shared"
+                          ? "Shared with me"
+                          : selectedCategory == "done"
+                          ? "Done"
+                          : "All Plans",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 30,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    ...getSoonPlans(displayPlans).map(_buildPlanTile),
-                    const SizedBox(height: 16),
-                  ],
-                  if (!isDone && getLaterPlans(displayPlans).isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    const Text(
-                      "Later...",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ...getLaterPlans(displayPlans).map(_buildPlanTile),
-                  ],
-                  if (isDone || isAll) ...displayPlans.map(_buildPlanTile),
+                  ),
+                  FloatingActionButton.small(
+                    backgroundColor: _btnColorContinue,
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/create-travel-plan');
+                    },
+                    child: const Icon(Icons.add),
+                  ),
                 ],
               ),
             ),
-        ],
+            const SizedBox(height: 15),
+            _buildCategoryChips(),
+            const SizedBox(height: 8),
+            if (provider.isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (provider.error != null)
+              Center(
+                child: Text(
+                  "Error: ${provider.error}",
+                  style: const TextStyle(color: Colors.red),
+                ),
+              )
+            else
+              Expanded(
+                child:
+                    filteredPlans.isEmpty
+                        ? const Center(
+                          child: Text(
+                            "No travel plans found. Tap '+' to add one.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        )
+                        : ListView(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          children: [
+                            if (!isDone &&
+                                getSoonPlans(filteredPlans).isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              const Text(
+                                "Soon!",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ...getSoonPlans(
+                                filteredPlans,
+                              ).map(_buildPlanTile),
+                              const SizedBox(height: 16),
+                            ],
+                            if (!isDone &&
+                                getLaterPlans(filteredPlans).isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              const Text(
+                                "Later...",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ...getLaterPlans(
+                                filteredPlans,
+                              ).map(_buildPlanTile),
+                            ],
+                            if (isDone || isAll)
+                              ...filteredPlans.map(_buildPlanTile),
+                          ],
+                        ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -193,38 +204,47 @@ class _TravelPlansState extends State<TravelPlans> {
     final startDateStr = _dateFormatter.format(plan.startDate);
     final endDateStr = _dateFormatter.format(plan.endDate);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.black12)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.image, size: 48, color: Colors.grey),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  plan.name,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Start: $startDateStr",
-                  style: const TextStyle(fontSize: 12),
-                ),
-                Text("End: $endDateStr", style: const TextStyle(fontSize: 12)),
-                Text(
-                  "Location: ${plan.location}",
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+    return GestureDetector(
+      onTap: () {
+        context.read<TravelPlanProvider>().setSelectedPlan(plan);
+        Navigator.pushNamed(context, '/travel-plan-details', arguments: plan);
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.black12)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.image, size: 48, color: Colors.grey),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    plan.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Start: $startDateStr",
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  Text(
+                    "End: $endDateStr",
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  Text(
+                    "Location: ${plan.location}",
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:project/models/travel_plan.dart';
 import 'package:project/providers/travel_plan_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:project/models/checklist_item.dart';
 
 class NewPlanExtra extends StatefulWidget {
   const NewPlanExtra({super.key});
@@ -16,56 +15,108 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
 
   late TextEditingController _flightController;
   late TextEditingController _accommodationController;
-  late TextEditingController _itineraryController;
   late TextEditingController _notesController;
-  final TextEditingController _checklistItemController = TextEditingController();
+  late TextEditingController _checklistItemController;
 
-  List<ChecklistItem> checklist = [];
+  late Map<String, dynamic> _additionalInfo = {};
+  late List<String> _checklist = [];
 
   @override
   void initState() {
     super.initState();
-    final plan = context.read<TravelPlanProvider>().currentlyAdding;
+    final provider = context.read<TravelPlanProvider>();
+    final draftPlan = provider.draftPlan;
 
-    _flightController = TextEditingController(text: plan.flight ?? '');
-    _accommodationController = TextEditingController(text: plan.accommodation ?? '');
-    _itineraryController = TextEditingController(text: plan.itinerary ?? '');
-    _notesController = TextEditingController(text: plan.notes ?? '');
-    checklist = List<ChecklistItem>.from(plan.checklist ?? []);
+    if (draftPlan == null) return;
+
+    // Initialize controllers with draft plan data
+    _flightController = TextEditingController(
+      text: draftPlan.additionalInfo['flightDetails'] ?? '',
+    );
+    _accommodationController = TextEditingController(
+      text: draftPlan.additionalInfo['accommodation'] ?? '',
+    );
+    _notesController = TextEditingController(
+      text:
+          (draftPlan.additionalInfo['notes'] as List<String>?)?.join('\n') ??
+          '',
+    );
+    _checklistItemController = TextEditingController();
+
+    // Initialize checklist from draft plan
+    _checklist = List<String>.from(draftPlan.additionalInfo['checklist'] ?? []);
+    _additionalInfo = Map<String, dynamic>.from(draftPlan.additionalInfo);
   }
 
   void _addChecklistItem() {
-    if (_checklistItemController.text.isNotEmpty) {
+    final text = _checklistItemController.text.trim();
+    if (text.isNotEmpty) {
       setState(() {
-        checklist.add(ChecklistItem(text: _checklistItemController.text));
+        _checklist.add(text);
         _checklistItemController.clear();
       });
     }
   }
 
   void _removeChecklistItem(int index) {
-    setState(() => checklist.removeAt(index));
+    setState(() {
+      _checklist.removeAt(index);
+    });
   }
 
-  void _saveInfo() {
+  void _updateAdditionalInfo(String key, String value) {
+    setState(() {
+      if (value.isEmpty) {
+        _additionalInfo.remove(key);
+      } else {
+        _additionalInfo[key] = value;
+      }
+    });
+  }
+
+  void _savePlan(BuildContext context) {
     final provider = context.read<TravelPlanProvider>();
-    final previous = provider.currentlyAdding;
+    final draftPlan = provider.draftPlan;
 
-    provider.currentlyAdding = TravelPlan(
-      title: previous.title,
-      date: previous.date,
-      location: previous.location,
-      category: previous.category,
-      flight: _flightController.text,
-      accommodation: _accommodationController.text,
-      itinerary: _itineraryController.text,
-      notes: _notesController.text,
-      checklist: checklist,
-    );
+    if (draftPlan == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No draft plan found')));
+      return;
+    }
 
-    provider.addPlan(provider.currentlyAdding);
+    // Update additional info with current form values
+    final updatedInfo = {
+      ..._additionalInfo,
+      'flightDetails': _flightController.text.trim(),
+      'accommodation': _accommodationController.text.trim(),
+      'notes':
+          _notesController.text
+              .trim()
+              .split('\n')
+              .where((n) => n.isNotEmpty)
+              .toList(),
+      'checklist': _checklist,
+    };
 
-    Navigator.pop(context);
+    // Update the draft plan in provider
+    final updatedPlan = draftPlan.copyWith(additionalInfo: updatedInfo);
+    provider.updateDraftAdditionalInfo(updatedPlan.additionalInfo);
+
+    // Create the plan in Firestore
+    provider.createPlan(updatedPlan);
+
+    // Navigate back
+    Navigator.pushNamed(context, '/homepage');
+  }
+
+  @override
+  void dispose() {
+    _flightController.dispose();
+    _accommodationController.dispose();
+    _notesController.dispose();
+    _checklistItemController.dispose();
+    super.dispose();
   }
 
   @override
@@ -76,99 +127,113 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
         backgroundColor: const Color(0xFFF6EEF8),
         elevation: 0,
         leading: const BackButton(color: Colors.black),
-        title: const Text('HaoFar Can I Go', style: TextStyle(color: Colors.black)),
+        title: const Text(
+          'HaoFar Can I Go',
+          style: TextStyle(color: Colors.black),
+        ),
         centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
-            const Text('Create new plan', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text(
+              'Add More Details',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 20),
-            _buildTextField('Flight Details', _flightController),
+            TextField(
+              controller: _flightController,
+              onChanged:
+                  (value) => _updateAdditionalInfo('flightDetails', value),
+              decoration: const InputDecoration(
+                labelText: 'Flight Details',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 20),
-            _buildTextField('Accommodation Details', _accommodationController),
+            TextField(
+              controller: _accommodationController,
+              onChanged:
+                  (value) => _updateAdditionalInfo('accommodation', value),
+              decoration: const InputDecoration(
+                labelText: 'Accommodation Details',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 20),
-            _buildTextField('Itinerary', _itineraryController),
-            const SizedBox(height: 20),
-            _buildTextField('Other notes', _notesController),
+            TextField(
+              controller: _notesController,
+              onChanged: (value) => _updateAdditionalInfo('notes', value),
+              maxLines: null,
+              decoration: const InputDecoration(
+                labelText: 'Notes (one per line)',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _checklistItemController,
-                    decoration: const InputDecoration(labelText: 'Add item', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Add Checklist Item',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _addChecklistItem,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                  ),
                   child: const Icon(Icons.add, color: Colors.white),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-            ...checklist.asMap().entries.map((entry) {
+            ..._checklist.asMap().entries.map((entry) {
               final index = entry.key;
               final item = entry.value;
-              return CheckboxListTile(
-                title: Text(item.text),
-                value: item.isChecked,
-                onChanged: (val) {
-                  setState(() => item.isChecked = val ?? false);
-                },
-                secondary: IconButton(
-                  icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+              return ListTile(
+                title: Text(item),
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.remove_circle_outline,
+                    color: Colors.red,
+                  ),
                   onPressed: () => _removeChecklistItem(index),
                 ),
               );
-            }),
+            }).toList(),
+            if (_checklist.isEmpty) const Text('No checklist items added yet.'),
             const SizedBox(height: 20),
-            _createDoneButton(context),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _btnColor,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    side: const BorderSide(color: Colors.black26, width: 1),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                  elevation: 2,
+                ),
+                onPressed: () => _savePlan(context),
+                child: const Text("Save Plan"),
+              ),
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(String label, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      maxLines: null,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-    );
-  }
-
-  Widget _createDoneButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _btnColor,
-          foregroundColor: Colors.black,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            side: const BorderSide(color: Colors.black26, width: 1),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-          ),
-          elevation: 2,
-        ),
-        onPressed: () {
-          _saveInfo();
-          print("Created new plan");
-          Navigator.pushNamed(context, '/homepage');
-        },
-        child: const Text("DONE"),
       ),
     );
   }

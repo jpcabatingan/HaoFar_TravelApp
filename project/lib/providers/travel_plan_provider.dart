@@ -17,6 +17,13 @@ class TravelPlanProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  TravelPlan? _selectedPlan;
+  TravelPlan? get selectedPlan => _selectedPlan;
+
+  User? get currentUser => _auth.currentUser;
+  TravelPlan? _draftPlan;
+  TravelPlan? get draftPlan => _draftPlan;
+
   TravelPlanProvider(this._travelPlanApi) {
     _init();
   }
@@ -89,5 +96,34 @@ class TravelPlanProvider with ChangeNotifier {
       notifyListeners();
       rethrow;
     }
+  }
+
+  void refresh() {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    _init(); // Re-fetch data
+  }
+
+  void setSelectedPlan(TravelPlan plan) {
+    _selectedPlan = plan;
+    notifyListeners();
+  }
+
+  void clearSelectedPlan() {
+    _selectedPlan = null;
+    notifyListeners();
+  }
+
+  void setDraftPlan(TravelPlan plan) {
+    _draftPlan = plan;
+    notifyListeners();
+  }
+
+  void updateDraftAdditionalInfo(Map<String, dynamic> info) {
+    if (_draftPlan != null) {
+      _draftPlan = _draftPlan!.copyWith(additionalInfo: info);
+    }
+    notifyListeners();
   }
 }

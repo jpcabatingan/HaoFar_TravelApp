@@ -52,9 +52,10 @@ class FirebaseTravelPlanApi {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
-    final docRef = await _db
-        .collection('travelPlans')
-        .add(travelPlan.toFirestore());
+    // Ensure planId is used as document ID
+    final docRef = _db.collection('travelPlans').doc(travelPlan.planId);
+    await docRef.set(travelPlan.toFirestore());
+
     return docRef.id;
   }
 
@@ -62,10 +63,11 @@ class FirebaseTravelPlanApi {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
+    // Use set() to fully replace the document
     await _db
         .collection('travelPlans')
         .doc(travelPlan.planId)
-        .update(travelPlan.toFirestore());
+        .set(travelPlan.toFirestore());
   }
 
   Future<void> deleteTravelPlan(String id) async {
