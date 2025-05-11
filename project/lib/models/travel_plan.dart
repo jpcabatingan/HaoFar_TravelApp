@@ -1,5 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+
+extension DateTimeComparison on DateTime {
+  bool isAtSameMomentAs(DateTime other) =>
+      year == other.year && month == other.month && day == other.day;
+
+  bool isAtSameOrAfter(DateTime other) =>
+      isAfter(other) || isAtSameMomentAs(other);
+
+  bool isAtSameOrBefore(DateTime other) =>
+      isBefore(other) || isAtSameMomentAs(other);
+}
 
 class TravelPlan {
   final String planId;

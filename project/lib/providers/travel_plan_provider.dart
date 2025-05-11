@@ -1,5 +1,3 @@
-// providers/travel_plan_provider.dart
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:project/api/travel_plan_api.dart';
@@ -16,9 +14,6 @@ class TravelPlanProvider with ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String? get error => _error;
-
-  TravelPlan? _selectedPlan;
-  TravelPlan? get selectedPlan => _selectedPlan;
 
   User? get currentUser => _auth.currentUser;
   TravelPlan? _draftPlan;
@@ -45,20 +40,28 @@ class TravelPlanProvider with ChangeNotifier {
     }
   }
 
-  void _init() {
-    _travelPlanApi.getTravelPlans().listen(
-      (plans) {
-        _plans = plans;
-        _isLoading = false;
-        _error = null;
-        notifyListeners();
-      },
-      onError: (e) {
-        _error = e.toString();
-        _isLoading = false;
-        notifyListeners();
-      },
-    );
+  Future<void> _init() async {
+    _isLoading = true;
+    notifyListeners();
+
+    await _travelPlanApi
+        .getTravelPlans()
+        .first
+        .then((plans) {
+          final uniquePlans = <String, TravelPlan>{};
+          for (var plan in plans) {
+            uniquePlans[plan.planId] = plan;
+          }
+          _plans = uniquePlans.values.toList();
+          _isLoading = false;
+          _error = null;
+          notifyListeners();
+        })
+        .catchError((e) {
+          _error = e.toString();
+          _isLoading = false;
+          notifyListeners();
+        });
   }
 
   void setFilterCategory(String category) {
@@ -75,6 +78,16 @@ class TravelPlanProvider with ChangeNotifier {
 
     try {
       await _travelPlanApi.createTravelPlan(plan);
+
+      // ✅ Avoid adding duplicate if it already exists
+      final existingIndex = _plans.indexWhere((p) => p.planId == plan.planId);
+      if (existingIndex == -1) {
+        _plans.add(plan);
+      } else {
+        _plans[existingIndex] = plan;
+      }
+
+      await refresh();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -85,6 +98,7 @@ class TravelPlanProvider with ChangeNotifier {
   Future<void> updatePlan(TravelPlan plan) async {
     try {
       await _travelPlanApi.updateTravelPlan(plan);
+      await refresh();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -95,6 +109,7 @@ class TravelPlanProvider with ChangeNotifier {
   Future<void> deletePlan(String planId) async {
     try {
       await _travelPlanApi.deleteTravelPlan(planId);
+      await refresh();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -102,21 +117,11 @@ class TravelPlanProvider with ChangeNotifier {
     }
   }
 
-  void refresh() {
+  Future<void> refresh() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
-    _init(); // Re-fetch data
-  }
-
-  void setSelectedPlan(TravelPlan plan) {
-    _selectedPlan = plan;
-    notifyListeners();
-  }
-
-  void clearSelectedPlan() {
-    _selectedPlan = null;
-    notifyListeners();
+    await _init(); // Make _init() async and await it
   }
 
   void setDraftPlan(TravelPlan plan) {
@@ -134,5 +139,19 @@ class TravelPlanProvider with ChangeNotifier {
   void clearDraftPlan() {
     _draftPlan = null;
     notifyListeners();
+  }
+
+  Stream<TravelPlan?> getPlanStream(String planId) {
+    return _travelPlanApi.getPlanById(planId);
+  }
+
+  Future<TravelPlan?> getPlanById(String planId) async {
+    try {
+      return await _travelPlanApi.getPlanByIdOnce(planId);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
   }
 }

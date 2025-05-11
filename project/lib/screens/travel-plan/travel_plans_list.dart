@@ -12,14 +12,7 @@ class TravelPlans extends StatefulWidget {
 }
 
 class _TravelPlansState extends State<TravelPlans> {
-  final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
-  final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
-  final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColorContinue = const Color.fromARGB(255, 163, 181, 101);
-  final Color _cardMyColor = const Color.fromARGB(255, 241, 100, 46);
-  final Color _textMyColor = const Color.fromARGB(255, 255, 255, 255);
-  final Color _cardSharedColor = const Color.fromARGB(255, 252, 221, 157);
-
   final DateFormat _dateFormatter = DateFormat.yMMMMd();
 
   @override
@@ -31,25 +24,14 @@ class _TravelPlansState extends State<TravelPlans> {
     final isDone = selectedCategory == "done";
     final isAll = selectedCategory == "none";
 
+    final now = _getDateOnly(DateTime.now());
+    final soon = now.add(const Duration(days: 7));
+
+    final soonPlans = getSoonPlans(filteredPlans, now, soon);
+    final laterPlans = getLaterPlans(filteredPlans, soon);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6EEF8),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF6EEF8),
-        elevation: 0,
-        leading: BackButton(
-          color: Colors.black,
-          onPressed: () => Navigator.pushNamed(context, '/'),
-        ),
-        title: const Text(
-          'Traveler',
-          style: TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: RefreshIndicator(
         onRefresh: () async {
           provider.refresh();
@@ -113,8 +95,7 @@ class _TravelPlansState extends State<TravelPlans> {
                         : ListView(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           children: [
-                            if (!isDone &&
-                                getSoonPlans(filteredPlans).isNotEmpty) ...[
+                            if (!isDone && soonPlans.isNotEmpty) ...[
                               const SizedBox(height: 10),
                               const Text(
                                 "Soon!",
@@ -124,13 +105,10 @@ class _TravelPlansState extends State<TravelPlans> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              ...getSoonPlans(
-                                filteredPlans,
-                              ).map(_buildPlanTile),
+                              ...soonPlans.map((plan) => _buildPlanTile(plan)),
                               const SizedBox(height: 16),
                             ],
-                            if (!isDone &&
-                                getLaterPlans(filteredPlans).isNotEmpty) ...[
+                            if (!isDone && laterPlans.isNotEmpty) ...[
                               const SizedBox(height: 10),
                               const Text(
                                 "Later...",
@@ -140,12 +118,13 @@ class _TravelPlansState extends State<TravelPlans> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              ...getLaterPlans(
-                                filteredPlans,
-                              ).map(_buildPlanTile),
+                              ...laterPlans.map((plan) => _buildPlanTile(plan)),
                             ],
-                            if (isDone || isAll)
-                              ...filteredPlans.map(_buildPlanTile),
+                            // Changed condition: Only show flat list for "Done" category
+                            if (isDone)
+                              ...filteredPlans.map(
+                                (plan) => _buildPlanTile(plan),
+                              ),
                           ],
                         ),
               ),
@@ -155,17 +134,22 @@ class _TravelPlansState extends State<TravelPlans> {
     );
   }
 
-  List<TravelPlan> getSoonPlans(List<TravelPlan> plans) {
-    final now = DateTime.now();
-    final soon = now.add(const Duration(days: 7));
-    return plans
-        .where((p) => p.startDate.isAfter(now) && p.startDate.isBefore(soon))
-        .toList();
+  List<TravelPlan> getSoonPlans(
+    List<TravelPlan> plans,
+    DateTime now,
+    DateTime soon,
+  ) {
+    return plans.where((p) {
+      final planDate = _getDateOnly(p.startDate);
+      return planDate.isAfter(now) && planDate.isBefore(soon);
+    }).toList();
   }
 
-  List<TravelPlan> getLaterPlans(List<TravelPlan> plans) {
-    final soon = DateTime.now().add(const Duration(days: 7));
-    return plans.where((p) => p.startDate.isAfter(soon)).toList();
+  List<TravelPlan> getLaterPlans(List<TravelPlan> plans, DateTime soon) {
+    return plans.where((p) {
+      final planDate = _getDateOnly(p.startDate);
+      return planDate.isAtSameOrAfter(soon);
+    }).toList();
   }
 
   Widget _buildCategoryChips() {
@@ -205,9 +189,13 @@ class _TravelPlansState extends State<TravelPlans> {
     final endDateStr = _dateFormatter.format(plan.endDate);
 
     return GestureDetector(
+      key: Key(plan.planId), // ✅ Unique key to avoid Flutter widget reuse bugs
       onTap: () {
-        context.read<TravelPlanProvider>().setSelectedPlan(plan);
-        Navigator.pushNamed(context, '/travel-plan-details', arguments: plan);
+        Navigator.pushNamed(
+          context,
+          '/travel-list-details',
+          arguments: plan.planId, // Pass ID instead of the entire plan
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
@@ -247,5 +235,9 @@ class _TravelPlansState extends State<TravelPlans> {
         ),
       ),
     );
+  }
+
+  DateTime _getDateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 }

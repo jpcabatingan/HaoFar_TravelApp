@@ -50,7 +50,7 @@ class _NewPlanState extends State<NewPlan> {
     }
   }
 
-  void _savePlan(BuildContext context) {
+  void _savePlan(BuildContext context) async {
     final provider = Provider.of<TravelPlanProvider>(context, listen: false);
     final user = provider.currentUser;
 
@@ -63,9 +63,11 @@ class _NewPlanState extends State<NewPlan> {
       return;
     }
 
+    print("Saving plan with createdBy: ${user?.uid ?? 'null'}");
+
     final newPlan = TravelPlan(
       planId: FirebaseFirestore.instance.collection('travelPlans').doc().id,
-      createdBy: user?.uid ?? '',
+      createdBy: user!.uid,
       name: _titleController.text,
       startDate: _startDate!,
       endDate: _endDate ?? _startDate!.add(const Duration(days: 1)),
@@ -75,6 +77,30 @@ class _NewPlanState extends State<NewPlan> {
       sharedWith: [],
       qrCodeData: null,
     );
+
+    try {
+      await provider.createPlan(newPlan);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Plan saved successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/travel-lists',
+        (route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save plan: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
 
     provider.createPlan(newPlan);
 
@@ -93,13 +119,19 @@ class _NewPlanState extends State<NewPlan> {
       return;
     }
 
-    // ✅ Generate planId here
-    final String planId =
-        FirebaseFirestore.instance.collection('travelPlans').doc().id;
+    final user = provider.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('User not authenticated')));
+      return;
+    }
+
+    print("Saving plan with createdBy: ${user?.uid ?? 'null'}");
 
     final draftPlan = TravelPlan(
-      planId: planId,
-      createdBy: '', // Will be filled later
+      planId: FirebaseFirestore.instance.collection('travelPlans').doc().id,
+      createdBy: user?.uid ?? '',
       name: _titleController.text,
       startDate: _startDate!,
       endDate: _endDate ?? _startDate!.add(const Duration(days: 1)),

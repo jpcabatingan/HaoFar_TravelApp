@@ -13,7 +13,6 @@ class EditPlan extends StatefulWidget {
 
 class _EditPlanState extends State<EditPlan> {
   final Color _btnColor = const Color.fromARGB(255, 163, 181, 101);
-
   final _titleController = TextEditingController();
   final _locationController = TextEditingController();
 
@@ -26,6 +25,70 @@ class _EditPlanState extends State<EditPlan> {
   late TextEditingController _checklistController;
 
   List<String> checklist = [];
+  String? planId;
+  TravelPlan? plan;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers only
+    _flightController = TextEditingController();
+    _accommodationController = TextEditingController();
+    _notesController = TextEditingController();
+    _checklistController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Safe to access context here
+    if (planId == null) {
+      planId = ModalRoute.of(context)?.settings.arguments as String?;
+      if (planId != null) {
+        _fetchPlan();
+      } else {
+        if (mounted) setState(() => isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _fetchPlan() async {
+    if (planId == null || !mounted) return;
+
+    final provider = context.read<TravelPlanProvider>();
+    try {
+      final fetchedPlan = await provider.getPlanById(planId!);
+      if (!mounted) return;
+
+      if (fetchedPlan == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Plan not found')));
+        Navigator.pop(context);
+        return;
+      }
+
+      setState(() {
+        plan = fetchedPlan;
+        _titleController.text = plan!.name;
+        _locationController.text = plan!.location;
+        _startDate = plan!.startDate;
+        _endDate = plan!.endDate;
+        _flightController.text = plan!.flightDetails;
+        _accommodationController.text = plan!.accommodation;
+        _notesController.text = plan!.notes.join('\n');
+        checklist = List.from(plan!.checklist);
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error fetching plan: $e')));
+      Navigator.pop(context);
+    }
+  }
 
   void _pickStartDate() async {
     final now = DateTime.now();
@@ -35,7 +98,7 @@ class _EditPlanState extends State<EditPlan> {
       firstDate: now,
       lastDate: DateTime(2100),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() => _startDate = picked);
     }
   }
@@ -49,32 +112,13 @@ class _EditPlanState extends State<EditPlan> {
       firstDate: _startDate!,
       lastDate: DateTime(2100),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() => _endDate = picked);
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    final plan = context.read<TravelPlanProvider>().selectedPlan;
-    if (plan == null) return;
-
-    _titleController.text = plan.name;
-    _locationController.text = plan.location;
-    _startDate = plan.startDate;
-    _endDate = plan.endDate;
-
-    _flightController = TextEditingController(text: plan.flightDetails);
-    _accommodationController = TextEditingController(text: plan.accommodation);
-    _notesController = TextEditingController(text: plan.notes.join('\n'));
-    _checklistController = TextEditingController();
-
-    checklist = plan.checklist;
-  }
-
   void _addChecklistItem() {
-    if (_checklistController.text.isNotEmpty) {
+    if (_checklistController.text.isNotEmpty && mounted) {
       setState(() {
         checklist.add(_checklistController.text.trim());
         _checklistController.clear();
@@ -83,18 +127,16 @@ class _EditPlanState extends State<EditPlan> {
   }
 
   void _removeChecklistItem(int index) {
-    setState(() => checklist.removeAt(index));
+    if (mounted) setState(() => checklist.removeAt(index));
   }
 
-  void _saveInfo() {
-    final provider = context.read<TravelPlanProvider>();
-    final plan = provider.selectedPlan;
-
+  void _saveInfo() async {
     if (plan == null || _startDate == null || _endDate == null) return;
 
+    final provider = context.read<TravelPlanProvider>();
     final updatedPlan = TravelPlan(
-      planId: plan.planId,
-      createdBy: plan.createdBy,
+      planId: plan!.planId,
+      createdBy: plan!.createdBy,
       name: _titleController.text,
       startDate: _startDate!,
       endDate: _endDate!,
@@ -109,25 +151,39 @@ class _EditPlanState extends State<EditPlan> {
                 .toList(),
         'checklist': checklist,
       },
-      itinerary: plan.itinerary,
-      sharedWith: plan.sharedWith,
-      qrCodeData: plan.qrCodeData,
+      itinerary: plan!.itinerary,
+      sharedWith: plan!.sharedWith,
+      qrCodeData: plan!.qrCodeData,
     );
 
-    provider.updatePlan(updatedPlan);
-    Navigator.pop(context);
+    try {
+      await provider.updatePlan(updatedPlan);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to update plan: $e')));
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (plan == null) {
+      return const Scaffold(body: Center(child: Text('Plan not found')));
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6EEF8),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF6EEF8),
         elevation: 0,
-        leading: const BackButton(color: Colors.black),
         title: const Text(
-          'HaoFar Can I Go',
+          'Travel Plan Details',
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
@@ -247,6 +303,15 @@ class _EditPlanState extends State<EditPlan> {
                 ),
               );
             }).toList(),
+            const SizedBox(height: 20),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                side: const BorderSide(color: Colors.grey),
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,

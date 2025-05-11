@@ -24,24 +24,24 @@ class FirebaseTravelPlanApi {
             .snapshots();
 
     return StreamZip([createdStream, sharedStream])
-        .map((snapshots) {
+        .asyncMap((snapshots) async {
           final createdSnapshot = snapshots[0] as QuerySnapshot;
           final sharedSnapshot = snapshots[1] as QuerySnapshot;
 
-          final allDocs = <DocumentSnapshot>[
-            ...createdSnapshot.docs,
-            ...sharedSnapshot.docs,
-          ];
-
           final uniquePlans = <String, DocumentSnapshot>{};
 
-          for (var doc in allDocs) {
+          // Add created plans
+          for (var doc in createdSnapshot.docs) {
             uniquePlans[doc.id] = doc;
           }
 
-          return uniquePlans.values
-              .map((doc) => TravelPlan.fromFirestore(doc))
-              .toList();
+          // Add shared plans, avoiding duplicates
+          for (var doc in sharedSnapshot.docs) {
+            uniquePlans.putIfAbsent(doc.id, () => doc);
+          }
+
+          final List<DocumentSnapshot> allUnique = uniquePlans.values.toList();
+          return allUnique.map((doc) => TravelPlan.fromFirestore(doc)).toList();
         })
         .handleError((e) {
           throw Exception('Failed to fetch travel plans: $e');
@@ -79,5 +79,18 @@ class FirebaseTravelPlanApi {
     if (user == null) throw Exception('User not authenticated');
 
     await _db.collection('travelPlans').doc(id).delete();
+  }
+
+  Stream<TravelPlan?> getPlanById(String planId) {
+    return _db
+        .collection('travelPlans')
+        .doc(planId)
+        .snapshots()
+        .map((doc) => doc.exists ? TravelPlan.fromFirestore(doc) : null);
+  }
+
+  Future<TravelPlan?> getPlanByIdOnce(String planId) async {
+    final doc = await _db.collection('travelPlans').doc(planId).get();
+    return doc.exists ? TravelPlan.fromFirestore(doc) : null;
   }
 }

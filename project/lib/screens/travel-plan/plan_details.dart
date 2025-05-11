@@ -9,109 +9,120 @@ class PlanDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<TravelPlanProvider>();
-    final plan = provider.selectedPlan;
-
-    if (plan == null) {
-      return const Scaffold(body: Center(child: Text("Plan not found")));
-    }
+    final planId = ModalRoute.of(context)?.settings.arguments as String;
+    final provider = context.read<TravelPlanProvider>();
 
     final dateFormatter = DateFormat.yMMMMd();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6EEF8),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF6EEF8),
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
-        title: const Text(
-          'HaoFar Can I Go',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                plan.name,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+    return StreamBuilder<TravelPlan?>(
+      stream: provider.getPlanStream(planId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final plan = snapshot.data;
+        if (plan == null) {
+          return const Scaffold(body: Center(child: Text("Plan not found")));
+        }
+        // Build UI with the fetched plan
+        return Scaffold(
+          backgroundColor: const Color(0xFFF6EEF8),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFFF6EEF8),
+            elevation: 0,
+            leading: const BackButton(color: Colors.black),
+            title: Text(
+              '${plan.name} Details',
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+                fontSize: 20,
               ),
-              const SizedBox(height: 8),
-              Text("Start: ${dateFormatter.format(plan.startDate)}"),
-              Text("End: ${dateFormatter.format(plan.endDate)}"),
-              Text("Location: ${plan.location}"),
-              const SizedBox(height: 20),
-
-              _sectionLabel('FLIGHT DETAILS'),
-              _infoBox(plan.flightDetails),
-
-              _sectionLabel('ACCOMMODATION'),
-              _infoBox(plan.accommodation),
-
-              _sectionLabel('ITINERARY'),
-              _buildItinerary(plan.itinerary),
-
-              _sectionLabel('OTHER NOTES'),
-              _buildNotes(plan.notes),
-
-              _sectionLabel('CHECKLIST'),
-              _buildChecklist(plan.checklist),
-
-              const SizedBox(height: 20),
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/travel-list-details-edit',
-                      arguments: plan,
-                    );
-                  },
-                  child: const Text(
-                    'Edit Details',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w500,
+            ),
+            centerTitle: true,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    plan.name,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ),
-              Center(
-                child: TextButton(
-                  onPressed: () async {
-                    try {
-                      await provider.deletePlan(plan.planId);
-                      Navigator.pop(context);
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Failed to delete plan: $e")),
-                      );
-                    }
-                  },
-                  child: const Text(
-                    'Delete Plan',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.w500,
+                  const SizedBox(height: 8),
+                  Text("Start: ${dateFormatter.format(plan.startDate)}"),
+                  Text("End: ${dateFormatter.format(plan.endDate)}"),
+                  Text("Location: ${plan.location}"),
+                  const SizedBox(height: 20),
+
+                  _sectionLabel('FLIGHT DETAILS'),
+                  _infoBox(plan.flightDetails),
+
+                  _sectionLabel('ACCOMMODATION'),
+                  _infoBox(plan.accommodation),
+
+                  _sectionLabel('ITINERARY'),
+                  _buildItinerary(plan.itinerary),
+
+                  _sectionLabel('OTHER NOTES'),
+                  _buildNotes(plan.notes),
+
+                  _sectionLabel('CHECKLIST'),
+                  _buildChecklist(plan.checklist),
+
+                  const SizedBox(height: 20),
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/travel-list-details-edit',
+                          arguments: plan.planId,
+                        );
+                      },
+                      child: const Text(
+                        'Edit Details',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  Center(
+                    child: TextButton(
+                      onPressed: () async {
+                        try {
+                          await provider.deletePlan(plan.planId);
+                          Navigator.pop(context);
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Failed to delete plan: $e"),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text(
+                        'Delete Plan',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

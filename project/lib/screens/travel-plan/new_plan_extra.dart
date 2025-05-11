@@ -78,6 +78,8 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
     final provider = context.read<TravelPlanProvider>();
     final draftPlan = provider.draftPlan;
 
+    print("Saving plan with createdBy: ${provider.currentUser?.uid ?? 'null'}");
+
     if (draftPlan == null) {
       ScaffoldMessenger.of(
         context,
@@ -85,7 +87,6 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
       return;
     }
 
-    // Update additional info with current form values
     final updatedInfo = {
       ..._additionalInfo,
       'flightDetails': _flightController.text.trim(),
