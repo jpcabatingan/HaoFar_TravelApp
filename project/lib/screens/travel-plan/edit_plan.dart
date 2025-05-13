@@ -178,9 +178,9 @@ class _EditPlanState extends State<EditPlan> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6EEF8),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF6EEF8),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
         title: const Text(
           'Travel Plan Details',

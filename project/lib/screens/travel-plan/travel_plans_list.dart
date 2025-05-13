@@ -13,7 +13,8 @@ class TravelPlans extends StatefulWidget {
 
 class _TravelPlansState extends State<TravelPlans> {
   final Color _btnColorContinue = const Color.fromARGB(255, 163, 181, 101);
-  final DateFormat _dateFormatter = DateFormat.yMMMMd();
+  final Color _btnAdd = const Color.fromARGB(255, 201, 238, 80);
+  DateFormat _dateFormatter = DateFormat.yMMMMd();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +32,7 @@ class _TravelPlansState extends State<TravelPlans> {
     final laterPlans = getLaterPlans(filteredPlans, soon);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6EEF8),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: RefreshIndicator(
         onRefresh: () async {
           provider.refresh();
@@ -60,11 +61,11 @@ class _TravelPlansState extends State<TravelPlans> {
                     ),
                   ),
                   FloatingActionButton.small(
-                    backgroundColor: _btnColorContinue,
+                    backgroundColor: _btnAdd,
                     onPressed: () {
                       Navigator.pushNamed(context, '/new-travel-list');
                     },
-                    child: const Icon(Icons.add),
+                    child: const Icon(Icons.add, color: Color.fromARGB(255, 71, 70, 70),),
                   ),
                 ],
               ),

@@ -26,9 +26,9 @@ class PlanDetails extends StatelessWidget {
         }
         // Build UI with the fetched plan
         return Scaffold(
-          backgroundColor: const Color(0xFFF6EEF8),
+          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
           appBar: AppBar(
-            backgroundColor: const Color(0xFFF6EEF8),
+            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
             elevation: 0,
             leading: const BackButton(color: Colors.black),
             title: Text(
@@ -58,6 +58,13 @@ class PlanDetails extends StatelessWidget {
                   Text("Start: ${dateFormatter.format(plan.startDate)}"),
                   Text("End: ${dateFormatter.format(plan.endDate)}"),
                   Text("Location: ${plan.location}"),
+                  IconButton(onPressed: ()=>{
+                    Navigator.pushNamed(
+                            context,
+                            '/shareqr',
+                            arguments: plan.planId,
+                          )
+                  }, icon: Icon(Icons.qr_code_2_rounded)),
                   const SizedBox(height: 20),
 
                   _sectionLabel('FLIGHT DETAILS'),
@@ -76,46 +83,47 @@ class PlanDetails extends StatelessWidget {
                   _buildChecklist(plan.checklist),
 
                   const SizedBox(height: 20),
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/travel-list-details-edit',
-                          arguments: plan.planId,
-                        );
-                      },
-                      child: const Text(
-                        'Edit Details',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: TextButton(
-                      onPressed: () async {
-                        try {
-                          await provider.deletePlan(plan.planId);
-                          Navigator.pop(context);
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Failed to delete plan: $e"),
-                            ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/travel-list-details-edit',
+                            arguments: plan.planId,
                           );
-                        }
-                      },
-                      child: const Text(
-                        'Delete Plan',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w500,
+                        },
+                        child: const Text(
+                          'Edit Details',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
+                      TextButton(
+                        onPressed: () async {
+                          try {
+                            await provider.deletePlan(plan.planId);
+                            Navigator.pop(context);
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Failed to delete plan: $e"),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text(
+                          'Delete Plan',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

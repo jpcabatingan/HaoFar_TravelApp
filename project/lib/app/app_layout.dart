@@ -7,6 +7,7 @@ import 'package:project/screens/travel-plan/new_plan.dart';
 import 'package:project/screens/profile/profile.dart';
 import 'package:project/screens/travel-plan/edit_plan.dart';
 import 'package:project/screens/travel-plan/plan_details.dart';
+import 'package:project/screens/travel-plan/shareqr.dart';
 import 'package:project/screens/travel-plan/travel_plans_list.dart';
 
 class AppLayout extends StatefulWidget {
@@ -69,6 +70,8 @@ class AppLayoutState extends State<AppLayout> {
         return const PlanDetails();
       case AppRoutes.travelListDetailsEdit:
         return const EditPlan();
+      case AppRoutes.shareQR:
+        return const ShareQR();
       case AppRoutes.createTravelPlan:
         return const NewPlan();
       case AppRoutes.createTravelPlanExtra:

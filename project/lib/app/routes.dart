@@ -7,6 +7,7 @@ import 'package:project/screens/auth/sign_up_travel_styles.dart';
 import 'package:project/screens/errors/not_found_page.dart';
 import 'package:project/screens/profile/profile.dart';
 import 'package:project/screens/friends/friends.dart';
+import 'package:project/screens/travel-plan/shareqr.dart';
 
 class AppRoutes {
   // Auth
@@ -22,6 +23,7 @@ class AppRoutes {
   static const String travelListDetailsEdit = '/travel-list-details-edit';
   static const String createTravelPlan = '/new-travel-list';
   static const String createTravelPlanExtra = '/new-travel-list-extra';
+  static const String shareQR = '/shareqr';
   static const String friends = '/friends';
   static const String profile = '/profile';
   static const String notFound = '/not-found';
@@ -31,7 +33,7 @@ class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.signIn:
-        return MaterialPageRoute(builder: (_) => const SignIn());
+        // return MaterialPageRoute(builder: (_) => const SignIn());
       case AppRoutes.signUp:
         return MaterialPageRoute(builder: (_) => const SignUp());
       case AppRoutes.signUpInterest:
