@@ -5,7 +5,6 @@ import 'package:project/models/user.dart';
 import 'package:project/screens/profile/view_profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class Friends extends StatefulWidget {
   const Friends({Key? key}) : super(key: key);
 
@@ -14,7 +13,7 @@ class Friends extends StatefulWidget {
 }
 
 class _FriendsState extends State<Friends> {
-  final UserApi _usersApi = UserApi();
+  final UserApi _userApi = UserApi();
   final TextEditingController _searchController = TextEditingController();
 
   List<UserModel> _allUsers = [];
@@ -42,28 +41,35 @@ class _FriendsState extends State<Friends> {
   }
 
   Future<void> _loadUsers() async {
-    final users = await _usersApi.getAllUsers(); // only public
+    final users = await _userApi.getAllUsers();
     setState(() => _allUsers = users);
   }
 
   List<UserModel> get _filteredUsers {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    final hasFilters = _filterInterests.isNotEmpty || _filterStyles.isNotEmpty;
+
+    // If no search term and no filters selected, show empty list
+    if (_search.isEmpty && !hasFilters) {
+      return [];
+    }
 
     return _allUsers.where((u) {
-      
-      if (u.userId == currentUid) return false; // exclude self from results
+      // exclude current user
+      if (u.userId == currentUid) return false;
 
       final fullname = "${u.firstName} ${u.lastName}".toLowerCase();
-      final matchesSearch =
-          u.username.toLowerCase().contains(_search) || fullname.contains(_search);
+      final matchesSearch = _search.isEmpty
+          ? true
+          : u.username.toLowerCase().contains(_search) || fullname.contains(_search);
 
       final sharesInterest = u.interests.any(_filterInterests.contains);
-      final sharesStyle    = u.travelStyles.any(_filterStyles.contains);
+      final sharesStyle = u.travelStyles.any(_filterStyles.contains);
 
-      // only show if at least one filter set and at least one tag matches
-      final passesFilter = (_filterInterests.isNotEmpty || _filterStyles.isNotEmpty)
+      // if filters active, require at least one match, else allow by search only
+      final passesFilter = hasFilters
           ? (sharesInterest || sharesStyle)
-          : false;
+          : true;
 
       return matchesSearch && passesFilter;
     }).toList();
@@ -72,7 +78,7 @@ class _FriendsState extends State<Friends> {
   void _openFilterSheet() {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,                   
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -118,7 +124,7 @@ class _FriendsState extends State<Friends> {
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
-                      setState(() {}); // re-run the list filter
+                      setState(() {});
                       Navigator.pop(context);
                     },
                     child: const Text("Apply Filters"),
@@ -176,7 +182,8 @@ class _FriendsState extends State<Friends> {
                 backgroundColor: highlightColor,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 12),
               ),
             ),
           ),
@@ -196,7 +203,7 @@ class _FriendsState extends State<Friends> {
                     leading: CircleAvatar(
                       radius: 28,
                       backgroundImage:
-                          NetworkImage(u.profilePicture ?? ''), 
+                          NetworkImage(u.profilePicture ?? ''),
                     ),
                     title: Text(u.username,
                         style: GoogleFonts.lexend(
