@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart'hide AuthProvider;
+import 'package:project/providers/user_provider.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -217,6 +219,7 @@ class _SignUpState extends State<SignUp> {
         onPressed: () async {
           if (formKey.currentState!.validate()) {
             try {
+              // create the auth account + backend user record
               await Provider.of<AuthProvider>(context, listen: false).signUp(
                 _emailController.text.trim(),
                 _passwordController.text,
@@ -224,6 +227,9 @@ class _SignUpState extends State<SignUp> {
                 _firstNameController.text.trim(),
                 _lastNameController.text.trim(),
               );
+              // immediately fetch into UserProvider
+              final uid = FirebaseAuth.instance.currentUser!.uid;
+              await Provider.of<UserProvider>(context, listen: false).fetchUser(uid);
               Navigator.pushNamed(context, '/sign-up-interests');
             } catch (e) {
               ScaffoldMessenger.of(

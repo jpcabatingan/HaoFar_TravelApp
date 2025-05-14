@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart'hide AuthProvider;
+import 'package:project/providers/user_provider.dart';
 
 class SignUpTravelStyles extends StatefulWidget {
   const SignUpTravelStyles({super.key});
@@ -166,8 +168,10 @@ class _SignUpTravelStylesState extends State<SignUpTravelStyles> {
           ),
           elevation: 2,
         ),
-        onPressed: () {
+        onPressed: () async {
           print("Skip button pressed");
+          final uid = FirebaseAuth.instance.currentUser!.uid;
+          await Provider.of<UserProvider>(context, listen: false).fetchUser(uid);
           Navigator.pushNamed(context, '/');
         },
         child: const Text("SKIP"),
@@ -195,13 +199,18 @@ class _SignUpTravelStylesState extends State<SignUpTravelStyles> {
           ),
           elevation: 2,
         ),
-        onPressed: () {
-          print("Finished sign up!");
-          Provider.of<AuthProvider>(
-            context,
-            listen: false,
-          ).updateTravelStyles(_selectedTravelStyles.toList());
-          Navigator.pushNamed(context, '/');
+        onPressed: () async {
+          try {
+            await Provider.of<AuthProvider>(context, listen: false)
+                .updateTravelStyles(_selectedTravelStyles.toList());
+            // re-fetch the full user doc (now including interests + travelStyles)
+            final uid = FirebaseAuth.instance.currentUser!.uid;
+            await Provider.of<UserProvider>(context, listen: false).fetchUser(uid);
+            Navigator.pushNamed(context, '/');
+          } catch (e) {
+            ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(e.toString())));
+          }
         },
         child: const Text(
           "Finish Sign Up",

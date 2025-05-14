@@ -43,14 +43,12 @@ class _ProfileState extends State<Profile> {
                   children: [
                     CircleAvatar(
                       radius: 60,
-                      backgroundImage:
-                          _imageFile != null
-                              ? FileImage(_imageFile!)
-                              : NetworkImage(
-                                    user.profilePicture ??
-                                        'https://picsum.photos/200',
-                                  )
-                                  as ImageProvider,
+                      backgroundImage: _imageFile != null
+                          ? FileImage(_imageFile!)
+                          : NetworkImage(
+                                user.profilePicture ??
+                                    'https://freesvg.org/img/abstract-user-flat-4.png',
+                              ) as ImageProvider,
                     ),
                     Positioned(
                       bottom: 0,
@@ -88,7 +86,7 @@ class _ProfileState extends State<Profile> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                user.bio ?? 'No bio yet.',
+                (user.bio?.isEmpty ?? true) ? 'No bio yet.' : user.bio!,
                 style: GoogleFonts.lexend(),
               ),
             ),
@@ -97,7 +95,9 @@ class _ProfileState extends State<Profile> {
             _sectionText(user.email),
             const SizedBox(height: 12),
             _sectionLabel('Phone Number'),
-            _sectionText(user.phoneNumber ?? 'Not set'),
+            _sectionText(
+              (user.phoneNumber?.isEmpty ?? true) ? 'Not set' : user.phoneNumber!,
+            ),
             const SizedBox(height: 20),
             _sectionLabel('Interests'),
             const SizedBox(height: 6),
@@ -149,13 +149,13 @@ class _ProfileState extends State<Profile> {
                     Navigator.pushReplacementNamed(context, '/');
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Logout failed: $e')),
+                      SnackBar(content: Text('Logout failed: \$e')),
                     );
                   }
                 },
                 backgroundColor: Colors.red,
-                child: const Icon(Icons.logout),
                 tooltip: 'Logout',
+                child: const Icon(Icons.logout),
               ),
             ),
           ],
@@ -177,10 +177,9 @@ class _ProfileState extends State<Profile> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-          color:
-              user.isProfilePublic
-                  ? const Color(0xFFF1642E).withOpacity(0.2)
-                  : Colors.grey.shade300,
+          color: user.isProfilePublic
+              ? const Color(0xFFF1642E).withOpacity(0.2)
+              : Colors.grey.shade300,
           border: Border.all(color: Colors.black12),
         ),
         child: Row(
@@ -189,20 +188,18 @@ class _ProfileState extends State<Profile> {
             Icon(
               user.isProfilePublic ? Icons.visibility : Icons.visibility_off,
               size: 18,
-              color:
-                  user.isProfilePublic
-                      ? const Color(0xFFF1642E)
-                      : Colors.grey.shade600,
+              color: user.isProfilePublic
+                  ? const Color(0xFFF1642E)
+                  : Colors.grey.shade600,
             ),
             const SizedBox(width: 8),
             Text(
               user.isProfilePublic ? 'Public Profile' : 'Private Profile',
               style: GoogleFonts.lexend(
                 fontSize: 12,
-                color:
-                    user.isProfilePublic
-                        ? const Color(0xFFF1642E)
-                        : Colors.grey.shade600,
+                color: user.isProfilePublic
+                    ? const Color(0xFFF1642E)
+                    : Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -223,7 +220,6 @@ class _ProfileState extends State<Profile> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
-
       // TODO: Implement Firebase Storage upload and updateProfilePicture
     }
   }
@@ -262,17 +258,14 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget _sectionLabel(String text) => Align(
-    alignment: Alignment.centerLeft,
-    child: Text(
-      text,
-      style: GoogleFonts.lexend(fontWeight: FontWeight.bold, fontSize: 14),
-    ),
-  );
+        alignment: Alignment.centerLeft,
+        child: Text(text, style: GoogleFonts.lexend(fontWeight: FontWeight.bold, fontSize: 14)),
+      );
 
   Widget _sectionText(String text) => Align(
-    alignment: Alignment.centerLeft,
-    child: Text(text, style: GoogleFonts.lexend(fontSize: 13)),
-  );
+        alignment: Alignment.centerLeft,
+        child: Text(text, style: GoogleFonts.lexend(fontSize: 13)),
+      );
 
   Widget _chipWrap(List<String> items, Color bgColor) {
     return Align(
@@ -280,22 +273,14 @@ class _ProfileState extends State<Profile> {
       child: Wrap(
         spacing: 8,
         runSpacing: 6,
-        children:
-            items
-                .map(
-                  (label) => Chip(
-                    label: Text(label, style: GoogleFonts.lexend(fontSize: 10)),
-                    backgroundColor: bgColor,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                )
-                .toList(),
+        children: items.map(
+          (label) => Chip(
+            label: Text(label, style: GoogleFonts.lexend(fontSize: 10)),
+            backgroundColor: bgColor,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+        ).toList(),
       ),
     );
   }

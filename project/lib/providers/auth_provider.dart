@@ -24,6 +24,7 @@ class AuthProvider with ChangeNotifier {
     try {
       await _authService.signOut();
       fetchUser();
+      
     } catch (e) {
       throw e.toString();
     }

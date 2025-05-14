@@ -6,6 +6,9 @@ import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
 // import 'package:my_app/providers/auth_provider.dart' as authprov;
+import 'package:firebase_auth/firebase_auth.dart'hide AuthProvider;
+import 'package:project/providers/user_provider.dart';
+
 
 class SignUpInterests extends StatefulWidget {
   const SignUpInterests({super.key});
@@ -171,8 +174,10 @@ class _SignUpInterestsState extends State<SignUpInterests> {
           ),
           elevation: 2,
         ),
-        onPressed: () {
+        onPressed: () async {
           print("Skip button pressed");
+          final uid = FirebaseAuth.instance.currentUser!.uid;
+          await Provider.of<UserProvider>(context, listen: false).fetchUser(uid);
           Navigator.pushNamed(context, '/sign-up-travel-styles');
         },
         child: const Text("SKIP"),

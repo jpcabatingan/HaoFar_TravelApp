@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart'hide AuthProvider;
+import 'package:project/providers/user_provider.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -169,18 +171,19 @@ class _SignInState extends State<SignIn> {
         onPressed: () async {
           if (formKey.currentState!.validate()) {
             try {
-              await Provider.of<AuthProvider>(
-                context,
-                listen: false,
-              ).signInWithUsername(
-                _usernameController.text.trim(),
-                _passwordController.text,
-              );
+              await Provider.of<AuthProvider>(context, listen: false)
+                  .signInWithUsername(
+                    _usernameController.text.trim(),
+                    _passwordController.text,
+                  );
+              //Fetch the fresh user data
+              final uid = FirebaseAuth.instance.currentUser!.uid;
+              await Provider.of<UserProvider>(context, listen: false)
+                  .fetchUser(uid);
               Navigator.pushNamed(context, '/');
             } catch (e) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(e.toString())));
+              ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(e.toString())));
             }
           }
         },
