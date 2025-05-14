@@ -62,10 +62,9 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> checkAuthStatus() async {
     try {
-      // Start both the auth check and minimum wait time
       await Future.wait<void>([
-        fetchUser(), // Your actual auth check
-        Future.delayed(const Duration(seconds: 2)), // Minimum wait time
+        fetchUser(),
+        Future.delayed(const Duration(seconds: 2)),
       ]);
     } catch (e) {
       user = null;
