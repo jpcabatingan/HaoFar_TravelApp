@@ -82,4 +82,15 @@ class UserApi {
       throw 'Failed to update profile picture: $e';
     }
   }
+  
+  Future<List<UserModel>> getAllUsers({bool onlyPublic = true}) async {
+    Query query = users;
+    if (onlyPublic) {
+      query = query.where('isProfilePublic', isEqualTo: true);
+    }
+    final snapshot = await query.get();
+    return snapshot.docs
+        .map((doc) => UserModel.fromFirestore(doc))
+        .toList();
+  }
 }

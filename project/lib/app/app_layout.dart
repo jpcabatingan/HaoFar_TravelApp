@@ -101,7 +101,7 @@ class AppLayoutState extends State<AppLayout> {
         NavigationDestination(
           icon: Icon(Icons.people_outlined),
           selectedIcon: Icon(Icons.people),
-          label: 'Friends',
+          label: 'Find Similar People',
         ),
         NavigationDestination(
           icon: Icon(Icons.person_outlined),

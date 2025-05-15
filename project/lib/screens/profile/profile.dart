@@ -1,5 +1,3 @@
-// screens/profile.dart
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -31,31 +29,51 @@ class _ProfileState extends State<Profile> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Center(
-              child: GestureDetector(
-                onTap: _showImageSourceActionSheet,
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundImage:
-                          _imageFile != null
-                              ? FileImage(_imageFile!)
-                              : NetworkImage(
-                                    user.profilePicture ??
-                                        'https://picsum.photos/200',
-                                  )
-                                  as ImageProvider,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: CircleAvatar(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: Text('Profile', style: GoogleFonts.lexend(color: Colors.black)),
+        automaticallyImplyLeading: false,
+        actions: [
+          TextButton.icon(
+            onPressed: () async {
+              try {
+                await context.read<AuthProvider>().signOut();
+                Navigator.pushReplacementNamed(context, '/');
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Logout failed: \$e')),
+                );
+              }
+            },
+            icon: const Icon(Icons.logout, color: Colors.red),
+            label: Text('Sign Out', style: GoogleFonts.lexend(color: Colors.red)),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: GestureDetector(
+                  onTap: _showImageSourceActionSheet,
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundImage: _imageFile != null
+                            ? FileImage(_imageFile!)
+                            : NetworkImage(
+                                  user.profilePicture ??
+                                      'https://freesvg.org/img/abstract-user-flat-4.png',
+                                ) as ImageProvider,
+                      ),
+                      CircleAvatar(
                         radius: 20,
                         backgroundColor: const Color(0xFFA3B565),
                         child: const Icon(
@@ -64,101 +82,85 @@ class _ProfileState extends State<Profile> {
                           size: 18,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _visibilityToggle(userProvider),
-            const SizedBox(height: 12),
-            Text(
-              user.username,
-              style: GoogleFonts.lexend(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${user.firstName} ${user.lastName}',
-              style: GoogleFonts.lexend(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                user.bio ?? 'No bio yet.',
-                style: GoogleFonts.lexend(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            _sectionLabel('Email'),
-            _sectionText(user.email),
-            const SizedBox(height: 12),
-            _sectionLabel('Phone Number'),
-            _sectionText(user.phoneNumber ?? 'Not set'),
-            const SizedBox(height: 20),
-            _sectionLabel('Interests'),
-            const SizedBox(height: 6),
-            _chipWrap(user.interests, const Color(0xFFFCDD9D)),
-            const SizedBox(height: 20),
-            _sectionLabel('Preferred Travel Styles'),
-            const SizedBox(height: 6),
-            _chipWrap(user.travelStyles, const Color(0xFFFCDD9D)),
-            const SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const EditProfileScreen(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFA3B565),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: const BorderSide(color: Colors.black26, width: 1),
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
+                    ],
                   ),
-                  child: Text('Edit Profile', style: GoogleFonts.lexend()),
                 ),
               ),
-            ),
-            const SizedBox(height: 40),
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: FloatingActionButton(
-                onPressed: () async {
-                  try {
-                    await context.read<AuthProvider>().signOut();
-                    Navigator.pushReplacementNamed(context, '/');
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Logout failed: $e')),
-                    );
-                  }
-                },
-                backgroundColor: Colors.red,
-                child: const Icon(Icons.logout),
-                tooltip: 'Logout',
+              const SizedBox(height: 16),
+              Center(child: _visibilityToggle(userProvider)),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  user.username,
+                  style: GoogleFonts.lexend(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Center(
+                child: Text(
+                  '${user.firstName} ${user.lastName}',
+                  style: GoogleFonts.lexend(fontSize: 16, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  (user.bio?.isEmpty ?? true) ? 'No bio yet.' : user.bio!,
+                  style: GoogleFonts.lexend(),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _sectionLabel('Email'),
+              _sectionText(user.email),
+              const SizedBox(height: 16),
+              _sectionLabel('Phone Number'),
+              _sectionText(
+                (user.phoneNumber?.isEmpty ?? true) ? 'Not set' : user.phoneNumber!,
+              ),
+              const SizedBox(height: 24),
+              _sectionLabel('Interests'),
+              const SizedBox(height: 8),
+              _chipWrap(user.interests, const Color(0xFFFCDD9D)),
+              const SizedBox(height: 24),
+              _sectionLabel('Preferred Travel Styles'),
+              const SizedBox(height: 8),
+              _chipWrap(user.travelStyles, const Color(0xFFFCDD9D)),
+              const SizedBox(height: 32),
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const EditProfileScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFA3B565),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: Text('Edit Profile', style: GoogleFonts.lexend()),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
@@ -166,21 +168,17 @@ class _ProfileState extends State<Profile> {
 
   Widget _visibilityToggle(UserProvider provider) {
     final user = provider.user!;
-
     return GestureDetector(
       onTap: () async {
-        await provider.updateProfile({
-          'isProfilePublic': !user.isProfilePublic,
-        });
+        await provider.updateProfile({'isProfilePublic': !user.isProfilePublic});
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-          color:
-              user.isProfilePublic
-                  ? const Color(0xFFF1642E).withOpacity(0.2)
-                  : Colors.grey.shade300,
+          color: user.isProfilePublic
+              ? const Color(0xFFF1642E).withOpacity(0.2)
+              : Colors.grey.shade300,
           border: Border.all(color: Colors.black12),
         ),
         child: Row(
@@ -189,24 +187,22 @@ class _ProfileState extends State<Profile> {
             Icon(
               user.isProfilePublic ? Icons.visibility : Icons.visibility_off,
               size: 18,
-              color:
-                  user.isProfilePublic
-                      ? const Color(0xFFF1642E)
-                      : Colors.grey.shade600,
+              color: user.isProfilePublic
+                  ? const Color(0xFFF1642E)
+                  : Colors.grey.shade600,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             Text(
               user.isProfilePublic ? 'Public Profile' : 'Private Profile',
               style: GoogleFonts.lexend(
                 fontSize: 12,
-                color:
-                    user.isProfilePublic
-                        ? const Color(0xFFF1642E)
-                        : Colors.grey.shade600,
+                color: user.isProfilePublic
+                    ? const Color(0xFFF1642E)
+                    : Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             const Icon(Icons.swap_horiz, size: 18, color: Colors.black54),
           ],
         ),
@@ -215,16 +211,10 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(
-      source: source,
-      imageQuality: 85,
-    );
+    final pickedFile = await _picker.pickImage(source: source, imageQuality: 85);
     if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
-
-      // TODO: Implement Firebase Storage upload and updateProfilePicture
+      setState(() => _imageFile = File(pickedFile.path));
+      // TODO: upload and updateProfilePicture
     }
   }
 
@@ -234,69 +224,53 @@ class _ProfileState extends State<Profile> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: Text('Choose from Gallery', style: GoogleFonts.lexend()),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: Text('Take a Photo', style: GoogleFonts.lexend()),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text('Gallery', style: GoogleFonts.lexend()),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text('Camera', style: GoogleFonts.lexend()),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _sectionLabel(String text) => Align(
-    alignment: Alignment.centerLeft,
-    child: Text(
-      text,
-      style: GoogleFonts.lexend(fontWeight: FontWeight.bold, fontSize: 14),
-    ),
-  );
+  Widget _sectionLabel(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Text(text, style: GoogleFonts.lexend(fontWeight: FontWeight.bold, fontSize: 14)),
+      );
 
-  Widget _sectionText(String text) => Align(
-    alignment: Alignment.centerLeft,
-    child: Text(text, style: GoogleFonts.lexend(fontSize: 13)),
-  );
+  Widget _sectionText(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Text(text, style: GoogleFonts.lexend(fontSize: 13)),
+      );
 
   Widget _chipWrap(List<String> items, Color bgColor) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 6,
-        children:
-            items
-                .map(
-                  (label) => Chip(
-                    label: Text(label, style: GoogleFonts.lexend(fontSize: 10)),
-                    backgroundColor: bgColor,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                )
-                .toList(),
-      ),
+    return Wrap(
+      spacing: 8,
+      runSpacing: 6,
+      children: items.map(
+        (label) => Chip(
+          label: Text(label, style: GoogleFonts.lexend(fontSize: 10)),
+          backgroundColor: bgColor,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        ),
+      ).toList(),
     );
   }
 }
