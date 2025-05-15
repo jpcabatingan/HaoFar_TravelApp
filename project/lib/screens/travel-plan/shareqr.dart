@@ -135,11 +135,6 @@ class ShareQR extends StatelessWidget {
                                 .auto, // Automatically determines QR version
                         size: 220.0, // Size of the QR code image
                         gapless: false, // Whether to have a small border (gap)
-                        // You can embed an image in the center if desired:
-                        // embeddedImage: AssetImage('assets/my_logo.png'),
-                        // embeddedImageStyle: QrEmbeddedImageStyle(
-                        //   size: Size(40, 40),
-                        // ),
                         errorStateBuilder: (cxt, err) {
                           // Handles errors during QR generation
                           return const Center(
