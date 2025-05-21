@@ -25,7 +25,7 @@ class _SignUpState extends State<SignUp> {
 
   // app colors
   final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
-  final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
+  final Color _fieldColor = const Color.fromARGB(255, 255, 246, 230);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColor = const Color.fromARGB(255, 163, 181, 101);
   final Color _linkColor = const Color.fromARGB(255, 241, 100, 46);
@@ -59,7 +59,7 @@ class _SignUpState extends State<SignUp> {
                       Text(
                         "Create account",
                         style: TextStyle(
-                          fontSize: 60,
+                          fontSize: 40,
                           fontWeight: FontWeight.bold,
                           color: _titleColor,
                           letterSpacing: 1,
