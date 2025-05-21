@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart'hide AuthProvider;
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:project/providers/user_provider.dart';
 
 class SignIn extends StatefulWidget {
@@ -20,7 +20,7 @@ class _SignInState extends State<SignIn> {
 
   // app colors
   final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
-  final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
+  final Color _fieldColor = const Color.fromARGB(255, 255, 246, 230);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColor = const Color.fromARGB(255, 163, 181, 101);
   final Color _linkColor = const Color.fromARGB(255, 241, 100, 46);
@@ -46,7 +46,7 @@ class _SignInState extends State<SignIn> {
                 Padding(
                   padding: const EdgeInsets.only(top: 35.0, bottom: 35.0),
                   child: Text(
-                    "Travel App",
+                    "Hao Far Can I Go",
                     style: GoogleFonts.boogaloo(
                       textStyle: TextStyle(
                         fontSize: 60,
@@ -171,19 +171,24 @@ class _SignInState extends State<SignIn> {
         onPressed: () async {
           if (formKey.currentState!.validate()) {
             try {
-              await Provider.of<AuthProvider>(context, listen: false)
-                  .signInWithUsername(
-                    _usernameController.text.trim(),
-                    _passwordController.text,
-                  );
+              await Provider.of<AuthProvider>(
+                context,
+                listen: false,
+              ).signInWithUsername(
+                _usernameController.text.trim(),
+                _passwordController.text,
+              );
               //Fetch the fresh user data
               final uid = FirebaseAuth.instance.currentUser!.uid;
-              await Provider.of<UserProvider>(context, listen: false)
-                  .fetchUser(uid);
+              await Provider.of<UserProvider>(
+                context,
+                listen: false,
+              ).fetchUser(uid);
               Navigator.pushNamed(context, '/');
             } catch (e) {
-              ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(e.toString())));
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(e.toString())));
             }
           }
         },

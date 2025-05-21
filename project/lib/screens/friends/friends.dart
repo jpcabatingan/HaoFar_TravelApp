@@ -194,7 +194,7 @@ class _FriendsState extends State<Friends> {
                   children: [
                     Text(
                       "Filter by Interests",
-                      style: GoogleFonts.lexend(
+                      style: GoogleFonts.roboto(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -208,7 +208,7 @@ class _FriendsState extends State<Friends> {
                     const SizedBox(height: 20),
                     Text(
                       "Filter by Travel Styles",
-                      style: GoogleFonts.lexend(
+                      style: GoogleFonts.roboto(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -238,7 +238,7 @@ class _FriendsState extends State<Friends> {
                           },
                           child: Text(
                             "Clear All",
-                            style: GoogleFonts.lexend(color: Colors.redAccent),
+                            style: GoogleFonts.roboto(color: Colors.redAccent),
                           ),
                         ),
                         ElevatedButton(
@@ -258,14 +258,14 @@ class _FriendsState extends State<Friends> {
                               horizontal: 30,
                               vertical: 12,
                             ),
-                            textStyle: GoogleFonts.lexend(
+                            textStyle: GoogleFonts.roboto(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           child: Text(
                             "Apply Filters",
-                            style: GoogleFonts.lexend(color: Colors.white),
+                            style: GoogleFonts.roboto(color: Colors.white),
                           ),
                         ),
                       ],
@@ -294,7 +294,7 @@ class _FriendsState extends State<Friends> {
             return FilterChip(
               label: Text(
                 tag,
-                style: GoogleFonts.lexend(
+                style: GoogleFonts.roboto(
                   fontSize: 13,
                   color: isSelected ? Colors.white : Colors.black87,
                 ),
@@ -346,7 +346,7 @@ class _FriendsState extends State<Friends> {
       appBar: AppBar(
         title: Text(
           'Find People',
-          style: GoogleFonts.lexend(
+          style: GoogleFonts.roboto(
             color: Colors.black,
             fontWeight: FontWeight.w600,
           ),
@@ -363,10 +363,10 @@ class _FriendsState extends State<Friends> {
             // Search Field
             TextField(
               controller: _searchController,
-              style: GoogleFonts.lexend(),
+              style: GoogleFonts.roboto(),
               decoration: InputDecoration(
                 hintText: 'Search by name or username...',
-                hintStyle: GoogleFonts.lexend(color: Colors.grey[600]),
+                hintStyle: GoogleFonts.roboto(color: Colors.grey[600]),
                 prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
                 filled: true,
                 fillColor: Colors.grey[100],
@@ -389,7 +389,7 @@ class _FriendsState extends State<Friends> {
                 icon: const Icon(Icons.filter_list_rounded, size: 20),
                 label: Text(
                   "Filters",
-                  style: GoogleFonts.lexend(fontWeight: FontWeight.w500),
+                  style: GoogleFonts.roboto(fontWeight: FontWeight.w500),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: highlightColor,
@@ -419,7 +419,7 @@ class _FriendsState extends State<Friends> {
                     child: Text(
                       "No users match your search or filter criteria.\nTry adjusting your filters or search term.",
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.lexend(
+                      style: GoogleFonts.roboto(
                         fontSize: 16,
                         color: Colors.grey[700],
                       ),
@@ -438,7 +438,7 @@ class _FriendsState extends State<Friends> {
                     child: Text(
                       "Search for users or apply filters to find people.",
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.lexend(
+                      style: GoogleFonts.roboto(
                         fontSize: 16,
                         color: Colors.grey[700],
                       ),
@@ -483,7 +483,7 @@ class _FriendsState extends State<Friends> {
                                         : (user.username.isNotEmpty
                                             ? user.username[0].toUpperCase()
                                             : "?"),
-                                    style: GoogleFonts.lexend(
+                                    style: GoogleFonts.roboto(
                                       fontSize: 20,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -493,14 +493,14 @@ class _FriendsState extends State<Friends> {
                         ),
                         title: Text(
                           "${user.firstName} ${user.lastName}",
-                          style: GoogleFonts.lexend(
+                          style: GoogleFonts.roboto(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
                         ),
                         subtitle: Text(
                           "@${user.username}",
-                          style: GoogleFonts.lexend(
+                          style: GoogleFonts.roboto(
                             color: Colors.grey[600],
                             fontSize: 13,
                           ),
