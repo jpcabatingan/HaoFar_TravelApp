@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project/models/travel_plan.dart';
-import 'package:project/providers/auth_provider.dart'; // Required for current user ID
+import 'package:project/providers/auth_provider.dart'; 
 import 'package:project/screens/travel-plan/scanqr.dart';
 import 'package:provider/provider.dart';
 import 'package:project/providers/travel_plan_provider.dart';
-import 'package:project/app/routes.dart'; // Assuming AppRoutes are defined
-// Import the new QrScannerScreen (ensure the path is correct)
+import 'package:project/app/routes.dart'; 
+
 
 class TravelPlans extends StatefulWidget {
   const TravelPlans({super.key});
@@ -18,10 +18,9 @@ class TravelPlans extends StatefulWidget {
 class _TravelPlansState extends State<TravelPlans> {
   final Color _btnAdd = const Color.fromARGB(255, 201, 238, 80);
   final DateFormat _dateFormatter =
-      DateFormat.yMMMMd(); // Corrected initialization
+      DateFormat.yMMMMd(); 
 
   Future<void> _scanAndJoinPlan() async {
-    // Navigate to the QrScannerScreen and wait for a result
     final String? scannedPlanId = await Navigator.push<String>(
       context,
       MaterialPageRoute(builder: (context) => const QrScannerScreen()),
@@ -33,7 +32,7 @@ class _TravelPlansState extends State<TravelPlans> {
           const SnackBar(content: Text("Scanned QR code was empty.")),
         );
       }
-      return; // User cancelled or QR code was empty
+      return; 
     }
 
     final travelPlanProvider = context.read<TravelPlanProvider>();
@@ -117,13 +116,11 @@ class _TravelPlansState extends State<TravelPlans> {
 
     final selectedCategory = provider.planCategory;
     final isDone = selectedCategory == "done";
-    // final isAll = selectedCategory == "none"; // Not used, can be removed
 
     final now = _getDateOnly(DateTime.now());
     final soon = now.add(const Duration(days: 7));
 
     // Filter out plans where the current user is the creator for "Soon" and "Later" if category is "shared"
-    // This is to avoid showing plans created by the user in the "shared" soon/later sections.
     List<TravelPlan> relevantPlans = filteredPlans;
     if (selectedCategory == "shared") {
       final authProvider = context.read<AuthProvider>();
@@ -140,7 +137,7 @@ class _TravelPlansState extends State<TravelPlans> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: RefreshIndicator(
-        onRefresh: provider.refresh, // Simplified call
+        onRefresh: provider.refresh, 
         child: Column(
           children: [
             const SizedBox(height: 25),
@@ -156,7 +153,7 @@ class _TravelPlansState extends State<TravelPlans> {
                           ? "Shared With Me"
                           : selectedCategory == "done"
                           ? "Completed Plans"
-                          : "All My Plans",
+                          : "All Plans",
                       style: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w600,
@@ -164,7 +161,6 @@ class _TravelPlansState extends State<TravelPlans> {
                       ),
                     ),
                   ),
-                  // Scan QR Code Button
                   IconButton(
                     icon: const Icon(
                       Icons.qr_code_scanner_rounded,
@@ -173,7 +169,7 @@ class _TravelPlansState extends State<TravelPlans> {
                     tooltip: 'Scan to Join Plan',
                     onPressed: _scanAndJoinPlan,
                   ),
-                  const SizedBox(width: 8), // Spacing
+                  const SizedBox(width: 8),
                   FloatingActionButton.small(
                     backgroundColor: _btnAdd,
                     tooltip: 'Create New Plan',
@@ -181,7 +177,7 @@ class _TravelPlansState extends State<TravelPlans> {
                       Navigator.pushNamed(
                         context,
                         AppRoutes.createTravelPlan,
-                      ); // Use AppRoutes
+                      );
                     },
                     child: const Icon(
                       Icons.add,
@@ -197,10 +193,10 @@ class _TravelPlansState extends State<TravelPlans> {
             if (provider.isLoading)
               const Expanded(
                 child: Center(child: CircularProgressIndicator()),
-              ) // Expanded for proper centering
+              ) 
             else if (provider.error != null)
               Expanded(
-                // Expanded for proper centering
+               
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -267,7 +263,7 @@ class _TravelPlansState extends State<TravelPlans> {
                               const SizedBox(height: 16),
                             ],
                             if (isDone && filteredPlans.isNotEmpty) ...[
-                              // Show "Completed" header only if there are done plans
+                              
                               const SizedBox(height: 10),
                               const Text(
                                 "Completed Trips",
@@ -281,15 +277,12 @@ class _TravelPlansState extends State<TravelPlans> {
                                 (plan) => _buildPlanTile(plan),
                               ),
                             ] else if (isDone && filteredPlans.isEmpty) ...[
-                              // This case is handled by the main empty message now
+                            
                             ] else if (!isDone &&
                                 soonPlans.isEmpty &&
                                 laterPlans.isEmpty &&
                                 filteredPlans.isNotEmpty) ...[
-                              // If not 'done' and no soon/later plans, but there are plans (e.g. "all" or "my" with only past plans not yet 'done')
-                              // This section will list them without "Soon" or "Later" headers.
-                              // This might occur if 'done' filter logic is strictly by date and some past plans aren't yet categorized as 'done'
-                              // or if 'all'/'my' categories contain only past plans.
+                             
                               ...filteredPlans.map(
                                 (plan) => _buildPlanTile(plan),
                               ),
@@ -310,27 +303,27 @@ class _TravelPlansState extends State<TravelPlans> {
   ) {
     return plans.where((p) {
         final planDate = _getDateOnly(p.startDate);
-        // Show plans starting today or in the next 7 days, but not past end date
+      
         return (planDate.isAtSameMomentAs(now) || planDate.isAfter(now)) &&
             planDate.isBefore(soon) &&
             !_getDateOnly(p.endDate).isBefore(now);
       }).toList()
       ..sort(
         (a, b) => a.startDate.compareTo(b.startDate),
-      ); // Sort by start date
+      ); 
   }
 
   List<TravelPlan> getLaterPlans(List<TravelPlan> plans, DateTime soon) {
     final now = _getDateOnly(DateTime.now());
     return plans.where((p) {
         final planDate = _getDateOnly(p.startDate);
-        // Show plans starting on or after 'soon' date, and not past end date
+       
         return planDate.isAtSameOrAfter(soon) &&
             !_getDateOnly(p.endDate).isBefore(now);
       }).toList()
       ..sort(
         (a, b) => a.startDate.compareTo(b.startDate),
-      ); // Sort by start date
+      ); 
   }
 
   Widget _buildCategoryChips() {
@@ -338,9 +331,9 @@ class _TravelPlansState extends State<TravelPlans> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Wrap(
         spacing: 8,
-        runSpacing: 4, // Added runSpacing for better layout on smaller screens
+        runSpacing: 4, 
         children: [
-          _chipButton("All My Plans", "none", Colors.blueAccent),
+          _chipButton("All", "none", Colors.blueAccent),
           _chipButton("My Created", "my", Colors.teal),
           _chipButton("Shared With Me", "shared", Colors.orange),
           _chipButton("Completed", "done", Colors.purple),
@@ -351,7 +344,7 @@ class _TravelPlansState extends State<TravelPlans> {
 
   Widget _chipButton(String label, String value, Color activeColor) {
     final provider =
-        context.read<TravelPlanProvider>(); // Use read here as it's for action
+        context.read<TravelPlanProvider>();
     final isSelected = provider.planCategory == value;
     return ChoiceChip(
       label: Text(label),
@@ -379,18 +372,17 @@ class _TravelPlansState extends State<TravelPlans> {
         context.read<AuthProvider>().user?.uid == plan.createdBy;
 
     return Card(
-      // Using Card for a nicer look
       margin: const EdgeInsets.symmetric(vertical: 6),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        // InkWell for tap effect
+
         borderRadius: BorderRadius.circular(12),
         key: Key(plan.planId),
         onTap: () {
           Navigator.pushNamed(
             context,
-            AppRoutes.travelListDetails, // Use AppRoutes
+            AppRoutes.travelListDetails,
             arguments: plan.planId,
           );
         },
@@ -399,7 +391,7 @@ class _TravelPlansState extends State<TravelPlans> {
           child: Row(
             children: [
               Container(
-                // Placeholder for an image or icon
+              
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
@@ -409,7 +401,7 @@ class _TravelPlansState extends State<TravelPlans> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  Icons.explore_outlined, // More thematic icon
+                  Icons.explore_outlined,
                   size: 30,
                   color:
                       Colors.primaries[plan.name.hashCode %

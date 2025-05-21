@@ -30,10 +30,12 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
-        centerTitle: true,
-        title: Text('Profile', style: GoogleFonts.lexend(color: Colors.black)),
+        title: Text('My Profile', style: GoogleFonts.roboto(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),),
         automaticallyImplyLeading: false,
         actions: [
           TextButton.icon(
@@ -48,7 +50,7 @@ class _ProfileState extends State<Profile> {
               }
             },
             icon: const Icon(Icons.logout, color: Colors.red),
-            label: Text('Sign Out', style: GoogleFonts.lexend(color: Colors.red)),
+            label: Text('Sign Out', style: GoogleFonts.roboto(color: Colors.red)),
           ),
         ],
       ),
@@ -90,9 +92,8 @@ class _ProfileState extends State<Profile> {
               Center(child: _visibilityToggle(userProvider)),
               const SizedBox(height: 16),
               Center(
-                child: Text(
-                  user.username,
-                  style: GoogleFonts.lexend(
+                child: Text("@${user.username}",
+                  style: GoogleFonts.roboto(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
@@ -102,7 +103,7 @@ class _ProfileState extends State<Profile> {
               Center(
                 child: Text(
                   '${user.firstName} ${user.lastName}',
-                  style: GoogleFonts.lexend(fontSize: 16, color: Colors.grey),
+                  style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey),
                 ),
               ),
               const SizedBox(height: 20),
@@ -110,7 +111,7 @@ class _ProfileState extends State<Profile> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   (user.bio?.isEmpty ?? true) ? 'No bio yet.' : user.bio!,
-                  style: GoogleFonts.lexend(),
+                  style: GoogleFonts.roboto(),
                 ),
               ),
               const SizedBox(height: 24),
@@ -154,7 +155,7 @@ class _ProfileState extends State<Profile> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: Text('Edit Profile', style: GoogleFonts.lexend()),
+                    child: Text('Edit Profile', style: GoogleFonts.roboto()),
                   ),
                 ),
               ),
@@ -194,7 +195,7 @@ class _ProfileState extends State<Profile> {
             const SizedBox(width: 6),
             Text(
               user.isProfilePublic ? 'Public Profile' : 'Private Profile',
-              style: GoogleFonts.lexend(
+              style: GoogleFonts.roboto(
                 fontSize: 12,
                 color: user.isProfilePublic
                     ? const Color(0xFFF1642E)
@@ -229,7 +230,7 @@ class _ProfileState extends State<Profile> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: Text('Gallery', style: GoogleFonts.lexend()),
+              title: Text('Gallery', style: GoogleFonts.roboto()),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
@@ -237,7 +238,7 @@ class _ProfileState extends State<Profile> {
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: Text('Camera', style: GoogleFonts.lexend()),
+              title: Text('Camera', style: GoogleFonts.roboto()),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.camera);
@@ -251,12 +252,12 @@ class _ProfileState extends State<Profile> {
 
   Widget _sectionLabel(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
-        child: Text(text, style: GoogleFonts.lexend(fontWeight: FontWeight.bold, fontSize: 14)),
+        child: Text(text, style: GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 14)),
       );
 
   Widget _sectionText(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
-        child: Text(text, style: GoogleFonts.lexend(fontSize: 13)),
+        child: Text(text, style: GoogleFonts.roboto(fontSize: 13)),
       );
 
   Widget _chipWrap(List<String> items, Color bgColor) {
@@ -265,7 +266,7 @@ class _ProfileState extends State<Profile> {
       runSpacing: 6,
       children: items.map(
         (label) => Chip(
-          label: Text(label, style: GoogleFonts.lexend(fontSize: 10)),
+          label: Text(label, style: GoogleFonts.roboto(fontSize: 10)),
           backgroundColor: bgColor,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

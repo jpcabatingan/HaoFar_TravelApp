@@ -168,13 +168,13 @@ class _FriendsState extends State<Friends> {
   void _openFilterSheet() {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Important for full-screen-like modal
+      isScrollControlled: true, 
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
-        // Use StatefulBuilder to manage the state of chips within the modal
+        
         return StatefulBuilder(
           builder: (BuildContext modalContext, StateSetter setModalState) {
             return Padding(
@@ -229,12 +229,6 @@ class _FriendsState extends State<Friends> {
                               _filterInterests.clear();
                               _filterStyles.clear();
                             });
-                            // Apply changes immediately or wait for "Apply"
-                            // For immediate apply after clearing:
-                            // setState(() {
-                            //   _applyFiltersAndSearch();
-                            // });
-                            // Navigator.pop(modalContext);
                           },
                           child: Text(
                             "Clear All",
@@ -339,10 +333,11 @@ class _FriendsState extends State<Friends> {
   Widget build(BuildContext context) {
     const highlightColor = Color(
       0xFFF1642E,
-    ); // Or use Theme.of(context).colorScheme.secondary
+    ); 
 
     return Scaffold(
       backgroundColor: Colors.white,
+      
       appBar: AppBar(
         title: Text(
           'Find People',
@@ -352,11 +347,11 @@ class _FriendsState extends State<Friends> {
           ),
         ),
         backgroundColor: Colors.white,
-        elevation: 1, // Slight elevation for definition
-        automaticallyImplyLeading: false, // Assuming this is a tab screen
+        elevation: 0, 
+        automaticallyImplyLeading: false,
       ),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0), // Adjusted padding
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
