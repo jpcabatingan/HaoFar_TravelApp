@@ -155,7 +155,7 @@ class _NewPlanState extends State<NewPlan> {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: const Text(
-          'HaoFar Can I Go',
+          'New Travel PLan',
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,

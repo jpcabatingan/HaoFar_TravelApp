@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project/models/travel_plan.dart';
-import 'package:project/providers/auth_provider.dart'; 
+import 'package:project/providers/auth_provider.dart';
 import 'package:project/screens/travel-plan/scanqr.dart';
 import 'package:provider/provider.dart';
 import 'package:project/providers/travel_plan_provider.dart';
-import 'package:project/app/routes.dart'; 
-
+import 'package:project/app/routes.dart';
 
 class TravelPlans extends StatefulWidget {
   const TravelPlans({super.key});
@@ -17,8 +16,7 @@ class TravelPlans extends StatefulWidget {
 
 class _TravelPlansState extends State<TravelPlans> {
   final Color _btnAdd = const Color.fromARGB(255, 201, 238, 80);
-  final DateFormat _dateFormatter =
-      DateFormat.yMMMMd(); 
+  final DateFormat _dateFormatter = DateFormat.yMMMMd();
 
   Future<void> _scanAndJoinPlan() async {
     final String? scannedPlanId = await Navigator.push<String>(
@@ -32,7 +30,7 @@ class _TravelPlansState extends State<TravelPlans> {
           const SnackBar(content: Text("Scanned QR code was empty.")),
         );
       }
-      return; 
+      return;
     }
 
     final travelPlanProvider = context.read<TravelPlanProvider>();
@@ -47,7 +45,6 @@ class _TravelPlansState extends State<TravelPlans> {
     }
 
     try {
-      // Show loading indicator
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Processing... Joining plan...")),
       );
@@ -79,7 +76,6 @@ class _TravelPlansState extends State<TravelPlans> {
         return;
       }
 
-      // Add current user to sharedWith list
       final List<String> updatedSharedWith = List<String>.from(
         planToJoin.sharedWith,
       );
@@ -98,7 +94,7 @@ class _TravelPlansState extends State<TravelPlans> {
             backgroundColor: Colors.green,
           ),
         );
-        travelPlanProvider.refresh(); // Refresh the list of plans
+        travelPlanProvider.refresh();
       }
     } catch (e) {
       if (mounted) {
@@ -120,7 +116,6 @@ class _TravelPlansState extends State<TravelPlans> {
     final now = _getDateOnly(DateTime.now());
     final soon = now.add(const Duration(days: 7));
 
-    // Filter out plans where the current user is the creator for "Soon" and "Later" if category is "shared"
     List<TravelPlan> relevantPlans = filteredPlans;
     if (selectedCategory == "shared") {
       final authProvider = context.read<AuthProvider>();
@@ -137,7 +132,7 @@ class _TravelPlansState extends State<TravelPlans> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: RefreshIndicator(
-        onRefresh: provider.refresh, 
+        onRefresh: provider.refresh,
         child: Column(
           children: [
             const SizedBox(height: 25),
@@ -150,10 +145,10 @@ class _TravelPlansState extends State<TravelPlans> {
                       selectedCategory == "my"
                           ? "My Plans"
                           : selectedCategory == "shared"
-                          ? "Shared With Me"
-                          : selectedCategory == "done"
-                          ? "Completed Plans"
-                          : "All Plans",
+                              ? "Shared With Me"
+                              : selectedCategory == "done"
+                                  ? "Completed Plans"
+                                  : "All Plans",
                       style: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w600,
@@ -193,10 +188,9 @@ class _TravelPlansState extends State<TravelPlans> {
             if (provider.isLoading)
               const Expanded(
                 child: Center(child: CircularProgressIndicator()),
-              ) 
+              )
             else if (provider.error != null)
               Expanded(
-               
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -210,85 +204,80 @@ class _TravelPlansState extends State<TravelPlans> {
               )
             else
               Expanded(
-                child:
-                    filteredPlans.isEmpty
-                        ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              selectedCategory == "none"
-                                  ? "No travel plans yet.\nTap '+' to create one or scan a QR code to join!"
-                                  : selectedCategory == "my"
-                                  ? "You haven't created any plans yet.\nTap '+' to get started!"
-                                  : selectedCategory == "shared"
-                                  ? "No plans have been shared with you yet.\nScan a QR code to join one."
-                                  : selectedCategory == "done"
-                                  ? "No completed plans."
-                                  : "No travel plans in this category.",
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey,
-                              ),
+                child: filteredPlans.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            selectedCategory == "none"
+                                ? "No travel plans yet.\nTap '+' to create one or scan a QR code to join!"
+                                : selectedCategory == "my"
+                                    ? "You haven't created any plans yet.\nTap '+' to get started!"
+                                    : selectedCategory == "shared"
+                                        ? "No plans have been shared with you yet.\nScan a QR code to join one."
+                                        : selectedCategory == "done"
+                                            ? "No completed plans."
+                                            : "No travel plans in this category.",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey,
                             ),
                           ),
-                        )
-                        : ListView(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          children: [
-                            if (!isDone && soonPlans.isNotEmpty) ...[
-                              const SizedBox(height: 10),
-                              const Text(
-                                "Coming Up Soon!",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              ...soonPlans.map((plan) => _buildPlanTile(plan)),
-                              const SizedBox(height: 16),
-                            ],
-                            if (!isDone && laterPlans.isNotEmpty) ...[
-                              const SizedBox(height: 10),
-                              const Text(
-                                "Later Adventures",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              ...laterPlans.map((plan) => _buildPlanTile(plan)),
-                              const SizedBox(height: 16),
-                            ],
-                            if (isDone && filteredPlans.isNotEmpty) ...[
-                              
-                              const SizedBox(height: 10),
-                              const Text(
-                                "Completed Trips",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              ...filteredPlans.map(
-                                (plan) => _buildPlanTile(plan),
-                              ),
-                            ] else if (isDone && filteredPlans.isEmpty) ...[
-                            
-                            ] else if (!isDone &&
-                                soonPlans.isEmpty &&
-                                laterPlans.isEmpty &&
-                                filteredPlans.isNotEmpty) ...[
-                             
-                              ...filteredPlans.map(
-                                (plan) => _buildPlanTile(plan),
-                              ),
-                            ],
-                          ],
                         ),
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        children: [
+                          if (!isDone && soonPlans.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            const Text(
+                              "Coming Up Soon!",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...soonPlans.map((plan) => _buildPlanTile(plan)),
+                            const SizedBox(height: 16),
+                          ],
+                          if (!isDone && laterPlans.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            const Text(
+                              "Later Adventures",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...laterPlans.map((plan) => _buildPlanTile(plan)),
+                            const SizedBox(height: 16),
+                          ],
+                          if (isDone && filteredPlans.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            const Text(
+                              "Completed Trips",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...filteredPlans.map(
+                              (plan) => _buildPlanTile(plan),
+                            ),
+                          ] else if (isDone && filteredPlans.isEmpty) ...[] else if (!isDone &&
+                              soonPlans.isEmpty &&
+                              laterPlans.isEmpty &&
+                              filteredPlans.isNotEmpty) ...[
+                            ...filteredPlans.map(
+                              (plan) => _buildPlanTile(plan),
+                            ),
+                          ],
+                        ],
+                      ),
               ),
           ],
         ),
@@ -302,39 +291,37 @@ class _TravelPlansState extends State<TravelPlans> {
     DateTime soon,
   ) {
     return plans.where((p) {
-        final planDate = _getDateOnly(p.startDate);
-      
-        return (planDate.isAtSameMomentAs(now) || planDate.isAfter(now)) &&
-            planDate.isBefore(soon) &&
-            !_getDateOnly(p.endDate).isBefore(now);
-      }).toList()
+      final planDate = _getDateOnly(p.startDate);
+      return (planDate.isAtSameMomentAs(now) || planDate.isAfter(now)) &&
+          planDate.isBefore(soon) &&
+          !_getDateOnly(p.endDate).isBefore(now);
+    }).toList()
       ..sort(
         (a, b) => a.startDate.compareTo(b.startDate),
-      ); 
+      );
   }
 
   List<TravelPlan> getLaterPlans(List<TravelPlan> plans, DateTime soon) {
     final now = _getDateOnly(DateTime.now());
     return plans.where((p) {
-        final planDate = _getDateOnly(p.startDate);
-       
-        return planDate.isAtSameOrAfter(soon) &&
-            !_getDateOnly(p.endDate).isBefore(now);
-      }).toList()
+      final planDate = _getDateOnly(p.startDate);
+      return planDate.isAtSameOrAfter(soon) &&
+          !_getDateOnly(p.endDate).isBefore(now);
+    }).toList()
       ..sort(
         (a, b) => a.startDate.compareTo(b.startDate),
-      ); 
+      );
   }
 
   Widget _buildCategoryChips() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Wrap(
         spacing: 8,
-        runSpacing: 4, 
+        runSpacing: 4,
         children: [
           _chipButton("All", "none", Colors.blueAccent),
-          _chipButton("My Created", "my", Colors.teal),
+          _chipButton("My Plans", "my", Colors.teal),
           _chipButton("Shared With Me", "shared", Colors.orange),
           _chipButton("Completed", "done", Colors.purple),
         ],
@@ -343,8 +330,7 @@ class _TravelPlansState extends State<TravelPlans> {
   }
 
   Widget _chipButton(String label, String value, Color activeColor) {
-    final provider =
-        context.read<TravelPlanProvider>();
+    final provider = context.read<TravelPlanProvider>();
     final isSelected = provider.planCategory == value;
     return ChoiceChip(
       label: Text(label),
@@ -357,7 +343,7 @@ class _TravelPlansState extends State<TravelPlans> {
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20), // More rounded
+        borderRadius: BorderRadius.circular(20),
         side: BorderSide(color: isSelected ? activeColor : Colors.grey[400]!),
       ),
       elevation: isSelected ? 2 : 0,
@@ -376,7 +362,6 @@ class _TravelPlansState extends State<TravelPlans> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-
         borderRadius: BorderRadius.circular(12),
         key: Key(plan.planId),
         onTap: () {
@@ -391,7 +376,6 @@ class _TravelPlansState extends State<TravelPlans> {
           child: Row(
             children: [
               Container(
-              
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
@@ -403,9 +387,8 @@ class _TravelPlansState extends State<TravelPlans> {
                 child: Icon(
                   Icons.explore_outlined,
                   size: 30,
-                  color:
-                      Colors.primaries[plan.name.hashCode %
-                          Colors.primaries.length],
+                  color: Colors.primaries[
+                      plan.name.hashCode % Colors.primaries.length],
                 ),
               ),
               const SizedBox(width: 16),
