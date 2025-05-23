@@ -1,6 +1,6 @@
 // providers/user_provider.dart
 
-import 'dart:async'; // Import for StreamSubscription
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project/api/users_api.dart';
@@ -9,11 +9,10 @@ import 'package:project/models/user.dart';
 class UserProvider with ChangeNotifier {
   final UserApi _userApi = UserApi();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  StreamSubscription<User?>?
-  _authStateSubscription; // To manage the subscription
+  StreamSubscription<User?>? _authStateSubscription;
 
   UserModel? _user;
-  bool _isLoading = false; // Start with false, set to true when fetching
+  bool _isLoading = false;
   String? _error;
 
   bool get isLoading => _isLoading;
@@ -25,28 +24,24 @@ class UserProvider with ChangeNotifier {
   }
 
   void _listenToAuthChanges() {
-    _isLoading = true; // Initially, we might be loading auth state
+    _isLoading = true;
     notifyListeners();
 
     _authStateSubscription = _auth.authStateChanges().listen(
       (User? firebaseUser) {
         if (firebaseUser == null) {
-          // User logged out
           _user = null;
           _isLoading = false;
           _error = null;
           notifyListeners();
         } else {
-          // User logged in or auth state changed with a user
-          // Set loading true before fetching new user data
           _isLoading = true;
-          _error = null; // Clear previous errors
+          _error = null;
           notifyListeners();
           fetchUser(firebaseUser.uid);
         }
       },
       onError: (e) {
-        // Handle errors from the auth stream itself
         _user = null;
         _isLoading = false;
         _error = "Auth listener error: ${e.toString()}";
@@ -56,14 +51,7 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<void> fetchUser(String userId) async {
-    // This check prevents re-fetching if already loading for this user,
-    // though _isLoading being set before calling fetchUser handles most cases.
-    // if (_isLoading && _user?.userId == userId) return;
-
     _isLoading = true;
-    // No need to notifyListeners here if it was already done in _listenToAuthChanges
-    // or if the caller expects to handle UI updates. However, for direct calls, it might be useful.
-    // For consistency with _listenToAuthChanges, let's assume the listener handles the initial loading notification.
 
     try {
       final userModel = await _userApi.getUser(userId);
@@ -71,11 +59,11 @@ class UserProvider with ChangeNotifier {
       _isLoading = false;
       _error = null;
     } catch (e) {
-      _user = null; // Clear user data on error
+      _user = null;
       _error = "Failed to fetch user: ${e.toString()}";
       _isLoading = false;
     }
-    notifyListeners(); // Notify after fetching is complete (success or failure)
+    notifyListeners();
   }
 
   Future<void> updateProfile(Map<String, dynamic> updateData) async {
@@ -90,10 +78,10 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _userApi.updateProfile(currentUserId, updateData);
-      await fetchUser(currentUserId); // Re-fetch user data to reflect updates
+      await fetchUser(currentUserId);
     } catch (e) {
       _error = "Failed to update profile: ${e.toString()}";
-      _isLoading = false; // Ensure loading is false on error
+      _isLoading = false;
       notifyListeners();
       rethrow;
     }
@@ -161,8 +149,7 @@ class UserProvider with ChangeNotifier {
 
   @override
   void dispose() {
-    _authStateSubscription
-        ?.cancel(); // Cancel subscription when provider is disposed
+    _authStateSubscription?.cancel();
     super.dispose();
   }
 }

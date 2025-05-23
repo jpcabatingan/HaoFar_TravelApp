@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart'; // Package to display QR codes
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:project/models/travel_plan.dart';
 import 'package:project/providers/travel_plan_provider.dart';
 
@@ -10,14 +10,12 @@ class ShareQR extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Attempt to cast safely and handle potential null.
     final Object? arguments = ModalRoute.of(context)?.settings.arguments;
     final String? planId = arguments is String ? arguments : null;
 
     final provider = context.read<TravelPlanProvider>();
-    final dateFormatter = DateFormat.yMMMMd(); // For formatting dates
+    final dateFormatter = DateFormat.yMMMMd();
 
-    // Handle the case where planId might be null (e.g., if arguments are not passed correctly)
     if (planId == null) {
       return Scaffold(
         appBar: AppBar(
@@ -29,11 +27,10 @@ class ShareQR extends StatelessWidget {
     }
 
     return StreamBuilder<TravelPlan?>(
-      stream: provider.getPlanStream(planId), // Fetch the specific plan
+      stream: provider.getPlanStream(planId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            // Return a full scaffold during loading for better UX
             appBar: AppBar(
               title: const Text('Loading...'),
               leading: const BackButton(color: Colors.black),
@@ -54,20 +51,14 @@ class ShareQR extends StatelessWidget {
           );
         }
 
-        // Main UI for displaying the plan details and the QR code
         return Scaffold(
-          backgroundColor: const Color.fromARGB(
-            255,
-            245,
-            245,
-            245,
-          ), // Light grey background
+          backgroundColor: const Color.fromARGB(255, 245, 245, 245),
           appBar: AppBar(
-            backgroundColor: Colors.white, // White app bar
-            elevation: 1, // Subtle shadow
+            backgroundColor: Colors.white,
+            elevation: 1,
             leading: const BackButton(color: Colors.black87),
             title: Text(
-              'Share: ${plan.name}', // More descriptive title
+              'Share: ${plan.name}',
               style: const TextStyle(
                 color: Colors.black87,
                 fontWeight: FontWeight.w600,
@@ -77,22 +68,18 @@ class ShareQR extends StatelessWidget {
             centerTitle: true,
           ),
           body: Padding(
-            padding: const EdgeInsets.all(24.0), // Increased padding
+            padding: const EdgeInsets.all(24.0),
             child: Center(
-              // Center the content
               child: SingleChildScrollView(
-                // Ensure content is scrollable if it overflows
                 child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center, // Center column content
-                  crossAxisAlignment:
-                      CrossAxisAlignment.center, // Center items horizontally
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       plan.name,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 26, // Larger font for plan name
+                        fontSize: 26,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
@@ -109,12 +96,9 @@ class ShareQR extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                     ),
-                    const SizedBox(height: 30), // More space before QR code
-                    // QR Code Generation and Display
+                    const SizedBox(height: 30),
                     Container(
-                      padding: const EdgeInsets.all(
-                        10,
-                      ), // Padding around QR code
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -128,15 +112,11 @@ class ShareQR extends StatelessWidget {
                         ],
                       ),
                       child: QrImageView(
-                        data:
-                            planId, // The data encoded in the QR code (the planId)
-                        version:
-                            QrVersions
-                                .auto, // Automatically determines QR version
-                        size: 220.0, // Size of the QR code image
-                        gapless: false, // Whether to have a small border (gap)
+                        data: planId,
+                        version: QrVersions.auto,
+                        size: 220.0,
+                        gapless: false,
                         errorStateBuilder: (cxt, err) {
-                          // Handles errors during QR generation
                           return const Center(
                             child: Text(
                               "Uh oh! Something went wrong generating the QR code.",

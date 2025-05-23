@@ -40,23 +40,12 @@ class _SignInState extends State<SignIn> {
         child: Center(
           child: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 35.0, bottom: 35.0),
-                  child: Text(
-                    "Hao Far Can I Go",
-                    style: GoogleFonts.boogaloo(
-                      textStyle: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.bold,
-                        color: _titleColor,
-                        letterSpacing: 1,
-                        height: 1,
-                      ),
-                    ),
-                  ),
+                  padding: const EdgeInsets.only(top: 0.0, bottom: 35.0),
+                  child: Image.asset('assets/logo.png', height: 150),
                 ),
 
                 // USERNAME FIELD
@@ -154,8 +143,8 @@ class _SignInState extends State<SignIn> {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _btnColor,
-          foregroundColor: Colors.black,
+          backgroundColor: _linkColor,
+          foregroundColor: const Color.fromARGB(255, 255, 255, 255),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
