@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart'hide AuthProvider;
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:project/providers/user_provider.dart';
 
 class SignUp extends StatefulWidget {
@@ -23,7 +23,6 @@ class _SignUpState extends State<SignUp> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  // app colors
   final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _fieldColor = const Color.fromARGB(255, 255, 246, 230);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
@@ -80,18 +79,11 @@ class _SignUpState extends State<SignUp> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // FIRST NAME
                 _buildTextField(_firstNameController, "First Name", Icons.face),
                 const SizedBox(height: 20),
-
-                // LAST NAME
                 _buildTextField(_lastNameController, "Last Name", Icons.face),
                 const SizedBox(height: 20),
-
-                // EMAIL
                 _buildTextField(
                   _emailController,
                   "Email",
@@ -105,31 +97,26 @@ class _SignUpState extends State<SignUp> {
                   },
                 ),
                 const SizedBox(height: 20),
-
-                // USERNAME
                 _buildTextField(
                   _usernameController,
                   "Username",
                   Icons.person_rounded,
                 ),
                 const SizedBox(height: 20),
-
-                // PASSWORD
                 _buildTextField(
                   _passwordController,
                   "Password",
                   Icons.password_rounded,
                   obscureText: true,
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Password required';
+                    }
                     if (value.length < 6) return 'Minimum 6 characters';
                     return null;
                   },
                 ),
                 const SizedBox(height: 20),
-
-                // CONFIRM PASSWORD
                 _buildTextField(
                   _confirmPasswordController,
                   "Confirm Password",
@@ -143,8 +130,6 @@ class _SignUpState extends State<SignUp> {
                   },
                 ),
                 const SizedBox(height: 30),
-
-                // SIGN UP BUTTON
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 60.0),
                   child: _createSignUpButton(context),
@@ -219,7 +204,6 @@ class _SignUpState extends State<SignUp> {
         onPressed: () async {
           if (formKey.currentState!.validate()) {
             try {
-              // create the auth account + backend user record
               await Provider.of<AuthProvider>(context, listen: false).signUp(
                 _emailController.text.trim(),
                 _passwordController.text,
@@ -227,7 +211,6 @@ class _SignUpState extends State<SignUp> {
                 _firstNameController.text.trim(),
                 _lastNameController.text.trim(),
               );
-              // immediately fetch into UserProvider
               final uid = FirebaseAuth.instance.currentUser!.uid;
               await Provider.of<UserProvider>(context, listen: false).fetchUser(uid);
               Navigator.pushNamed(context, '/sign-up-interests');
@@ -251,9 +234,10 @@ class _SignUpState extends State<SignUp> {
         decoration: TextDecoration.underline,
         fontWeight: FontWeight.bold,
       ),
-      recognizer:
-          TapGestureRecognizer()
-            ..onTap = () => Navigator.pushNamed(context, '/sign-in'),
+      recognizer: TapGestureRecognizer()
+        ..onTap = () {
+          Navigator.pop(context);
+        },
     );
   }
 }

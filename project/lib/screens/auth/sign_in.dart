@@ -40,15 +40,12 @@ class _SignInState extends State<SignIn> {
         child: Center(
           child: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 35.0, bottom: 35.0),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 35.0, bottom: 35.0),
-                    child: Image.asset('assets/logo.png', height: 180),
-                  ),
+                  padding: const EdgeInsets.only(top: 0.0, bottom: 35.0),
+                  child: Image.asset('assets/logo.png', height: 150),
                 ),
 
                 // USERNAME FIELD
