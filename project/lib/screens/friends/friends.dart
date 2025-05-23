@@ -29,6 +29,7 @@ class _FriendsState extends State<Friends> {
   Set<String> _filterInterests = {};
   Set<String> _filterStyles = {};
 
+  // Tags
   static const List<String> _allInterestTags = [
     "Local Food", "Fancy Cuisine", "Locals", "Rich History",
     "Beaches", "Mountains", "Malls", "Festivals",
@@ -37,10 +38,21 @@ class _FriendsState extends State<Friends> {
     "Solo", "Group", "Backpacking", "Long-Term", "Short-Term",
   ];
 
+  // Provider reference for listening to profile changes
+  late final UserProvider _userProvider;
+
   @override
   void initState() {
     super.initState();
+
+    // grab provider and listen for profile changes
+    _userProvider = Provider.of<UserProvider>(context, listen: false);
+    _userProvider.addListener(_onProfileChanged);
+
+    // start loading users
     _loadUsers();
+
+    // react to search‐term edits
     _searchController.addListener(() {
       setState(() {
         _searchTerm = _searchController.text.trim().toLowerCase();
@@ -49,11 +61,31 @@ class _FriendsState extends State<Friends> {
     });
   }
 
+  void _onProfileChanged() {
+    final currentUser = _userProvider.user;
+    if (currentUser != null) {
+      setState(() {
+        // reseed filters any time user updates their interests/styles
+        _filterInterests = currentUser.interests.toSet();
+        _filterStyles = currentUser.travelStyles.toSet();
+        _applyFiltersAndSearch();
+      });
+    }
+  }
+
   Future<void> _loadUsers() async {
     setState(() => _isLoading = true);
     try {
       final users = await _userApi.getAllUsers();
       if (!mounted) return;
+
+      // initial seed of filters from your profile
+      final me = _userProvider.user;
+      if (me != null) {
+        _filterInterests = me.interests.toSet();
+        _filterStyles = me.travelStyles.toSet();
+      }
+
       setState(() {
         _allUsers = users;
         _applyFiltersAndSearch();
@@ -72,14 +104,16 @@ class _FriendsState extends State<Friends> {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     var list = List<UserModel>.from(_allUsers);
 
+    // exclude yourself
     if (currentUid != null) {
       list.removeWhere((u) => u.userId == currentUid);
     }
 
+    // search
     if (_searchTerm.isNotEmpty) {
       list = list.where((u) {
-        final name = '${u.firstName} ${u.lastName}'.toLowerCase();
-        return name.contains(_searchTerm) ||
+        final fullName = '${u.firstName} ${u.lastName}'.toLowerCase();
+        return fullName.contains(_searchTerm) ||
                u.username.toLowerCase().contains(_searchTerm);
       }).toList();
     }
@@ -87,25 +121,21 @@ class _FriendsState extends State<Friends> {
     final hasI = _filterInterests.isNotEmpty;
     final hasS = _filterStyles.isNotEmpty;
 
+    // apply OR‐logic filters
     if (hasI || hasS) {
       list = list.where((u) {
-        var matchI = !hasI;
-        if (hasI) matchI = u.interests.any(_filterInterests.contains);
-
-        var matchS = !hasS;
-        if (hasS) matchS = u.travelStyles.any(_filterStyles.contains);
-
-        if (hasI && hasS) return matchI && matchS;
-        if (hasI) return matchI;
-        return matchS;
+        final matchI = hasI && u.interests.any(_filterInterests.contains);
+        final matchS = hasS && u.travelStyles.any(_filterStyles.contains);
+        return matchI || matchS;
       }).toList();
     }
 
+    // if nothing selected and no search, show empty
     if (_searchTerm.isEmpty && !hasI && !hasS) {
-      _filteredUsers = [];
-    } else {
-      _filteredUsers = list;
+      list = [];
     }
+
+    setState(() => _filteredUsers = list);
   }
 
   void _openFilterSheet() {
@@ -115,76 +145,65 @@ class _FriendsState extends State<Friends> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (modalCtx, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
-                top: 20, left: 20, right: 20,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Filter by Interests",
-                      style: GoogleFonts.roboto(
-                        fontSize: 18, fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildChipGroup(_allInterestTags, _filterInterests, setModalState),
-                    const SizedBox(height: 20),
-                    Text("Filter by Travel Styles",
-                      style: GoogleFonts.roboto(
-                        fontSize: 18, fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildChipGroup(_allStyleTags, _filterStyles, setModalState),
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            setModalState(() {
-                              _filterInterests.clear();
-                              _filterStyles.clear();
-                            });
-                          },
-                          child: Text("Clear All",
-                            style: GoogleFonts.roboto(color: Colors.redAccent),
-                          ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (modalCtx, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
+              top: 20, left: 20, right: 20,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Filter by Interests",
+                    style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildChipGroup(_allInterestTags, _filterInterests, setModalState),
+                  const SizedBox(height: 20),
+                  Text("Filter by Travel Styles",
+                    style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildChipGroup(_allStyleTags, _filterStyles, setModalState),
+                  const SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          setModalState(() {
+                            _filterInterests.clear();
+                            _filterStyles.clear();
+                          });
+                        },
+                        child: Text("Clear All",
+                          style: GoogleFonts.roboto(color: Colors.redAccent),
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(_applyFiltersAndSearch);
-                            Navigator.pop(modalCtx);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 12,
-                            ),
-                            textStyle: GoogleFonts.roboto(
-                              fontSize: 16, fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          child: Text("Apply Filters",
-                            style: GoogleFonts.roboto(color: Colors.white),
-                          ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(_applyFiltersAndSearch);
+                          Navigator.pop(modalCtx);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                        child: Text("Apply Filters",
+                          style: GoogleFonts.roboto(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            );
-          },
-        );
-      },
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -199,26 +218,18 @@ class _FriendsState extends State<Friends> {
         final sel = selectedSet.contains(tag);
         return FilterChip(
           label: Text(tag,
-            style: GoogleFonts.roboto(
-              fontSize: 13,
-              color: sel ? Colors.white : Colors.black87,
-            ),
+            style: GoogleFonts.roboto(fontSize: 13, color: sel ? Colors.white : Colors.black87),
           ),
           selected: sel,
-          onSelected: (b) {
-            setModalState(() {
-              if (b) selectedSet.add(tag);
-              else selectedSet.remove(tag);
-            });
-          },
+          onSelected: (b) => setModalState(() {
+            if (b) selectedSet.add(tag); else selectedSet.remove(tag);
+          }),
           backgroundColor: Colors.grey[200],
           selectedColor: Theme.of(context).primaryColor.withOpacity(0.8),
           checkmarkColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: sel ? Theme.of(context).primaryColor : Colors.grey[400]!,
-            ),
+            side: BorderSide(color: sel ? Theme.of(context).primaryColor : Colors.grey[400]!),
           ),
         );
       }).toList(),
@@ -228,6 +239,7 @@ class _FriendsState extends State<Friends> {
   @override
   void dispose() {
     _searchController.dispose();
+    _userProvider.removeListener(_onProfileChanged);
     super.dispose();
   }
 
@@ -239,9 +251,7 @@ class _FriendsState extends State<Friends> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('Find People',
-          style: GoogleFonts.roboto(
-            color: Colors.black, fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -265,9 +275,7 @@ class _FriendsState extends State<Friends> {
                   borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 14, horizontal: 20,
-                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
               ),
             ),
             const SizedBox(height: 12),
@@ -280,12 +288,8 @@ class _FriendsState extends State<Friends> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: highlightColor,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18, vertical: 10,
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                 ),
               ),
             ),
@@ -327,21 +331,15 @@ class _FriendsState extends State<Friends> {
                     final user = _filteredUsers[i];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 2,
                       child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10,
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         leading: CircleAvatar(
                           radius: 28,
                           backgroundColor: Colors.grey[300],
                           backgroundImage: user.profilePicture != null && user.profilePicture!.isNotEmpty
-                              ? MemoryImage(
-                                  base64Decode(user.profilePicture!),
-                                )
+                              ? MemoryImage(base64Decode(user.profilePicture!))
                               : null,
                           child: (user.profilePicture == null || user.profilePicture!.isEmpty)
                               ? Text(
@@ -350,44 +348,27 @@ class _FriendsState extends State<Friends> {
                                       : (user.username.isNotEmpty
                                           ? user.username[0].toUpperCase()
                                           : "?"),
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: GoogleFonts.roboto(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
                                 )
                               : null,
                         ),
-                        title: Text(
-                          "${user.firstName} ${user.lastName}",
-                          style: GoogleFonts.roboto(
-                            fontWeight: FontWeight.w600, fontSize: 16,
-                          ),
+                        title: Text("${user.firstName} ${user.lastName}",
+                          style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 16),
                         ),
-                        subtitle: Text(
-                          "@${user.username}",
-                          style: GoogleFonts.roboto(
-                            color: Colors.grey[600], fontSize: 13,
-                          ),
+                        subtitle: Text("@${user.username}",
+                          style: GoogleFonts.roboto(color: Colors.grey[600], fontSize: 13),
                         ),
-                        trailing: const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16, color: Colors.grey,
-                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
                         onTap: () {
                           if (user.isProfilePublic) {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) => PublicProfileScreen(userId: user.userId),
-                              ),
+                              MaterialPageRoute(builder: (_) => PublicProfileScreen(userId: user.userId)),
                             );
                           } else {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) => PrivateProfilePlaceholderScreen(user: user),
-                              ),
+                              MaterialPageRoute(builder: (_) => PrivateProfilePlaceholderScreen(user: user)),
                             );
                           }
                         },
