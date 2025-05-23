@@ -24,7 +24,7 @@ class _EditPlanState extends State<EditPlan> {
   late TextEditingController _notesController;
   late TextEditingController _checklistController;
 
-  List<Map<String, dynamic>> checklist = [];
+  List<Map<String, dynamic>> checklist = []; // Changed to List<Map<String, dynamic>>
   String? planId;
   TravelPlan? plan;
   bool isLoading = true;
@@ -74,7 +74,18 @@ class _EditPlanState extends State<EditPlan> {
         _flightController.text = plan!.flightDetails;
         _accommodationController.text = plan!.accommodation;
         _notesController.text = plan!.notes.join('\n');
-        checklist = plan!.checklist.map((item) => {'title': item, 'done': false}).toList();
+
+        // Safely initialize checklist based on fetched data
+        checklist = [];
+        if (plan!.checklist is List) {
+          for (var item in plan!.checklist) {
+            if (item is Map<String, dynamic> && item.containsKey('title') && item.containsKey('done')) {
+              checklist.add(item); // Already in the correct format
+            } else if (item is String) {
+              checklist.add({'title': item, 'done': false}); // Convert old string format
+            }
+          }
+        }
         isLoading = false;
       });
     } catch (e) {
@@ -123,6 +134,8 @@ class _EditPlanState extends State<EditPlan> {
     if (mounted) setState(() => checklist.removeAt(index));
   }
 
+  // No specific _toggleChecklistItem needed as CheckboxListTile handles it inline
+
   void _saveInfo() async {
     if (plan == null || _startDate == null || _endDate == null) return;
 
@@ -138,7 +151,7 @@ class _EditPlanState extends State<EditPlan> {
         'flightDetails': _flightController.text,
         'accommodation': _accommodationController.text,
         'notes': _notesController.text.split('\n').where((n) => n.isNotEmpty).toList(),
-        'checklist': checklist.map((item) => item['title']).toList(),
+        'checklist': checklist, // Now directly passing the List<Map<String, dynamic>>
       },
       itinerary: plan!.itinerary,
       sharedWith: plan!.sharedWith,
@@ -248,12 +261,19 @@ class _EditPlanState extends State<EditPlan> {
               ],
             ),
             const SizedBox(height: 10),
+            // Display checklist items with checkboxes and removal
             ...checklist.asMap().entries.map((entry) {
               final index = entry.key;
               final item = entry.value;
               return CheckboxListTile(
-                title: Text(item['title']),
-                value: item['done'],
+                title: Text(
+                  item['title'].toString(), // Ensure it's a string
+                  style: TextStyle(
+                    decoration: (item['done'] ?? false) ? TextDecoration.lineThrough : null,
+                    color: (item['done'] ?? false) ? Colors.grey : Colors.black,
+                  ),
+                ),
+                value: item['done'] ?? false, // Default to false if 'done' is missing
                 onChanged: (value) {
                   setState(() {
                     checklist[index]['done'] = value ?? false;

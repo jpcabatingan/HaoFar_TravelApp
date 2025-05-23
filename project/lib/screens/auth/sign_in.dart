@@ -143,8 +143,8 @@ class _SignInState extends State<SignIn> {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _btnColor,
-          foregroundColor: Colors.black,
+          backgroundColor: _linkColor,
+          foregroundColor: const Color.fromARGB(255, 255, 255, 255),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),

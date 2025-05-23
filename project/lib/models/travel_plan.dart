@@ -118,6 +118,18 @@ class TravelPlan {
   String get accommodation => additionalInfo['accommodation'] as String? ?? '';
   List<String> get notes =>
       List<String>.from(additionalInfo['notes'] as List<dynamic>? ?? []);
-  List<String> get checklist =>
-      List<String>.from(additionalInfo['checklist'] as List<dynamic>? ?? []);
+  List<Map<String, dynamic>> get checklist {
+    final dynamic rawChecklist = additionalInfo['checklist'];
+    if (rawChecklist is List) {
+      return rawChecklist.map((item) {
+        if (item is Map<String, dynamic> && item.containsKey('title') && item.containsKey('done')) {
+          return item;
+        } else if (item is String) {
+          return {'title': item, 'done': false};
+        }
+        return {'title': 'Invalid Item', 'done': false};
+      }).toList();
+    }
+    return [];
+  }
 }

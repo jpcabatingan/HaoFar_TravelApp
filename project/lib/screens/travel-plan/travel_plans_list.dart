@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:project/models/travel_plan.dart';
 import 'package:project/providers/auth_provider.dart';
@@ -130,156 +131,182 @@ class _TravelPlansState extends State<TravelPlans> {
     final laterPlans = getLaterPlans(relevantPlans, soon);
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-      body: RefreshIndicator(
-        onRefresh: provider.refresh,
-        child: Column(
-          children: [
-            const SizedBox(height: 25),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      selectedCategory == "my"
-                          ? "My Plans"
-                          : selectedCategory == "shared"
+      backgroundColor: const Color.fromARGB(255, 209, 204, 235),
+      appBar: AppBar(
+        title: Image.asset('assets/logo.png', height: 50),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 204, 235),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+      ),
+      body: ClipRRect(
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(20), 
+        ),
+        child: Container(
+          color: const Color.fromARGB(255, 255, 255, 255),
+          child: RefreshIndicator(
+            onRefresh: provider.refresh,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          selectedCategory == "my"
+                              ? "My Plans"
+                              : selectedCategory == "shared"
                               ? "Shared With Me"
                               : selectedCategory == "done"
-                                  ? "Completed Plans"
-                                  : "All Plans",
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 30,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.qr_code_scanner_rounded,
-                      color: Color.fromARGB(255, 71, 70, 70),
-                    ),
-                    tooltip: 'Scan to Join Plan',
-                    onPressed: _scanAndJoinPlan,
-                  ),
-                  const SizedBox(width: 8),
-                  FloatingActionButton.small(
-                    backgroundColor: _btnAdd,
-                    tooltip: 'Create New Plan',
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.createTravelPlan,
-                      );
-                    },
-                    child: const Icon(
-                      Icons.add,
-                      color: Color.fromARGB(255, 71, 70, 70),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 15),
-            _buildCategoryChips(),
-            const SizedBox(height: 8),
-            if (provider.isLoading)
-              const Expanded(
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (provider.error != null)
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      "Error: ${provider.error}\nPull down to refresh.",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ),
-              )
-            else
-              Expanded(
-                child: filteredPlans.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            selectedCategory == "none"
-                                ? "No travel plans yet.\nTap '+' to create one or scan a QR code to join!"
-                                : selectedCategory == "my"
-                                    ? "You haven't created any plans yet.\nTap '+' to get started!"
-                                    : selectedCategory == "shared"
-                                        ? "No plans have been shared with you yet.\nScan a QR code to join one."
-                                        : selectedCategory == "done"
-                                            ? "No completed plans."
-                                            : "No travel plans in this category.",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey,
-                            ),
+                              ? "Completed Plans"
+                              : "All Plans",
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 30,
                           ),
                         ),
-                      )
-                    : ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        children: [
-                          if (!isDone && soonPlans.isNotEmpty) ...[
-                            const SizedBox(height: 10),
-                            const Text(
-                              "Coming Up Soon!",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            ...soonPlans.map((plan) => _buildPlanTile(plan)),
-                            const SizedBox(height: 16),
-                          ],
-                          if (!isDone && laterPlans.isNotEmpty) ...[
-                            const SizedBox(height: 10),
-                            const Text(
-                              "Later Adventures",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            ...laterPlans.map((plan) => _buildPlanTile(plan)),
-                            const SizedBox(height: 16),
-                          ],
-                          if (isDone && filteredPlans.isNotEmpty) ...[
-                            const SizedBox(height: 10),
-                            const Text(
-                              "Completed Trips",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            ...filteredPlans.map(
-                              (plan) => _buildPlanTile(plan),
-                            ),
-                          ] else if (isDone && filteredPlans.isEmpty) ...[] else if (!isDone &&
-                              soonPlans.isEmpty &&
-                              laterPlans.isEmpty &&
-                              filteredPlans.isNotEmpty) ...[
-                            ...filteredPlans.map(
-                              (plan) => _buildPlanTile(plan),
-                            ),
-                          ],
-                        ],
                       ),
-              ),
-          ],
+                      IconButton(
+                        icon: const Icon(
+                          Icons.qr_code_scanner_rounded,
+                          color: Color.fromARGB(255, 71, 70, 70),
+                        ),
+                        tooltip: 'Scan to Join Plan',
+                        onPressed: _scanAndJoinPlan,
+                      ),
+                      const SizedBox(width: 8),
+                      FloatingActionButton.small(
+                        backgroundColor: _btnAdd,
+                        tooltip: 'Create New Plan',
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.createTravelPlan,
+                          );
+                        },
+                        child: const Icon(
+                          Icons.add,
+                          color: Color.fromARGB(255, 71, 70, 70),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 15),
+                _buildCategoryChips(),
+                const SizedBox(height: 8),
+                if (provider.isLoading)
+                  const Expanded(
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (provider.error != null)
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          "Error: ${provider.error}\nPull down to refresh.",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child:
+                        filteredPlans.isEmpty
+                            ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(
+                                  selectedCategory == "none"
+                                      ? "No travel plans yet.\nTap '+' to create one or scan a QR code to join!"
+                                      : selectedCategory == "my"
+                                      ? "You haven't created any plans yet.\nTap '+' to get started!"
+                                      : selectedCategory == "shared"
+                                      ? "No plans have been shared with you yet.\nScan a QR code to join one."
+                                      : selectedCategory == "done"
+                                      ? "No completed plans."
+                                      : "No travel plans in this category.",
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            )
+                            : ListView(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              children: [
+                                if (!isDone && soonPlans.isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    "Coming Up Soon!",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ...soonPlans.map(
+                                    (plan) => _buildPlanTile(plan),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                                if (!isDone && laterPlans.isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    "Later Adventures",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ...laterPlans.map(
+                                    (plan) => _buildPlanTile(plan),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                                if (isDone && filteredPlans.isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    "Completed Trips",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ...filteredPlans.map(
+                                    (plan) => _buildPlanTile(plan),
+                                  ),
+                                ] else if (isDone && filteredPlans.isEmpty)
+                                  ...[]
+                                else if (!isDone &&
+                                    soonPlans.isEmpty &&
+                                    laterPlans.isEmpty &&
+                                    filteredPlans.isNotEmpty) ...[
+                                  ...filteredPlans.map(
+                                    (plan) => _buildPlanTile(plan),
+                                  ),
+                                ],
+                              ],
+                            ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -291,31 +318,27 @@ class _TravelPlansState extends State<TravelPlans> {
     DateTime soon,
   ) {
     return plans.where((p) {
-      final planDate = _getDateOnly(p.startDate);
-      return (planDate.isAtSameMomentAs(now) || planDate.isAfter(now)) &&
-          planDate.isBefore(soon) &&
-          !_getDateOnly(p.endDate).isBefore(now);
-    }).toList()
-      ..sort(
-        (a, b) => a.startDate.compareTo(b.startDate),
-      );
+        final planDate = _getDateOnly(p.startDate);
+        return (planDate.isAtSameMomentAs(now) || planDate.isAfter(now)) &&
+            planDate.isBefore(soon) &&
+            !_getDateOnly(p.endDate).isBefore(now);
+      }).toList()
+      ..sort((a, b) => a.startDate.compareTo(b.startDate));
   }
 
   List<TravelPlan> getLaterPlans(List<TravelPlan> plans, DateTime soon) {
     final now = _getDateOnly(DateTime.now());
     return plans.where((p) {
-      final planDate = _getDateOnly(p.startDate);
-      return planDate.isAtSameOrAfter(soon) &&
-          !_getDateOnly(p.endDate).isBefore(now);
-    }).toList()
-      ..sort(
-        (a, b) => a.startDate.compareTo(b.startDate),
-      );
+        final planDate = _getDateOnly(p.startDate);
+        return planDate.isAtSameOrAfter(soon) &&
+            !_getDateOnly(p.endDate).isBefore(now);
+      }).toList()
+      ..sort((a, b) => a.startDate.compareTo(b.startDate));
   }
 
   Widget _buildCategoryChips() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Wrap(
         spacing: 8,
         runSpacing: 4,
@@ -387,8 +410,9 @@ class _TravelPlansState extends State<TravelPlans> {
                 child: Icon(
                   Icons.explore_outlined,
                   size: 30,
-                  color: Colors.primaries[
-                      plan.name.hashCode % Colors.primaries.length],
+                  color:
+                      Colors.primaries[plan.name.hashCode %
+                          Colors.primaries.length],
                 ),
               ),
               const SizedBox(width: 16),
