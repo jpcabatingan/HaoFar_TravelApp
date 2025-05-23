@@ -1,5 +1,7 @@
+// Sign-in page
+// user can log in using their credentials
+
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -21,8 +23,6 @@ class _SignInState extends State<SignIn> {
   // app colors
   final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _fieldColor = const Color.fromARGB(255, 255, 246, 230);
-  final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
-  final Color _btnColor = const Color.fromARGB(255, 163, 181, 101);
   final Color _linkColor = const Color.fromARGB(255, 241, 100, 46);
 
   @override
