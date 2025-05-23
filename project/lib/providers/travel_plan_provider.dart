@@ -1,5 +1,5 @@
 // providers/travel_plan_provider.dart
-import 'dart:async'; // Import for StreamSubscription
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:project/api/travel_plan_api.dart';
@@ -9,12 +9,11 @@ class TravelPlanProvider with ChangeNotifier {
   final FirebaseTravelPlanApi _travelPlanApi;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   StreamSubscription<User?>? _authStateSubscription;
-  StreamSubscription<List<TravelPlan>>?
-  _plansSubscription; // To manage plan data stream
+  StreamSubscription<List<TravelPlan>>? _plansSubscription;
 
   String planCategory = "none";
   List<TravelPlan> _plans = [];
-  bool _isLoading = false; // Start with false, set to true when fetching
+  bool _isLoading = false;
   String? _error;
 
   bool get isLoading => _isLoading;
@@ -28,27 +27,23 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   void _listenToAuthChanges() {
-    _isLoading =
-        true; // Initially, we might be loading auth state or first set of plans
+    _isLoading = true;
     notifyListeners();
 
     _authStateSubscription = _auth.authStateChanges().listen(
       (User? firebaseUser) {
-        _plansSubscription
-            ?.cancel(); // Cancel any existing plan subscription from previous user
-        _plans = []; // Clear previous user's plans immediately
+        _plansSubscription?.cancel();
+        _plans = [];
 
         if (firebaseUser == null) {
-          // User logged out
           _isLoading = false;
           _error = null;
-          _draftPlan = null; // Clear draft plan
+          _draftPlan = null;
           notifyListeners();
         } else {
-          // User logged in, fetch new plans
           _isLoading = true;
-          _error = null; // Clear previous errors
-          notifyListeners(); // Notify UI that we are loading
+          _error = null;
+          notifyListeners();
           _fetchPlansForCurrentUser();
         }
       },
@@ -62,8 +57,6 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   void _fetchPlansForCurrentUser() {
-    // Ensure isLoading is true before starting the fetch.
-    // This might be redundant if _listenToAuthChanges already set it, but good for direct calls too.
     if (!_isLoading) {
       _isLoading = true;
       notifyListeners();
@@ -71,10 +64,9 @@ class TravelPlanProvider with ChangeNotifier {
 
     _plansSubscription = _travelPlanApi.getTravelPlans().listen(
       (plansData) {
-        // Renamed to avoid conflict with _plans
         final uniquePlans = <String, TravelPlan>{};
         for (var plan in plansData) {
-          uniquePlans[plan.planId] = plan; // Use planId as key for uniqueness
+          uniquePlans[plan.planId] = plan;
         }
         _plans = uniquePlans.values.toList();
         _isLoading = false;
@@ -84,7 +76,7 @@ class TravelPlanProvider with ChangeNotifier {
       onError: (e) {
         _error = "Failed to fetch travel plans: ${e.toString()}";
         _isLoading = false;
-        _plans = []; // Clear plans on error
+        _plans = [];
         notifyListeners();
       },
     );
@@ -98,7 +90,6 @@ class TravelPlanProvider with ChangeNotifier {
       case 'my':
         return _plans.where((p) => p.createdBy == userId).toList();
       case 'shared':
-        // Only show plans shared with the user that they didn't create.
         return _plans
             .where(
               (p) => p.sharedWith.contains(userId) && p.createdBy != userId,
@@ -107,9 +98,7 @@ class TravelPlanProvider with ChangeNotifier {
       case 'done':
         final now = DateTime.now();
         return _plans.where((p) => p.endDate.isBefore(now)).toList();
-      default: // "none" - should show all plans relevant to the user (created by OR shared with)
-        // The _travelPlanApi.getTravelPlans() already fetches both created and shared plans.
-        // So, _plans already contains all relevant plans.
+      default:
         return _plans;
     }
   }
@@ -127,18 +116,11 @@ class TravelPlanProvider with ChangeNotifier {
       notifyListeners();
       throw Exception("planId cannot be empty");
     }
-    // Optimistically update UI or wait for stream, for now, rely on stream
-    _isLoading = true; // Indicate activity
+    _isLoading = true;
     notifyListeners();
     try {
       await _travelPlanApi.createTravelPlan(plan);
-      // Data will be updated by the Firestore stream via _fetchPlansForCurrentUser.
-      // No need to manually add to _plans if stream is working.
-      // If immediate feedback is needed before stream updates, can add optimistically:
-      // _plans.add(plan); // But this might cause duplicates if stream also adds it.
-      // For now, let the stream handle it. A manual refresh() could be an option too.
-      _isLoading = false; // Reset loading after operation
-      // notifyListeners(); // Stream will notify
+      _isLoading = false;
     } catch (e) {
       _error = "Failed to create plan: ${e.toString()}";
       _isLoading = false;
@@ -152,9 +134,7 @@ class TravelPlanProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _travelPlanApi.updateTravelPlan(plan);
-      // Stream should update the list.
       _isLoading = false;
-      // notifyListeners(); // Stream will notify
     } catch (e) {
       _error = "Failed to update plan: ${e.toString()}";
       _isLoading = false;
@@ -168,9 +148,7 @@ class TravelPlanProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _travelPlanApi.deleteTravelPlan(planId);
-      // Stream should update the list.
       _isLoading = false;
-      // notifyListeners(); // Stream will notify
     } catch (e) {
       _error = "Failed to delete plan: ${e.toString()}";
       _isLoading = false;
@@ -180,16 +158,13 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    // This is a manual refresh, typically for pull-to-refresh.
-    // It should re-initiate the fetching process for the current user.
     if (_auth.currentUser != null) {
       _isLoading = true;
       _error = null;
       notifyListeners();
-      _plansSubscription?.cancel(); // Cancel existing subscription
-      _fetchPlansForCurrentUser(); // Re-fetch/re-subscribe for current user
+      _plansSubscription?.cancel();
+      _fetchPlansForCurrentUser();
     } else {
-      // No user, ensure state is clear
       _plans = [];
       _isLoading = false;
       _error = null;
@@ -215,12 +190,10 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Stream<TravelPlan?> getPlanStream(String planId) {
-    // This fetches a single plan, should be fine as is.
     return _travelPlanApi.getPlanById(planId);
   }
 
   Future<TravelPlan?> getPlanById(String planId) async {
-    // This fetches a single plan once, should be fine as is.
     _isLoading = true;
     notifyListeners();
     try {

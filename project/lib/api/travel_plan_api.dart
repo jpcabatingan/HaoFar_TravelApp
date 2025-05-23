@@ -52,7 +52,6 @@ class FirebaseTravelPlanApi {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
-    // ✅ Ensure planId is not empty
     if (travelPlan.planId.isEmpty) {
       throw Exception('planId cannot be empty');
     }
@@ -67,7 +66,6 @@ class FirebaseTravelPlanApi {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
-    // Use set() to fully replace the document
     await _db
         .collection('travelPlans')
         .doc(travelPlan.planId)

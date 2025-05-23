@@ -24,7 +24,7 @@ class _EditPlanState extends State<EditPlan> {
   late TextEditingController _notesController;
   late TextEditingController _checklistController;
 
-  List<Map<String, dynamic>> checklist = []; // Changed to List<Map<String, dynamic>>
+  List<Map<String, dynamic>> checklist = [];
   String? planId;
   TravelPlan? plan;
   bool isLoading = true;
@@ -75,14 +75,13 @@ class _EditPlanState extends State<EditPlan> {
         _accommodationController.text = plan!.accommodation;
         _notesController.text = plan!.notes.join('\n');
 
-        // Safely initialize checklist based on fetched data
         checklist = [];
         if (plan!.checklist is List) {
           for (var item in plan!.checklist) {
             if (item is Map<String, dynamic> && item.containsKey('title') && item.containsKey('done')) {
-              checklist.add(item); // Already in the correct format
+              checklist.add(item);
             } else if (item is String) {
-              checklist.add({'title': item, 'done': false}); // Convert old string format
+              checklist.add({'title': item, 'done': false});
             }
           }
         }
@@ -134,8 +133,6 @@ class _EditPlanState extends State<EditPlan> {
     if (mounted) setState(() => checklist.removeAt(index));
   }
 
-  // No specific _toggleChecklistItem needed as CheckboxListTile handles it inline
-
   void _saveInfo() async {
     if (plan == null || _startDate == null || _endDate == null) return;
 
@@ -151,7 +148,7 @@ class _EditPlanState extends State<EditPlan> {
         'flightDetails': _flightController.text,
         'accommodation': _accommodationController.text,
         'notes': _notesController.text.split('\n').where((n) => n.isNotEmpty).toList(),
-        'checklist': checklist, // Now directly passing the List<Map<String, dynamic>>
+        'checklist': checklist,
       },
       itinerary: plan!.itinerary,
       sharedWith: plan!.sharedWith,
@@ -261,19 +258,18 @@ class _EditPlanState extends State<EditPlan> {
               ],
             ),
             const SizedBox(height: 10),
-            // Display checklist items with checkboxes and removal
             ...checklist.asMap().entries.map((entry) {
               final index = entry.key;
               final item = entry.value;
               return CheckboxListTile(
                 title: Text(
-                  item['title'].toString(), // Ensure it's a string
+                  item['title'].toString(),
                   style: TextStyle(
                     decoration: (item['done'] ?? false) ? TextDecoration.lineThrough : null,
                     color: (item['done'] ?? false) ? Colors.grey : Colors.black,
                   ),
                 ),
-                value: item['done'] ?? false, // Default to false if 'done' is missing
+                value: item['done'] ?? false,
                 onChanged: (value) {
                   setState(() {
                     checklist[index]['done'] = value ?? false;

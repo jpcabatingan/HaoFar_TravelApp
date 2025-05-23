@@ -3,10 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:project/api/users_api.dart';
 import 'package:project/models/user.dart';
 import 'package:project/screens/friends/private_profile.dart';
-import 'package:project/screens/profile/view_profile_screen.dart'; // Your existing public profile screen
+import 'package:project/screens/profile/view_profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart'; // Assuming you might use UserProvider later
-import 'package:project/providers/user_provider.dart'; // For fetching specific user if needed
+import 'package:provider/provider.dart';
+import 'package:project/providers/user_provider.dart';
 
 class Friends extends StatefulWidget {
   const Friends({Key? key}) : super(key: key);
@@ -20,15 +20,13 @@ class _FriendsState extends State<Friends> {
   final TextEditingController _searchController = TextEditingController();
 
   List<UserModel> _allUsers = [];
-  List<UserModel> _filteredUsers = []; // Separate list for filtered results
+  List<UserModel> _filteredUsers = [];
   bool _isLoading = true;
-  String _searchTerm = ''; // Renamed from _search for clarity
+  String _searchTerm = '';
 
-  // Filter criteria
   Set<String> _filterInterests = {};
   Set<String> _filterStyles = {};
 
-  // Available tags for filtering (can be fetched or hardcoded)
   static const List<String> _allInterestTags = [
     "Local Food",
     "Fancy Cuisine",
@@ -74,10 +72,9 @@ class _FriendsState extends State<Friends> {
     super.initState();
     _loadUsers();
     _searchController.addListener(() {
-      // Call _filterUsers directly when search term changes
       setState(() {
         _searchTerm = _searchController.text.trim().toLowerCase();
-        _applyFiltersAndSearch(); // Apply filters and search
+        _applyFiltersAndSearch();
       });
     });
   }
@@ -89,7 +86,7 @@ class _FriendsState extends State<Friends> {
       if (!mounted) return;
       setState(() {
         _allUsers = users;
-        _applyFiltersAndSearch(); // Initial filter/search application
+        _applyFiltersAndSearch();
         _isLoading = false;
       });
     } catch (e) {
@@ -106,14 +103,12 @@ class _FriendsState extends State<Friends> {
 
     List<UserModel> usersToFilter = List.from(
       _allUsers,
-    ); // Start with all users
+    );
 
-    // Exclude current user
     if (currentUid != null) {
       usersToFilter.removeWhere((user) => user.userId == currentUid);
     }
 
-    // Apply search term
     if (_searchTerm.isNotEmpty) {
       usersToFilter =
           usersToFilter.where((user) {
@@ -124,7 +119,6 @@ class _FriendsState extends State<Friends> {
           }).toList();
     }
 
-    // Apply interest and style filters
     final hasInterestFilters = _filterInterests.isNotEmpty;
     final hasStyleFilters = _filterStyles.isNotEmpty;
 
@@ -132,31 +126,28 @@ class _FriendsState extends State<Friends> {
       usersToFilter =
           usersToFilter.where((user) {
             bool matchesInterests =
-                !hasInterestFilters; // True if no interest filters
+                !hasInterestFilters;
             if (hasInterestFilters) {
               matchesInterests = user.interests.any(_filterInterests.contains);
             }
 
-            bool matchesStyles = !hasStyleFilters; // True if no style filters
+            bool matchesStyles = !hasStyleFilters;
             if (hasStyleFilters) {
               matchesStyles = user.travelStyles.any(_filterStyles.contains);
             }
 
-            // If both filter types are active, user must match at least one from each active type (AND logic for types, OR within type)
-            // If only one filter type is active, user must match that type.
             if (hasInterestFilters && hasStyleFilters) {
               return matchesInterests &&
-                  matchesStyles; // Must match both if both are active
+                  matchesStyles;
             } else if (hasInterestFilters) {
               return matchesInterests;
             } else if (hasStyleFilters) {
               return matchesStyles;
             }
-            return false; // Should not reach here if logic is correct
+            return false;
           }).toList();
     }
 
-    // If search is empty AND no filters are applied, show no users.
     if (_searchTerm.isEmpty && !hasInterestFilters && !hasStyleFilters) {
       setState(() => _filteredUsers = []);
       return;
@@ -180,13 +171,12 @@ class _FriendsState extends State<Friends> {
               padding: EdgeInsets.only(
                 bottom:
                     MediaQuery.of(modalContext).viewInsets.bottom +
-                    20, // Adjust for keyboard
+                    20,
                 top: 20,
                 left: 20,
                 right: 20,
               ),
               child: SingleChildScrollView(
-                // Make content scrollable
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,17 +226,16 @@ class _FriendsState extends State<Friends> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            // Apply the filters to the main list
                             setState(() {
                               _applyFiltersAndSearch();
                             });
-                            Navigator.pop(modalContext); // Close the modal
+                            Navigator.pop(modalContext);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 Theme.of(
                                   context,
-                                ).primaryColor, // Use theme color
+                                ).primaryColor,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 30,
                               vertical: 12,
@@ -295,7 +284,6 @@ class _FriendsState extends State<Friends> {
               selected: isSelected,
               onSelected: (bool selected) {
                 setModalState(() {
-                  // Update the state within the modal
                   if (selected) {
                     selectedSet.add(tag);
                   } else {
@@ -306,7 +294,7 @@ class _FriendsState extends State<Friends> {
               backgroundColor: Colors.grey[200],
               selectedColor: Theme.of(
                 context,
-              ).primaryColor.withOpacity(0.8), // A bit of transparency
+              ).primaryColor.withOpacity(0.8),
               checkmarkColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -360,7 +348,6 @@ class _FriendsState extends State<Friends> {
                 ),
               ),
 
-              // Search Field
               Padding(
                 padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
                 child: TextField(
@@ -385,7 +372,6 @@ class _FriendsState extends State<Friends> {
               ),
 
               const SizedBox(height: 12),
-              // Filter Button
               Padding(
                 padding: const EdgeInsets.only(left: 20, right: 20),
                 child: Align(
@@ -413,7 +399,6 @@ class _FriendsState extends State<Friends> {
               ),
 
               const SizedBox(height: 16),
-              // User List
               if (_isLoading)
                 const Expanded(
                   child: Center(child: CircularProgressIndicator()),
@@ -477,28 +462,27 @@ class _FriendsState extends State<Friends> {
                           leading: CircleAvatar(
                             radius: 28,
                             backgroundColor:
-                                Colors.grey[300], // Placeholder background
+                                Colors.grey[300],
                             backgroundImage:
                                 user.profilePicture != null &&
                                         user.profilePicture!.isNotEmpty
                                     ? NetworkImage(user.profilePicture!)
-                                    : null, // Use null for NetworkImage to show child if no image
+                                    : null,
                             child:
                                 (user.profilePicture == null ||
                                         user.profilePicture!.isEmpty)
                                     ? Text(
-                                      // Display initials if no image
-                                      user.firstName.isNotEmpty
-                                          ? user.firstName[0].toUpperCase()
-                                          : (user.username.isNotEmpty
-                                              ? user.username[0].toUpperCase()
-                                              : "?"),
-                                      style: GoogleFonts.roboto(
-                                        fontSize: 20,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
+                                        user.firstName.isNotEmpty
+                                            ? user.firstName[0].toUpperCase()
+                                            : (user.username.isNotEmpty
+                                                ? user.username[0].toUpperCase()
+                                                : "?"),
+                                        style: GoogleFonts.roboto(
+                                          fontSize: 20,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )
                                     : null,
                           ),
                           title: Text(
