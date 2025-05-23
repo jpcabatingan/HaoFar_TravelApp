@@ -1,3 +1,6 @@
+// Additional Information for created plans
+// user can add optional additional information about their travel plan
+
 import 'package:flutter/material.dart';
 import 'package:project/models/travel_plan.dart';
 import 'package:project/providers/travel_plan_provider.dart';

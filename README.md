@@ -4,11 +4,17 @@
 **Section:** UV-3L <br/>
 
 ## Code Description
+This program is a travel app that allows users to create their own travel plans and share it with friends. The users can find people with similar interests and add them as friends. They can also edit their own profile according to their preferences
 
 ## Things you did in the code
+Sign-up and Sign-in - Firebase Authentication
+Add new plan - flutter layout forms
+Plans list - filtering and sorting
+Sharing plans - QR code
 
 
 ## Challenges encountered
+
   
 ## References
 Google Fonts

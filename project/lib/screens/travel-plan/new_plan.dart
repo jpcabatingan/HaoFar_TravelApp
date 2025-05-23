@@ -1,3 +1,6 @@
+// Create new plan
+// User can create new plan by filling up the required information
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

@@ -1,3 +1,6 @@
+// Edit plan page
+// user can edit existing plans here
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project/models/travel_plan.dart';

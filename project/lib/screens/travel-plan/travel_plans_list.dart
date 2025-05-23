@@ -1,5 +1,7 @@
+// Travel Plans list
+// user can view the list of travel plans categorized by ownership, status, and relative date
+
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:project/models/travel_plan.dart';
 import 'package:project/providers/auth_provider.dart';

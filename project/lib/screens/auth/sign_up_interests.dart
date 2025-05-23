@@ -1,11 +1,10 @@
+// Sign up Interests page
+// user can select their travel interests
+
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/gestures.dart';
 import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
-// import 'package:provider/provider.dart';
-// import 'package:my_app/providers/auth_provider.dart' as authprov;
 import 'package:firebase_auth/firebase_auth.dart'hide AuthProvider;
 import 'package:project/providers/user_provider.dart';
 
@@ -19,8 +18,6 @@ class SignUpInterests extends StatefulWidget {
 
 class _SignUpInterestsState extends State<SignUpInterests> {
   //  app colors
-  final Color _labelsColor = const Color.fromARGB(255, 80, 78, 118);
-  final Color _fieldColor = const Color.fromARGB(255, 255, 255, 255);
   final Color _titleColor = const Color.fromARGB(255, 80, 78, 118);
   final Color _btnColorContinue = const Color.fromARGB(255, 163, 181, 101);
   final Color _btnColorSkip = const Color.fromARGB(255, 252, 221, 157);
@@ -114,12 +111,12 @@ class _SignUpInterestsState extends State<SignUpInterests> {
                               color:
                                   isSelected
                                       ? _selectedColor
-                                      : Colors.transparent, // ← FILL COLOR
+                                      : Colors.transparent, 
                               border: Border.all(
                                 color:
                                     isSelected
                                         ? _selectedColor
-                                        : Colors.black54, // ← BORDER COLOR
+                                        : Colors.black54, 
                                 width: 1.5,
                               ),
                               borderRadius: BorderRadius.circular(24),

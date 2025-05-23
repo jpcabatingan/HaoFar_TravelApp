@@ -1,3 +1,6 @@
+// Scan QR
+// user can scan the QR of an existing plan of another user and have that plan be added to "Shared with me" plans list
+
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 

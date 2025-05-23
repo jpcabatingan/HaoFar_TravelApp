@@ -1,3 +1,6 @@
+// Share QR
+// user can generate a qr code image of their plan and have another user sign it to share the plan details
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
