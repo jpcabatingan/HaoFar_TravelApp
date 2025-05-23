@@ -24,7 +24,7 @@ class _EditPlanState extends State<EditPlan> {
   late TextEditingController _notesController;
   late TextEditingController _checklistController;
 
-  List<String> checklist = [];
+  List<Map<String, dynamic>> checklist = [];
   String? planId;
   TravelPlan? plan;
   bool isLoading = true;
@@ -32,7 +32,6 @@ class _EditPlanState extends State<EditPlan> {
   @override
   void initState() {
     super.initState();
-    // Initialize controllers only
     _flightController = TextEditingController();
     _accommodationController = TextEditingController();
     _notesController = TextEditingController();
@@ -42,7 +41,6 @@ class _EditPlanState extends State<EditPlan> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Safe to access context here
     if (planId == null) {
       planId = ModalRoute.of(context)?.settings.arguments as String?;
       if (planId != null) {
@@ -62,9 +60,7 @@ class _EditPlanState extends State<EditPlan> {
       if (!mounted) return;
 
       if (fetchedPlan == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Plan not found')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Plan not found')));
         Navigator.pop(context);
         return;
       }
@@ -78,14 +74,12 @@ class _EditPlanState extends State<EditPlan> {
         _flightController.text = plan!.flightDetails;
         _accommodationController.text = plan!.accommodation;
         _notesController.text = plan!.notes.join('\n');
-        checklist = List.from(plan!.checklist);
+        checklist = plan!.checklist.map((item) => {'title': item, 'done': false}).toList();
         isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error fetching plan: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error fetching plan: $e')));
       Navigator.pop(context);
     }
   }
@@ -105,7 +99,6 @@ class _EditPlanState extends State<EditPlan> {
 
   void _pickEndDate() async {
     if (_startDate == null) return;
-
     final picked = await showDatePicker(
       context: context,
       initialDate: _endDate ?? _startDate!.add(const Duration(days: 1)),
@@ -120,7 +113,7 @@ class _EditPlanState extends State<EditPlan> {
   void _addChecklistItem() {
     if (_checklistController.text.isNotEmpty && mounted) {
       setState(() {
-        checklist.add(_checklistController.text.trim());
+        checklist.add({'title': _checklistController.text.trim(), 'done': false});
         _checklistController.clear();
       });
     }
@@ -144,12 +137,8 @@ class _EditPlanState extends State<EditPlan> {
       additionalInfo: {
         'flightDetails': _flightController.text,
         'accommodation': _accommodationController.text,
-        'notes':
-            _notesController.text
-                .split('\n')
-                .where((n) => n.isNotEmpty)
-                .toList(),
-        'checklist': checklist,
+        'notes': _notesController.text.split('\n').where((n) => n.isNotEmpty).toList(),
+        'checklist': checklist.map((item) => item['title']).toList(),
       },
       itinerary: plan!.itinerary,
       sharedWith: plan!.sharedWith,
@@ -161,9 +150,7 @@ class _EditPlanState extends State<EditPlan> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to update plan: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update plan: $e')));
       }
     }
   }
@@ -182,35 +169,22 @@ class _EditPlanState extends State<EditPlan> {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
-        title: const Text(
-          'Travel Plan Details',
-          style: TextStyle(color: Colors.black),
-        ),
+        title: const Text('Travel Plan Details', style: TextStyle(color: Colors.black)),
         centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
-            const Text(
-              'Edit Plan',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            const Text('Edit Plan', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 20),
             ListTile(
-              title: Text(
-                _startDate == null
-                    ? 'Select Start Date'
-                    : DateFormat.yMMMMd().format(_startDate!),
-              ),
+              title: Text(_startDate == null ? 'Select Start Date' : DateFormat.yMMMMd().format(_startDate!)),
               trailing: const Icon(Icons.calendar_today),
               onTap: _pickStartDate,
               shape: RoundedRectangleBorder(
@@ -220,11 +194,7 @@ class _EditPlanState extends State<EditPlan> {
             ),
             const SizedBox(height: 10),
             ListTile(
-              title: Text(
-                _endDate == null
-                    ? 'Select End Date'
-                    : DateFormat.yMMMMd().format(_endDate!),
-              ),
+              title: Text(_endDate == null ? 'Select End Date' : DateFormat.yMMMMd().format(_endDate!)),
               trailing: const Icon(Icons.calendar_today),
               onTap: _pickEndDate,
               shape: RoundedRectangleBorder(
@@ -244,27 +214,18 @@ class _EditPlanState extends State<EditPlan> {
             const SizedBox(height: 20),
             TextField(
               controller: _flightController,
-              decoration: const InputDecoration(
-                labelText: 'Flight Details',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Flight Details', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 20),
             TextField(
               controller: _accommodationController,
-              decoration: const InputDecoration(
-                labelText: 'Accommodation',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Accommodation', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 20),
             TextField(
               controller: _notesController,
               maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Notes (one per line)',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Notes (one per line)', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 20),
             Row(
@@ -281,9 +242,7 @@ class _EditPlanState extends State<EditPlan> {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _addChecklistItem,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                   child: const Icon(Icons.add, color: Colors.white),
                 ),
               ],
@@ -292,13 +251,16 @@ class _EditPlanState extends State<EditPlan> {
             ...checklist.asMap().entries.map((entry) {
               final index = entry.key;
               final item = entry.value;
-              return ListTile(
-                title: Text(item),
-                trailing: IconButton(
-                  icon: const Icon(
-                    Icons.remove_circle_outline,
-                    color: Colors.red,
-                  ),
+              return CheckboxListTile(
+                title: Text(item['title']),
+                value: item['done'],
+                onChanged: (value) {
+                  setState(() {
+                    checklist[index]['done'] = value ?? false;
+                  });
+                },
+                secondary: IconButton(
+                  icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
                   onPressed: () => _removeChecklistItem(index),
                 ),
               );
