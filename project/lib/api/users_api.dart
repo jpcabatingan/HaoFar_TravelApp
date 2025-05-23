@@ -1,39 +1,32 @@
-// api/user_api.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:project/models/user.dart'; // Ensure this path is correct
+import 'package:project/models/user.dart';
+import 'package:project/models/friend_request.dart';
 
 class UserApi {
-  final CollectionReference users = FirebaseFirestore.instance.collection(
-    'users',
-  );
-  final FirebaseAuth _auth =
-      FirebaseAuth.instance; // Added for current user check
+  final CollectionReference users =
+      FirebaseFirestore.instance.collection('users');
+  final CollectionReference friendRequests =
+      FirebaseFirestore.instance.collection('friendRequests');
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Get user document
+
   Future<UserModel> getUser(String userId) async {
     final DocumentSnapshot snapshot = await users.doc(userId).get();
 
     if (snapshot.exists) {
-      // Ensure data is cast correctly, handle potential nulls if necessary
       return UserModel.fromFirestore(snapshot);
     } else {
-      // This else block might be problematic if called for a user that truly doesn't exist
-      // and isn't the current user. Consider if default data creation is always desired here.
-      final User? currentUser = _auth.currentUser; // Nullable current user
+      final User? currentUser = _auth.currentUser;
 
       if (currentUser != null && userId == currentUser.uid) {
-        // Create default user document only if it's for the currently authenticated user
-        // and their document doesn't exist.
         final defaultData = {
           'userId': userId,
-          'email': currentUser.email ?? '', // Provide default if null
+          'email': currentUser.email ?? '',
           'username':
               currentUser.email?.split('@')[0] ??
-              'traveler${DateTime.now().millisecondsSinceEpoch}', // More unique default
+              'traveler${DateTime.now().millisecondsSinceEpoch}',
           'firstName': currentUser.displayName?.split(' ').first ?? 'User',
-          // Corrected line for lastName:
           'lastName':
               (currentUser.displayName?.split(' ')?.length ?? 0) > 1
                   ? currentUser.displayName!.split(' ').last
@@ -45,16 +38,14 @@ class UserApi {
           'createdAt': FieldValue.serverTimestamp(),
           'friends': [],
           'notificationPreference': 3,
-          'profilePicture': null, // Explicitly null
-          'bio': null, // Explicitly null
+          'profilePicture': null,
+          'bio': null,
         };
 
         await users.doc(userId).set(defaultData);
         final newSnapshot = await users.doc(userId).get();
         return UserModel.fromFirestore(newSnapshot);
       } else {
-        // If the userId doesn't match the current user or no user is logged in,
-        // and the document doesn't exist, throw an error or return a specific state.
         throw Exception(
           'User document not found and cannot create default for this user.',
         );
@@ -62,19 +53,17 @@ class UserApi {
     }
   }
 
-  // Get all user documents
+
   Future<List<UserModel>> getAllUsers() async {
     try {
       final QuerySnapshot snapshot = await users.get();
       return snapshot.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
     } catch (e) {
-      // Log the error or handle it as per your app's error strategy
       print('Error fetching all users: $e');
       throw 'Failed to fetch users: $e';
     }
   }
 
-  // Update user profile
   Future<void> updateProfile(
     String userId,
     Map<String, dynamic> updateData,
@@ -87,7 +76,6 @@ class UserApi {
     }
   }
 
-  // Update user interests
   Future<void> updateInterests(String userId, List<String> interests) async {
     try {
       await users.doc(userId).update({'interests': interests});
@@ -97,7 +85,6 @@ class UserApi {
     }
   }
 
-  // Update user travel styles
   Future<void> updateTravelStyles(
     String userId,
     List<String> travelStyles,
@@ -110,7 +97,6 @@ class UserApi {
     }
   }
 
-  // Update profile picture
   Future<void> updateProfilePicture(String userId, String imageUrl) async {
     try {
       await users.doc(userId).update({'profilePicture': imageUrl});
@@ -119,4 +105,81 @@ class UserApi {
       throw 'Failed to update profile picture: $e';
     }
   }
+
+  Future<void> sendFriendRequest(String toUserId) async {
+    final currentUser = _auth.currentUser!;
+    await friendRequests.add({
+      'fromUserId': currentUser.uid,
+      'toUserId': toUserId,
+      'status': 'pending',
+      'createdAt': FieldValue.serverTimestamp(),
+      // isNotification defaults to false
+    });
+  }
+
+  Future<List<FriendRequest>> getIncomingFriendRequests() async {
+    final currentUser = _auth.currentUser!;
+    final snapshot = await friendRequests
+        .where('toUserId', isEqualTo: currentUser.uid)
+        .where('status', isEqualTo: 'pending')
+        .get();
+
+    final list = snapshot.docs
+        .map((doc) => FriendRequest.fromFirestore(doc))
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    return list;
+  }
+
+  Future<void> respondToFriendRequest(String requestId, bool accept) async {
+    final docRef = friendRequests.doc(requestId);
+    final snap = await docRef.get();
+    final data = snap.data() as Map<String, dynamic>;
+    final originalFrom = data['fromUserId'] as String;
+    final me = _auth.currentUser!;
+
+    await docRef.update({
+      'status': accept ? 'accepted' : 'declined',
+      'respondedAt': FieldValue.serverTimestamp(),
+    });
+
+    if (accept) {
+      await friendRequests.add({
+        'fromUserId': me.uid,
+        'toUserId': originalFrom,
+        'status': 'accepted',
+        'createdAt': FieldValue.serverTimestamp(),
+        'isNotification': true,
+      });
+
+      await users.doc(me.uid).update({
+        'friends': FieldValue.arrayUnion([originalFrom]),
+      });
+      await users.doc(originalFrom).update({
+        'friends': FieldValue.arrayUnion([me.uid]),
+      });
+    }
+  }
+
+  Future<List<FriendRequest>> getFriendRequestNotifications() async {
+    final currentUser = _auth.currentUser!;
+    final snapshot = await friendRequests
+        .where('toUserId', isEqualTo: currentUser.uid)
+        .where('isNotification', isEqualTo: true)
+        .get();
+
+    final list = snapshot.docs
+        .map((doc) => FriendRequest.fromFirestore(doc))
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    return list;
+  }
+
+  Future<void> deleteNotification(String requestId) async {
+    await friendRequests.doc(requestId).delete();
+  }
+
+  
 }

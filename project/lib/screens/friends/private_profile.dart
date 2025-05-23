@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:project/models/user.dart'; // Ensure this path is correct
+import 'package:project/models/user.dart';
 
 class PrivateProfilePlaceholderScreen extends StatelessWidget {
   final UserModel
-  user; // Pass the user model for potential use (e.g., username in AppBar)
+  user;
 
   const PrivateProfilePlaceholderScreen({super.key, required this.user});
 
@@ -11,23 +11,21 @@ class PrivateProfilePlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(user.username), // Display username in AppBar
+        title: Text(user.username),
         leading: IconButton(
-          // Custom back button
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
         elevation: 0,
-        backgroundColor: Colors.grey[200], // A light background for the appbar
+        backgroundColor: Colors.grey[200],
       ),
-      backgroundColor: Colors.grey[200], // Consistent background
+      backgroundColor: Colors.grey[200],
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Placeholder for profile picture
               CircleAvatar(
                 radius: 50,
                 backgroundColor: Colors.grey[400],
@@ -35,11 +33,11 @@ class PrivateProfilePlaceholderScreen extends StatelessWidget {
                     user.profilePicture != null &&
                             user.profilePicture!.isNotEmpty
                         ? NetworkImage(user.profilePicture!)
-                        : null, // Use actual image if available, otherwise default
+                        : null,
                 child:
                     user.profilePicture == null || user.profilePicture!.isEmpty
                         ? Icon(
-                          Icons.no_photography_outlined, // Icon for no image
+                          Icons.no_photography_outlined,
                           size: 50,
                           color: Colors.grey[700],
                         )
@@ -47,7 +45,7 @@ class PrivateProfilePlaceholderScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                user.username, // Show username
+                user.username,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -55,7 +53,7 @@ class PrivateProfilePlaceholderScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Icon(
-                Icons.lock_outline, // Lock icon to signify privacy
+                Icons.lock_outline,
                 size: 60,
                 color: Colors.grey[600],
               ),

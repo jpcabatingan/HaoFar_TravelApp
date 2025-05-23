@@ -25,11 +25,9 @@ class _FriendsState extends State<Friends> {
   bool _isLoading = true;
   String _searchTerm = '';
 
-  // Filter criteria
   Set<String> _filterInterests = {};
   Set<String> _filterStyles = {};
 
-  // Tags
   static const List<String> _allInterestTags = [
     "Local Food", "Fancy Cuisine", "Locals", "Rich History",
     "Beaches", "Mountains", "Malls", "Festivals",
@@ -38,21 +36,17 @@ class _FriendsState extends State<Friends> {
     "Solo", "Group", "Backpacking", "Long-Term", "Short-Term",
   ];
 
-  // Provider reference for listening to profile changes
   late final UserProvider _userProvider;
 
   @override
   void initState() {
     super.initState();
 
-    // grab provider and listen for profile changes
     _userProvider = Provider.of<UserProvider>(context, listen: false);
     _userProvider.addListener(_onProfileChanged);
 
-    // start loading users
     _loadUsers();
 
-    // react to search‐term edits
     _searchController.addListener(() {
       setState(() {
         _searchTerm = _searchController.text.trim().toLowerCase();
@@ -65,7 +59,6 @@ class _FriendsState extends State<Friends> {
     final currentUser = _userProvider.user;
     if (currentUser != null) {
       setState(() {
-        // reseed filters any time user updates their interests/styles
         _filterInterests = currentUser.interests.toSet();
         _filterStyles = currentUser.travelStyles.toSet();
         _applyFiltersAndSearch();
@@ -79,7 +72,6 @@ class _FriendsState extends State<Friends> {
       final users = await _userApi.getAllUsers();
       if (!mounted) return;
 
-      // initial seed of filters from your profile
       final me = _userProvider.user;
       if (me != null) {
         _filterInterests = me.interests.toSet();
@@ -104,12 +96,10 @@ class _FriendsState extends State<Friends> {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     var list = List<UserModel>.from(_allUsers);
 
-    // exclude yourself
     if (currentUid != null) {
       list.removeWhere((u) => u.userId == currentUid);
     }
 
-    // search
     if (_searchTerm.isNotEmpty) {
       list = list.where((u) {
         final fullName = '${u.firstName} ${u.lastName}'.toLowerCase();
@@ -121,7 +111,6 @@ class _FriendsState extends State<Friends> {
     final hasI = _filterInterests.isNotEmpty;
     final hasS = _filterStyles.isNotEmpty;
 
-    // apply OR‐logic filters
     if (hasI || hasS) {
       list = list.where((u) {
         final matchI = hasI && u.interests.any(_filterInterests.contains);
@@ -130,7 +119,6 @@ class _FriendsState extends State<Friends> {
       }).toList();
     }
 
-    // if nothing selected and no search, show empty
     if (_searchTerm.isEmpty && !hasI && !hasS) {
       list = [];
     }

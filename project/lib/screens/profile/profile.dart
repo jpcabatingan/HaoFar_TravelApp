@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:convert'; // ← for base64Encode/base64Decode
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +7,7 @@ import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:project/providers/user_provider.dart';
 import 'edit_profile_screen.dart';
+import 'package:project/screens/friends/notifications_page.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -44,6 +45,15 @@ class _ProfileState extends State<Profile> {
         ),
         automaticallyImplyLeading: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications, color: Colors.black),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationsPage()),
+              );
+            },
+          ),
           TextButton.icon(
             onPressed: () async {
               try {
