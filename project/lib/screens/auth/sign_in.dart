@@ -45,17 +45,9 @@ class _SignInState extends State<SignIn> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 35.0, bottom: 35.0),
-                  child: Text(
-                    "Hao Far Can I Go",
-                    style: GoogleFonts.boogaloo(
-                      textStyle: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.bold,
-                        color: _titleColor,
-                        letterSpacing: 1,
-                        height: 1,
-                      ),
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 35.0, bottom: 35.0),
+                    child: Image.asset('assets/logo.png', height: 180),
                   ),
                 ),
 
