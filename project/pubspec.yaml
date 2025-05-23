@@ -49,6 +49,7 @@ dependencies:
   rxdart: ^0.28.0
   async: ^2.12.0
   qr_flutter: ^4.1.0
+  
 
 dev_dependencies:
   flutter_test:
@@ -101,3 +102,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+assets:
+  - assets/default_pfp.png
+

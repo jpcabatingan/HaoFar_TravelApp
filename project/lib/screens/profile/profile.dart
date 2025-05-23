@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert'; // ← for base64Encode/base64Decode
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,7 +25,9 @@ class _ProfileState extends State<Profile> {
     final user = userProvider.user;
 
     if (userProvider.isLoading || user == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     return Scaffold(
@@ -32,10 +35,13 @@ class _ProfileState extends State<Profile> {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
-        title: Text('My Profile', style: GoogleFonts.roboto(
+        title: Text(
+          'My Profile',
+          style: GoogleFonts.roboto(
             color: Colors.black,
             fontWeight: FontWeight.w600,
-          ),),
+          ),
+        ),
         automaticallyImplyLeading: false,
         actions: [
           TextButton.icon(
@@ -70,10 +76,13 @@ class _ProfileState extends State<Profile> {
                         radius: 60,
                         backgroundImage: _imageFile != null
                             ? FileImage(_imageFile!)
-                            : NetworkImage(
-                                  user.profilePicture ??
-                                      'https://freesvg.org/img/abstract-user-flat-4.png',
-                                ) as ImageProvider,
+                            : (user.profilePicture != null
+                                ? MemoryImage(
+                                    base64Decode(user.profilePicture!),
+                                  )
+                                : const NetworkImage(
+                                    'https://freesvg.org/img/abstract-user-flat-4.png',
+                                  )) as ImageProvider,
                       ),
                       CircleAvatar(
                         radius: 20,
@@ -92,7 +101,8 @@ class _ProfileState extends State<Profile> {
               Center(child: _visibilityToggle(userProvider)),
               const SizedBox(height: 16),
               Center(
-                child: Text("@${user.username}",
+                child: Text(
+                  "@${user.username}",
                   style: GoogleFonts.roboto(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -212,10 +222,26 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(source: source, imageQuality: 85);
-    if (pickedFile != null) {
-      setState(() => _imageFile = File(pickedFile.path));
-      // TODO: upload and updateProfilePicture
+    final pickedFile = await _picker.pickImage(
+      source: source,
+      imageQuality: 85,
+    );
+    if (pickedFile == null) return;
+
+    final file = File(pickedFile.path);
+    setState(() => _imageFile = file);
+
+    final bytes = await file.readAsBytes();
+    final base64Image = base64Encode(bytes);
+    try {
+      await context.read<UserProvider>().updateProfilePicture(base64Image);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile picture updated!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating picture: $e')),
+      );
     }
   }
 
@@ -252,7 +278,10 @@ class _ProfileState extends State<Profile> {
 
   Widget _sectionLabel(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
-        child: Text(text, style: GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 14)),
+        child: Text(
+          text,
+          style: GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
       );
 
   Widget _sectionText(String text) => Padding(
@@ -264,14 +293,18 @@ class _ProfileState extends State<Profile> {
     return Wrap(
       spacing: 8,
       runSpacing: 6,
-      children: items.map(
-        (label) => Chip(
-          label: Text(label, style: GoogleFonts.roboto(fontSize: 10)),
-          backgroundColor: bgColor,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        ),
-      ).toList(),
+      children: items
+          .map(
+            (label) => Chip(
+              label: Text(label, style: GoogleFonts.roboto(fontSize: 10)),
+              backgroundColor: bgColor,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
