@@ -65,6 +65,18 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+  remove_alpha_ios: true
+  # adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/logo.png"
+  web:
+    generate: false
+
+scripts:
+  generate_icons: flutter pub run flutter_launcher_icons
 # The following section is specific to Flutter packages.
 flutter:
   # The following line ensures that the Material Icons font is
