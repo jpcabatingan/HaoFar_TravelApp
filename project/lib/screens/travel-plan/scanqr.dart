@@ -58,7 +58,6 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
               ),
             ),
           ),
-          // Torch button and related ValueListenableBuilder have been removed for this test.
         ],
       ),
     );
