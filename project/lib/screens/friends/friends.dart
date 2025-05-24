@@ -307,201 +307,220 @@ class _FriendsState extends State<Friends> {
     const highlightColor = Color(0xFFF1642E);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 209, 204, 235),
       appBar: AppBar(
-        title: Text(
-          'Find People',
-          style: GoogleFonts.roboto(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        backgroundColor: Colors.white,
+        title: Image.asset('assets/logo.png', height: 50),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 204, 235),
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _searchController,
-              style: GoogleFonts.roboto(),
-              decoration: InputDecoration(
-                hintText: 'Search by name or username...',
-                hintStyle: GoogleFonts.roboto(color: Colors.grey[600]),
-                prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 20,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ElevatedButton.icon(
-                onPressed: _openFilterSheet,
-                icon: const Icon(Icons.filter_list_rounded, size: 20),
-                label: Text(
-                  "Filters",
-                  style: GoogleFonts.roboto(fontWeight: FontWeight.w500),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: highlightColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
+      body: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: Container(
+          color: const Color.fromARGB(255, 255, 255, 255),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+                child: Text(
+                  "Find Friends",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 30,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            if (_isLoading)
-              const Expanded(child: Center(child: CircularProgressIndicator()))
-            else if (_filteredUsers.isEmpty &&
-                (_searchTerm.isNotEmpty ||
-                    _filterInterests.isNotEmpty ||
-                    _filterStyles.isNotEmpty))
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Text(
-                      "No users match your search or filter criteria.\nTry adjusting your filters or search term.",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(
-                        fontSize: 16,
-                        color: Colors.grey[700],
-                      ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 10, left: 20, right: 20),
+                child: TextField(
+                  controller: _searchController,
+                  style: GoogleFonts.roboto(),
+                  decoration: InputDecoration(
+                    hintText: 'Search by name or username...',
+                    hintStyle: GoogleFonts.roboto(color: Colors.grey[600]),
+                    prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 20,
                     ),
                   ),
                 ),
-              )
-            else if (_filteredUsers
-                .isEmpty) // This handles the initial state or when filters/search are cleared
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Text(
-                      "Search for users or apply filters to find people.",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(
-                        fontSize: 16,
-                        color: Colors.grey[700],
-                      ),
+              ),
+
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton.icon(
+                    onPressed: _openFilterSheet,
+                    icon: const Icon(Icons.filter_list_rounded, size: 20),
+                    label: Text(
+                      "Filters",
+                      style: GoogleFonts.roboto(fontWeight: FontWeight.w500),
                     ),
-                  ),
-                ),
-              )
-            else
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(top: 8),
-                  itemCount: _filteredUsers.length,
-                  itemBuilder: (ctx, i) {
-                    final user = _filteredUsers[i];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: highlightColor,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      elevation: 2,
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        leading: CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.grey[300],
-                          backgroundImage:
-                              user.profilePicture != null &&
-                                      user.profilePicture!.isNotEmpty
-                                  ? MemoryImage(
-                                    base64Decode(user.profilePicture!),
-                                  )
-                                  : null,
-                          child:
-                              (user.profilePicture == null ||
-                                      user.profilePicture!.isEmpty)
-                                  ? Text(
-                                    user.firstName.isNotEmpty
-                                        ? user.firstName[0].toUpperCase()
-                                        : (user.username.isNotEmpty
-                                            ? user.username[0].toUpperCase()
-                                            : "?"),
-                                    style: GoogleFonts.roboto(
-                                      fontSize: 20,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                  : null,
-                        ),
-                        title: Text(
-                          "${user.firstName} ${user.lastName}",
-                          style: GoogleFonts.roboto(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                        subtitle: Text(
-                          "@${user.username}",
-                          style: GoogleFonts.roboto(
-                            color: Colors.grey[600],
-                            fontSize: 13,
-                          ),
-                        ),
-                        trailing: const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                          color: Colors.grey,
-                        ),
-                        onTap: () {
-                          if (user.isProfilePublic) {
-                            Navigator.push(
-                              context,
-                              // Ensure PublicProfileScreen is correctly imported and defined
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => PublicProfileScreen(
-                                      userId: user.userId,
-                                    ),
-                              ),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              // Ensure PrivateProfilePlaceholderScreen is correctly imported and defined
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => PrivateProfilePlaceholderScreen(
-                                      user: user,
-                                    ),
-                              ),
-                            );
-                          }
-                        },
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 10,
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 ),
               ),
-            // The duplicated block that was here has been removed.
-          ],
+              const SizedBox(height: 16),
+              if (_isLoading)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_filteredUsers.isEmpty &&
+                  (_searchTerm.isNotEmpty ||
+                      _filterInterests.isNotEmpty ||
+                      _filterStyles.isNotEmpty))
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        "No users match your search or filter criteria.\nTry adjusting your filters or search term.",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.roboto(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else if (_filteredUsers
+                  .isEmpty) // This handles the initial state or when filters/search are cleared
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        "Search for users or apply filters to find people.",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.roboto(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(top: 8),
+                    itemCount: _filteredUsers.length,
+                    itemBuilder: (ctx, i) {
+                      final user = _filteredUsers[i];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          leading: CircleAvatar(
+                            radius: 28,
+                            backgroundColor: Colors.grey[300],
+                            backgroundImage:
+                                user.profilePicture != null &&
+                                        user.profilePicture!.isNotEmpty
+                                    ? MemoryImage(
+                                      base64Decode(user.profilePicture!),
+                                    )
+                                    : null,
+                            child:
+                                (user.profilePicture == null ||
+                                        user.profilePicture!.isEmpty)
+                                    ? Text(
+                                      user.firstName.isNotEmpty
+                                          ? user.firstName[0].toUpperCase()
+                                          : (user.username.isNotEmpty
+                                              ? user.username[0].toUpperCase()
+                                              : "?"),
+                                      style: GoogleFonts.roboto(
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                    : null,
+                          ),
+                          title: Text(
+                            "${user.firstName} ${user.lastName}",
+                            style: GoogleFonts.roboto(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          subtitle: Text(
+                            "@${user.username}",
+                            style: GoogleFonts.roboto(
+                              color: Colors.grey[600],
+                              fontSize: 13,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            if (user.isProfilePublic) {
+                              Navigator.push(
+                                context,
+                                // Ensure PublicProfileScreen is correctly imported and defined
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => PublicProfileScreen(
+                                        userId: user.userId,
+                                      ),
+                                ),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                // Ensure PrivateProfilePlaceholderScreen is correctly imported and defined
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => PrivateProfilePlaceholderScreen(
+                                        user: user,
+                                      ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              // The duplicated block that was here has been removed.
+            ],
+          ),
         ),
       ),
     );
