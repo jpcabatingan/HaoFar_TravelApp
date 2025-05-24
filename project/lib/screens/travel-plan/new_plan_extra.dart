@@ -1,3 +1,6 @@
+// Additional Information for created plans
+// user can add optional additional information about their travel plan
+
 import 'package:flutter/material.dart';
 import 'package:project/models/travel_plan.dart';
 import 'package:project/providers/travel_plan_provider.dart';
@@ -146,7 +149,7 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: const Text(
-          'HaoFar Can I Go',
+          'Itinerary',
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,

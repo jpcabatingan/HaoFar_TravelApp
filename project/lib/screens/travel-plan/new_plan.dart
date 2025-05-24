@@ -1,3 +1,6 @@
+// Create new plan
+// User can create new plan by filling up the required information
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -155,7 +158,7 @@ class _NewPlanState extends State<NewPlan> {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: const Text(
-          'HaoFar Can I Go',
+          'New Travel PLan',
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,

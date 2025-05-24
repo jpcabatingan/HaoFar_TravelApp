@@ -131,7 +131,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text('Edit Profile', style: GoogleFonts.lexend(color: Colors.black)),
+        title: Text('Edit Profile', style: GoogleFonts.roboto(color: Colors.black)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -207,7 +207,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                           )
-                        : Text('Save Changes', style: GoogleFonts.lexend()),
+                        : Text('Save Changes', style: GoogleFonts.roboto()),
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -239,11 +239,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               return null;
             }
           : null,
-      style: GoogleFonts.lexend(),
+      style: GoogleFonts.roboto(),
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,
-        labelStyle: GoogleFonts.lexend(fontWeight: FontWeight.bold),
+        labelStyle: GoogleFonts.roboto(fontWeight: FontWeight.bold),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         filled: true,
         fillColor: Colors.white,
@@ -253,7 +253,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _sectionLabel(String text) => Align(
         alignment: Alignment.centerLeft,
-        child: Text(text, style: GoogleFonts.lexend(fontWeight: FontWeight.bold, fontSize: 14)),
+        child: Text(text, style: GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 14)),
       );
 
   Widget _selectableChips(List<String> tags, List<String> currentList, Color bgColor) {
@@ -263,7 +263,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       children: tags.map((tag) {
         final isSelected = currentList.contains(tag);
         return FilterChip(
-          label: Text(tag, style: GoogleFonts.lexend(fontSize: 10)),
+          label: Text(tag, style: GoogleFonts.roboto(fontSize: 10)),
           selected: isSelected,
           backgroundColor: bgColor,
           selectedColor: const Color(0xFFF1642E),

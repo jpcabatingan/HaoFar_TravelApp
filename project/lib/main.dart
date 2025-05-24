@@ -42,11 +42,11 @@ class MyApp extends StatelessWidget {
 
   ThemeData _buildTheme() {
     return ThemeData(
-      scaffoldBackgroundColor: const Color(0xFFFDF8E6),
-      textTheme: GoogleFonts.lexendTextTheme(),
+      scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      textTheme: GoogleFonts.robotoTextTheme(),
       navigationBarTheme: NavigationBarThemeData(
         labelTextStyle: WidgetStateProperty.all(
-          GoogleFonts.lexend(fontSize: 12),
+          GoogleFonts.roboto(fontSize: 12),
         ),
       ),
     );

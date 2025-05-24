@@ -44,7 +44,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${u.username}’s Profile',
-            style: GoogleFonts.lexend(color: Colors.black)),
+            style: GoogleFonts.roboto(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -58,17 +58,17 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
           const SizedBox(height: 16),
           Text(u.username,
               style:
-                  GoogleFonts.lexend(fontWeight: FontWeight.bold, fontSize: 20)),
+                  GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 20)),
           Text('${u.firstName} ${u.lastName}',
-              style: GoogleFonts.lexend(color: Colors.grey, fontSize: 16)),
+              style: GoogleFonts.roboto(color: Colors.grey, fontSize: 16)),
           const SizedBox(height: 16),
           Text(u.bio?.isEmpty ?? true ? 'No bio yet.' : u.bio!,
-              style: GoogleFonts.lexend()),
+              style: GoogleFonts.roboto()),
           const SizedBox(height: 24),
           Align(
               alignment: Alignment.centerLeft,
               child: Text('Interests',
-                  style: GoogleFonts.lexend(
+                  style: GoogleFonts.roboto(
                       fontWeight: FontWeight.bold, fontSize: 14))),
           const SizedBox(height: 8),
           Wrap(
@@ -76,7 +76,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             runSpacing: 6,
             children: u.interests
                 .map((i) => Chip(
-                      label: Text(i, style: GoogleFonts.lexend(fontSize: 10)),
+                      label: Text(i, style: GoogleFonts.roboto(fontSize: 10)),
                       backgroundColor: const Color(0xFFFCDD9D),
                     ))
                 .toList(),
@@ -85,7 +85,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
           Align(
               alignment: Alignment.centerLeft,
               child: Text('Travel Styles',
-                  style: GoogleFonts.lexend(
+                  style: GoogleFonts.roboto(
                       fontWeight: FontWeight.bold, fontSize: 14))),
           const SizedBox(height: 8),
           Wrap(
@@ -93,7 +93,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             runSpacing: 6,
             children: u.travelStyles
                 .map((s) => Chip(
-                      label: Text(s, style: GoogleFonts.lexend(fontSize: 10)),
+                      label: Text(s, style: GoogleFonts.roboto(fontSize: 10)),
                       backgroundColor: const Color(0xFFFCDD9D),
                     ))
                 .toList(),
@@ -103,7 +103,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             onPressed: () {
               // TODO: implement “add friend”
             },
-            child: Text('Add Friend', style: GoogleFonts.lexend()),
+            child: Text('Add Friend', style: GoogleFonts.roboto()),
           ),
         ]),
       ),

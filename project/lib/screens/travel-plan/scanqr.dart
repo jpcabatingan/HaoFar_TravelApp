@@ -1,5 +1,8 @@
+// Scan QR
+// user can scan the QR of an existing plan of another user and have that plan be added to "Shared with me" plans list
+
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart'; // Ensure this import is present
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class QrScannerScreen extends StatefulWidget {
   const QrScannerScreen({super.key});
@@ -41,7 +44,8 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scan Travel Plan QR Code'),
-        backgroundColor: Colors.black.withOpacity(0.7),
+        backgroundColor:
+            const Color.fromRGBO(0, 0, 0, 0.7), 
         elevation: 0,
       ),
       extendBodyBehindAppBar: true,

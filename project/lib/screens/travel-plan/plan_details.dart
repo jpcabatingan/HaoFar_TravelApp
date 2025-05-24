@@ -1,9 +1,12 @@
+// Plan Details
+// user can view details of the plan and have the option to edit
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:project/models/travel_plan.dart';
 import 'package:project/providers/travel_plan_provider.dart';
-import 'package:project/app/routes.dart'; // Assuming AppRoutes.shareQR is defined
+import 'package:project/app/routes.dart';
 
 class PlanDetails extends StatelessWidget {
   const PlanDetails({super.key});
@@ -12,13 +15,12 @@ class PlanDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final planId =
         ModalRoute.of(context)?.settings.arguments
-            as String?; // Make planId nullable
+            as String?;
     final provider = context.read<TravelPlanProvider>();
 
     final dateFormatter = DateFormat.yMMMMd();
 
     if (planId == null) {
-      // Handle the case where planId is null, perhaps show an error or pop
       return Scaffold(
         appBar: AppBar(title: const Text("Error")),
         body: const Center(child: Text("Travel plan ID is missing.")),
@@ -40,7 +42,6 @@ class PlanDetails extends StatelessWidget {
             body: const Center(child: Text("Plan not found")),
           );
         }
-        // Build UI with the fetched plan
         return Scaffold(
           backgroundColor: const Color.fromARGB(255, 255, 255, 255),
           appBar: AppBar(
@@ -81,13 +82,11 @@ class PlanDetails extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushNamed(
                         context,
-                        AppRoutes.shareQR, // Use named route from AppRoutes
+                        AppRoutes.shareQR,
                         arguments: plan.planId,
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      // backgroundColor: Colors.blue, // Optional: style the button
-                      // foregroundColor: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -115,7 +114,7 @@ class PlanDetails extends StatelessWidget {
                         onPressed: () {
                           Navigator.pushNamed(
                             context,
-                            AppRoutes.travelListDetailsEdit, // Use named route
+                            AppRoutes.travelListDetailsEdit,
                             arguments: plan.planId,
                           );
                         },
@@ -129,7 +128,6 @@ class PlanDetails extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () async {
-                          // Confirm deletion
                           final confirm = await showDialog<bool>(
                             context: context,
                             builder:
@@ -168,7 +166,7 @@ class PlanDetails extends StatelessWidget {
                                 );
                                 Navigator.pop(
                                   context,
-                                ); // Go back to the previous screen
+                                );
                               }
                             } catch (e) {
                               if (context.mounted) {
@@ -192,7 +190,7 @@ class PlanDetails extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20), // Added some bottom padding
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -205,12 +203,12 @@ class PlanDetails extends StatelessWidget {
   Widget _sectionLabel(String text) => Padding(
     padding: const EdgeInsets.only(top: 16, bottom: 4),
     child: Text(
-      text.toUpperCase(), // Consistent styling
+      text.toUpperCase(),
       style: const TextStyle(
         fontWeight: FontWeight.w600,
-        fontSize: 12, // Adjusted for better hierarchy
-        letterSpacing: 1.1, // Keep letter spacing for style
-        color: Colors.black54, // Subtler color for section labels
+        fontSize: 12,
+        letterSpacing: 1.1,
+        color: Colors.black54,
       ),
     ),
   );
@@ -218,12 +216,11 @@ class PlanDetails extends StatelessWidget {
   Widget _infoBox(String content) {
     if (content.isEmpty) {
       return Container(
-        // Consistent styling even when empty
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: Colors.grey[100], // Slightly different background for empty
+          color: Colors.grey[100],
           borderRadius: BorderRadius.circular(6),
           border: Border.all(color: Colors.grey[300]!),
         ),
@@ -242,7 +239,6 @@ class PlanDetails extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.black12),
         boxShadow: [
-          // Subtle shadow for depth
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
             spreadRadius: 1,
@@ -254,7 +250,7 @@ class PlanDetails extends StatelessWidget {
       child: Text(
         content,
         style: const TextStyle(fontSize: 14, height: 1.4),
-      ), // Improved line height
+      ),
     );
   }
 
@@ -262,7 +258,7 @@ class PlanDetails extends StatelessWidget {
     if (itinerary.isEmpty)
       return _infoBox(
         "No itinerary items yet.",
-      ); // Use _infoBox for consistency
+      );
 
     return ListView.builder(
       shrinkWrap: true,
@@ -274,9 +270,8 @@ class PlanDetails extends StatelessWidget {
           day['activities'] ?? [],
         );
         return Card(
-          // Using Card for better visual separation
           margin: const EdgeInsets.only(bottom: 8),
-          elevation: 1, // Subtle elevation
+          elevation: 1,
           child: ExpansionTile(
             title: Text(
               "Day ${day['day']}",
@@ -285,10 +280,10 @@ class PlanDetails extends StatelessWidget {
             children:
                 activities.isEmpty
                     ? [
-                      const ListTile(
-                        title: Text("No activities for this day."),
-                      ),
-                    ]
+                        const ListTile(
+                          title: Text("No activities for this day."),
+                        ),
+                      ]
                     : activities
                         .map(
                           (act) => ListTile(
@@ -296,7 +291,7 @@ class PlanDetails extends StatelessWidget {
                               Icons.check_circle_outline,
                               size: 20,
                               color: Colors.green,
-                            ), // Added icon
+                            ),
                             title: Text("${act['time']} - ${act['activity']}"),
                             dense: true,
                           ),
@@ -309,17 +304,17 @@ class PlanDetails extends StatelessWidget {
   }
 
   Widget _buildNotes(List<String> notes) {
-    if (notes.isEmpty) return _infoBox("No notes added."); // Use _infoBox
+    if (notes.isEmpty) return _infoBox("No notes added.");
     return _infoBox(
       notes.map((note) => "• $note").join('\n'),
-    ); // Join notes into a single string for the info box
+    );
   }
 
-  Widget _buildChecklist(List<String> checklist) {
-    if (checklist.isEmpty)
-      return _infoBox("No checklist items."); // Use _infoBox
+  // Modified _buildChecklist to accept List<Map<String, dynamic>>
+  Widget _buildChecklist(List<Map<String, dynamic>> checklistItems) {
+    if (checklistItems.isEmpty)
+      return _infoBox("No checklist items.");
 
-    // For checklist, it's better to list them out rather than join into one string
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -340,15 +335,24 @@ class PlanDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children:
-            checklist
+            checklistItems
                 .map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: Text(
-                      "☐ $item",
-                      style: const TextStyle(fontSize: 14, height: 1.4),
-                    ),
-                  ),
+                  (item) {
+                    final title = item['title']?.toString() ?? 'Unnamed Item';
+                    final isDone = item['done'] as bool? ?? false;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                      child: Text(
+                        "${isDone ? '☑' : '☐'} $title",
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.4,
+                          decoration: isDone ? TextDecoration.lineThrough : null,
+                          color: isDone ? Colors.grey[600] : Colors.black,
+                        ),
+                      ),
+                    );
+                  },
                 )
                 .toList(),
       ),
