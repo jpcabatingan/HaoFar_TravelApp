@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import 'package:project/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:project/providers/user_provider.dart';
 import 'edit_profile_screen.dart';
+import 'package:project/screens/friends/notifications_page.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -24,7 +26,9 @@ class _ProfileState extends State<Profile> {
     final user = userProvider.user;
 
     if (userProvider.isLoading || user == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     return Scaffold(
@@ -37,45 +41,143 @@ class _ProfileState extends State<Profile> {
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 209, 204, 235),
         elevation: 0,
+        title: Text(
+          'My Profile',
+          style: GoogleFonts.roboto(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications, color: Colors.black),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationsPage()),
+              );
+            },
+          ),
+          TextButton.icon(
+            onPressed: () async {
+              try {
+                await context.read<AuthProvider>().signOut();
+                Navigator.pushReplacementNamed(context, '/');
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Logout failed: \$e')),
+                );
+              }
+            },
+            icon: const Icon(Icons.logout, color: Colors.red),
+            label: Text('Sign Out', style: GoogleFonts.roboto(color: Colors.red)),
+          ),
+        ],
       ),
-      body: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        child: Container(
-          color: const Color.fromARGB(255, 255, 255, 255),
-          child: SingleChildScrollView( // Added SingleChildScrollView to prevent overflow
-            child: Padding( // Added padding of 20 around the entire column content
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10), // Adjusted for overall padding
-                  Center(
-                    child: GestureDetector(
-                      onTap: _showImageSourceActionSheet,
-                      child: Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          CircleAvatar(
-                            radius: 60,
-                            backgroundImage: _imageFile != null
-                                ? FileImage(_imageFile!)
-                                : NetworkImage(
-                                        user.profilePicture ??
-                                            'https://freesvg.org/img/abstract-user-flat-4.png',
-                                      )
-                                    as ImageProvider,
-                          ),
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: const Color(0xFFA3B565),
-                            child: const Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                        ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: GestureDetector(
+                  onTap: _showImageSourceActionSheet,
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundImage: _imageFile != null
+                            ? FileImage(_imageFile!)
+                            : (user.profilePicture != null
+                                ? MemoryImage(
+                                    base64Decode(user.profilePicture!),
+                                  )
+                                : const NetworkImage(
+                                    'https://freesvg.org/img/abstract-user-flat-4.png',
+                                  )) as ImageProvider,
+                      ),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: const Color(0xFFA3B565),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(child: _visibilityToggle(userProvider)),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  "@${user.username}",
+                  style: GoogleFonts.roboto(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Center(
+                child: Text(
+                  '${user.firstName} ${user.lastName}',
+                  style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  (user.bio?.isEmpty ?? true) ? 'No bio yet.' : user.bio!,
+                  style: GoogleFonts.roboto(),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _sectionLabel('Email'),
+              _sectionText(user.email),
+              const SizedBox(height: 16),
+              _sectionLabel('Phone Number'),
+              _sectionText(
+                (user.phoneNumber?.isEmpty ?? true) ? 'Not set' : user.phoneNumber!,
+              ),
+              const SizedBox(height: 24),
+              _sectionLabel('Interests'),
+              const SizedBox(height: 8),
+              _chipWrap(user.interests, const Color(0xFFFCDD9D)),
+              const SizedBox(height: 24),
+              _sectionLabel('Preferred Travel Styles'),
+              const SizedBox(height: 8),
+              _chipWrap(user.travelStyles, const Color(0xFFFCDD9D)),
+              const SizedBox(height: 32),
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const EditProfileScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFA3B565),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -236,9 +338,22 @@ class _ProfileState extends State<Profile> {
       source: source,
       imageQuality: 85,
     );
-    if (pickedFile != null) {
-      setState(() => _imageFile = File(pickedFile.path));
-      // TODO: upload and updateProfilePicture
+    if (pickedFile == null) return;
+
+    final file = File(pickedFile.path);
+    setState(() => _imageFile = file);
+
+    final bytes = await file.readAsBytes();
+    final base64Image = base64Encode(bytes);
+    try {
+      await context.read<UserProvider>().updateProfilePicture(base64Image);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile picture updated!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating picture: $e')),
+      );
     }
   }
 
@@ -295,10 +410,7 @@ class _ProfileState extends State<Profile> {
             (label) => Chip(
               label: Text(label, style: GoogleFonts.roboto(fontSize: 10)),
               backgroundColor: bgColor,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 2,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
