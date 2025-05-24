@@ -8,8 +8,7 @@ import 'package:project/providers/user_provider.dart';
 
 class PublicProfileScreen extends StatefulWidget {
   final String userId;
-  const PublicProfileScreen({Key? key, required this.userId})
-      : super(key: key);
+  const PublicProfileScreen({super.key, required this.userId});
 
   @override
   _PublicProfileScreenState createState() => _PublicProfileScreenState();

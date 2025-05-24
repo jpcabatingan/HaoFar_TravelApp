@@ -7,7 +7,7 @@ import 'package:project/models/user.dart';
 import 'package:project/screens/profile/view_profile_screen.dart';
 
 class NotificationsPage extends StatefulWidget {
-  const NotificationsPage({Key? key}) : super(key: key);
+  const NotificationsPage({super.key});
   @override
   _NotificationsPageState createState() => _NotificationsPageState();
 }

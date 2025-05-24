@@ -829,7 +829,7 @@ class _EditPlanState extends State<EditPlan> {
                         ),
                         dense: true,
                       );
-                    }).toList(),
+                    }),
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,

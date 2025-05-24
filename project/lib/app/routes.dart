@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:project/screens/auth/auth_wrapper.dart';
-import 'package:project/screens/auth/sign_in.dart';
 import 'package:project/screens/auth/sign_up.dart';
 import 'package:project/screens/auth/sign_up_interests.dart';
 import 'package:project/screens/auth/sign_up_travel_styles.dart';
 import 'package:project/screens/errors/not_found_page.dart';
 import 'package:project/screens/profile/profile.dart';
 import 'package:project/screens/friends/friends.dart';
-import 'package:project/screens/travel-plan/shareqr.dart';
 
 class AppRoutes {
   // Auth

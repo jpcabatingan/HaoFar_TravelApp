@@ -24,7 +24,7 @@ class _NewPlanState extends State<NewPlan> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  Map<String, dynamic> _additionalInfo = {};
+  final Map<String, dynamic> _additionalInfo = {};
 
   void _pickStartDate() async {
     final now = DateTime.now();

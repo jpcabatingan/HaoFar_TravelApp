@@ -64,8 +64,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _toggleSelection(String tag, List<String> list) {
     setState(() {
-      if (list.contains(tag)) list.remove(tag);
-      else list.add(tag);
+      if (list.contains(tag)) {
+        list.remove(tag);
+      } else {
+        list.add(tag);
+      }
     });
   }
 

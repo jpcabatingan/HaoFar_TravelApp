@@ -34,61 +34,23 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 209, 204, 235),
       appBar: AppBar(
-        // Removed the first title: Padding(padding: const EdgeInsets.all(8.0), child: Image.asset('assets/logo.png', height: 50)),
+        title: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset('assets/logo.png', height: 50),
+        ),
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 209, 204, 235),
         elevation: 0,
-        title: Text(
-          // This is the primary title
-          'My Profile',
-          style: GoogleFonts.roboto(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.black),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const NotificationsPage()),
-              );
-            },
-          ),
-          TextButton.icon(
-            onPressed: () async {
-              try {
-                await context.read<AuthProvider>().signOut();
-                // Ensure you have a navigator route defined for '/' or use appropriate navigation
-                if (mounted) {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/',
-                    (route) => false,
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
-                }
-              }
-            },
-            icon: const Icon(Icons.logout, color: Colors.red),
-            label: Text(
-              'Sign Out',
-              style: GoogleFonts.roboto(color: Colors.red),
-            ),
-          ),
-        ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Column(
+      body: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: Container(
+          color: const Color.fromARGB(255, 255, 255, 255),
+          child: SingleChildScrollView( // Added SingleChildScrollView to prevent overflow
+            child: Padding( // Added padding of 20 around the entire column content
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
@@ -217,14 +179,12 @@ class _ProfileState extends State<Profile> {
                   ),
                 ),
               ),
-              // --- DUPLICATED BLOCK REMOVED FROM HERE ---
-              // The second _visibilityToggle, user info, sections, and Edit Profile button were here.
-              // --- REDUNDANT SIGN OUT BUTTON REMOVED FROM HERE ---
-              // The Center widget containing another Sign Out button was here.
               const SizedBox(
                 height: 20,
               ), // Keep some padding at the end if desired
             ],
+          ),
+            ),
           ),
         ),
       ),

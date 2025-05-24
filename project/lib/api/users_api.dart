@@ -139,8 +139,9 @@ class UserApi {
     final currentUser = _auth.currentUser;
     if (currentUser == null) throw Exception("User not authenticated");
 
-    if (currentUser.uid == toUserId)
+    if (currentUser.uid == toUserId) {
       throw Exception("Cannot send friend request to yourself.");
+    }
 
     // Check if users are already friends
     final currentUserDoc = await users.doc(currentUser.uid).get();

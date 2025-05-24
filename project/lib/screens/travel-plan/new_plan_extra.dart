@@ -660,30 +660,28 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
                     ...activities.asMap().entries.map((entry) {
                       final activityIndex = entry.key;
                       final activityData = entry.value;
-                      if (activityData is Map) {
-                        return ListTile(
-                          leading: const Icon(Icons.schedule, size: 20),
-                          title: Text(
-                            "${activityData['time']} - ${activityData['activity']}",
+                      return ListTile(
+                        leading: const Icon(Icons.schedule, size: 20),
+                        title: Text(
+                          "${activityData['time']} - ${activityData['activity']}",
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(
+                            Icons.remove_circle_outline,
+                            color: Colors.redAccent,
+                            size: 20,
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(
-                              Icons.remove_circle_outline,
-                              color: Colors.redAccent,
-                              size: 20,
-                            ),
-                            tooltip: "Remove activity",
-                            onPressed:
-                                () => _removeItineraryActivity(
-                                  dayIndex,
-                                  activityIndex,
-                                ),
-                          ),
-                          dense: true,
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    }).toList(),
+                          tooltip: "Remove activity",
+                          onPressed:
+                              () => _removeItineraryActivity(
+                                dayIndex,
+                                activityIndex,
+                              ),
+                        ),
+                        dense: true,
+                      );
+                                          return const SizedBox.shrink();
+                    }),
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
