@@ -1,7 +1,3 @@
-// Share QR
-// user can generate a qr code image of their plan and have another user sign it to share the plan details
-// Added functionality to save QR code to phone's storage.
-
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -12,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:project/models/travel_plan.dart';
 import 'package:project/providers/travel_plan_provider.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ShareQR extends StatefulWidget {
@@ -23,43 +19,36 @@ class ShareQR extends StatefulWidget {
 }
 
 class _ShareQRState extends State<ShareQR> {
-  final GlobalKey _qrImageKey = GlobalKey(); // Key to capture the QR image
+  final GlobalKey _qrImageKey = GlobalKey();
 
   Future<void> _saveQrCode(BuildContext context, String planName) async {
-    // 1. Request Storage Permission
-    var status = await Permission.storage.status;
+    var status = await Permission.photos.status;
     if (!status.isGranted) {
-      status = await Permission.storage.request();
+      status = await Permission.photos.request();
     }
-    // For Android 10 (API 29) and above, manage external storage might be needed for broader access
-    // or rely on scoped storage if targeting newer APIs. ImageGallerySaver often handles this.
-    // For iOS, photos permission is usually handled by the image_gallery_saver plugin via Info.plist.
 
     if (status.isGranted) {
       try {
-        // 2. Capture the QR Image
         RenderRepaintBoundary boundary =
             _qrImageKey.currentContext!.findRenderObject()
                 as RenderRepaintBoundary;
         ui.Image image = await boundary.toImage(
           pixelRatio: 3.0,
-        ); // Higher pixelRatio for better quality
+        );
         ByteData? byteData = await image.toByteData(
           format: ui.ImageByteFormat.png,
         );
         Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-        // 3. Save the image
-        // Sanitize planName for use as a filename
         final String sanitizedPlanName = planName
             .replaceAll(RegExp(r'[^\w\s]+'), '')
             .replaceAll(' ', '_');
-        final result = await ImageGallerySaver.saveImage(
+        final result = await ImageGallerySaverPlus.saveImage(
           pngBytes,
-          quality: 90,
+          quality: 90, 
           name:
               "travel_plan_qr_${sanitizedPlanName}_${DateTime.now().millisecondsSinceEpoch}",
-          isReturnImagePathOfIOS: true, // Required for iOS
+          isReturnImagePathOfIOS: true,
         );
 
         if (context.mounted) {
@@ -98,13 +87,11 @@ class _ShareQRState extends State<ShareQR> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Storage permission denied. Cannot save QR Code.'),
+            content: Text('Photos permission denied. Cannot save QR Code.'),
             backgroundColor: Colors.orange,
           ),
         );
       }
-      // Optionally, guide user to settings
-      // openAppSettings();
     }
   }
 
@@ -113,8 +100,6 @@ class _ShareQRState extends State<ShareQR> {
     final Object? arguments = ModalRoute.of(context)?.settings.arguments;
     final String? planId = arguments is String ? arguments : null;
 
-    // Using watch here if the plan details might change while this screen is open,
-    // otherwise read is fine if plan data is static once fetched for this screen.
     final provider = context.watch<TravelPlanProvider>();
     final dateFormatter = DateFormat.yMMMMd();
 
@@ -205,14 +190,12 @@ class _ShareQRState extends State<ShareQR> {
                     ),
                     const SizedBox(height: 30),
                     RepaintBoundary(
-                      // Wrap QrImageView with RepaintBoundary
                       key: _qrImageKey,
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color:
-                              Colors
-                                  .white, // Ensure background is not transparent for capture
+                              Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
@@ -225,13 +208,13 @@ class _ShareQRState extends State<ShareQR> {
                         ),
                         child: QrImageView(
                           data:
-                              planId, // The data for the QR code (e.g., plan ID or a URL)
+                              planId,
                           version: QrVersions.auto,
                           size: 220.0,
                           gapless:
-                              false, // Recommended to be false for better scanability
+                              false,
                           backgroundColor:
-                              Colors.white, // Explicit background for QR
+                              Colors.white,
                           dataModuleStyle: const QrDataModuleStyle(
                             dataModuleShape: QrDataModuleShape.square,
                             color: Colors.black,
@@ -260,7 +243,6 @@ class _ShareQRState extends State<ShareQR> {
                       style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 20),
-                    // Save QR Code Button
                     ElevatedButton.icon(
                       icon: const Icon(Icons.save_alt_rounded),
                       label: const Text("Save QR to Gallery"),

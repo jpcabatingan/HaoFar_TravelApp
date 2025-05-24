@@ -131,7 +131,6 @@ class PlanDetails extends StatelessWidget {
                   },
                 ),
                 TextButton(
-                  child: const Text('Share'),
                   onPressed:
                       (selectedFriendUsername == null || isLoadingFriends)
                           ? null
@@ -169,6 +168,7 @@ class PlanDetails extends StatelessWidget {
                               }
                             }
                           },
+                  child: const Text('Share'),
                 ),
               ],
             );
@@ -265,7 +265,7 @@ class PlanDetails extends StatelessWidget {
 
     final dateFormatter = DateFormat.yMMMMd();
 
-    Widget _buildCustomBackButton() {
+    Widget buildCustomBackButton() {
       return InkWell(
         onTap: () => Navigator.maybePop(context),
         child: Container(
@@ -315,7 +315,7 @@ class PlanDetails extends StatelessWidget {
                 Padding(
                   // Added top margin for back button
                   padding: const EdgeInsets.only(top: 8.0),
-                  child: _buildCustomBackButton(),
+                  child: buildCustomBackButton(),
                 ),
                 const SizedBox(height: 10),
                 const Center(child: Text("Travel plan ID is missing.")),
@@ -337,7 +337,7 @@ class PlanDetails extends StatelessWidget {
                 Padding(
                   // Added top margin for back button
                   padding: const EdgeInsets.only(top: 8.0),
-                  child: _buildCustomBackButton(),
+                  child: buildCustomBackButton(),
                 ),
                 const SizedBox(height: 10),
                 const Center(
@@ -371,7 +371,7 @@ class PlanDetails extends StatelessWidget {
                     Padding(
                       // Added top margin for back button
                       padding: const EdgeInsets.only(top: 8.0),
-                      child: _buildCustomBackButton(),
+                      child: buildCustomBackButton(),
                     ),
                     const SizedBox(height: 10),
                     const Center(
@@ -403,7 +403,7 @@ class PlanDetails extends StatelessWidget {
                       ), // Added bottom margin too
                       child: Align(
                         alignment: Alignment.topLeft,
-                        child: _buildCustomBackButton(),
+                        child: buildCustomBackButton(),
                       ),
                     ),
                     // const SizedBox(height: 8), // Adjusted spacing

@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:project/providers/user_provider.dart';
 
 class Friends extends StatefulWidget {
-  const Friends({Key? key}) : super(key: key);
+  const Friends({super.key});
 
   @override
   State<Friends> createState() => _FriendsState();
@@ -274,10 +274,11 @@ class _FriendsState extends State<Friends> {
               selected: sel,
               onSelected:
                   (b) => setModalState(() {
-                    if (b)
+                    if (b) {
                       selectedSet.add(tag);
-                    else
+                    } else {
                       selectedSet.remove(tag);
+                    }
                   }),
               backgroundColor: Colors.grey[200],
               selectedColor: Theme.of(context).primaryColor.withOpacity(0.8),
