@@ -18,7 +18,8 @@ class TravelPlanProvider with ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String? get error => _error;
-  User? get currentUser => _auth.currentUser;
+  User? get currentUser =>
+      _auth.currentUser; // Changed from currentUserAuth for consistency
   TravelPlan? _draftPlan;
   TravelPlan? get draftPlan => _draftPlan;
 
@@ -41,9 +42,9 @@ class TravelPlanProvider with ChangeNotifier {
           _draftPlan = null;
           notifyListeners();
         } else {
-          _isLoading = true;
+          _isLoading = true; // Set loading true before fetching
           _error = null;
-          notifyListeners();
+          notifyListeners(); // Notify UI that we are about to fetch
           _fetchPlansForCurrentUser();
         }
       },
@@ -57,6 +58,8 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   void _fetchPlansForCurrentUser() {
+    // Ensure isLoading is true if this method is called directly after an operation
+    // or during initial load. The stream listener will set it to false.
     if (!_isLoading) {
       _isLoading = true;
       notifyListeners();
@@ -65,15 +68,24 @@ class TravelPlanProvider with ChangeNotifier {
     _plansSubscription = _travelPlanApi.getTravelPlans().listen(
       (plansData) {
         _plans = plansData;
-        _isLoading = false;
+        _isLoading =
+            false; // Correctly set isLoading to false when data is received
         _error = null;
-        notifyListeners();
+        notifyListeners(); // Notify UI to rebuild with new data and loading state
       },
       onError: (e) {
         _error = "Failed to fetch travel plans: ${e.toString()}";
-        _isLoading = false;
+        _isLoading = false; // Also set isLoading to false on error
         _plans = [];
-        notifyListeners();
+        notifyListeners(); // Notify UI about the error and loading state
+      },
+      onDone: () {
+        // If the stream closes unexpectedly while we thought we were loading, update state.
+        // This is less common for Firestore streams unless manually closed or due to auth changes.
+        if (_isLoading) {
+          _isLoading = false;
+          notifyListeners();
+        }
       },
     );
   }
@@ -157,29 +169,25 @@ class TravelPlanProvider with ChangeNotifier {
     final planToSave = plan.copyWith(createdBy: user.uid);
 
     _isLoading = true;
-    notifyListeners();
+    notifyListeners(); // Notify that an operation has started
     try {
       await _travelPlanApi.createTravelPlan(planToSave);
-      _isLoading = false;
+      // DO NOT set _isLoading = false here. The stream will handle it.
     } catch (e) {
       _error = "Failed to create plan: ${e.toString()}";
-      _isLoading = false;
+      _isLoading =
+          false; // Set loading to false only on error during the operation itself
       notifyListeners();
       rethrow;
     }
   }
 
   Future<void> updatePlan(TravelPlan plan) async {
-    // This method is used by edit_plan.dart and now also for checklist updates.
-    _isLoading =
-        true; // Consider if this global loading is appropriate for quick checklist toggles.
+    _isLoading = true;
     notifyListeners();
     try {
-      await _travelPlanApi.updateTravelPlan(
-        plan,
-      ); // updateTravelPlan in API handles the full plan update
-      _isLoading = false;
-      // Stream will update the list.
+      await _travelPlanApi.updateTravelPlan(plan);
+      // DO NOT set _isLoading = false here. The stream will handle it.
     } catch (e) {
       _error = "Failed to update plan: ${e.toString()}";
       _isLoading = false;
@@ -193,7 +201,7 @@ class TravelPlanProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _travelPlanApi.deleteTravelPlan(planId);
-      _isLoading = false;
+      // DO NOT set _isLoading = false here. The stream will handle it.
     } catch (e) {
       _error = "Failed to delete plan: ${e.toString()}";
       _isLoading = false;
@@ -210,7 +218,7 @@ class TravelPlanProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _travelPlanApi.sharePlanWithUserByUsername(planId, targetUsername);
-      _isLoading = false;
+      // DO NOT set _isLoading = false here. The stream will handle it.
     } catch (e) {
       _error = "Failed to share plan by username: ${e.toString()}";
       _isLoading = false;
@@ -227,7 +235,7 @@ class TravelPlanProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _travelPlanApi.removeUserFromSharedPlan(planId, userIdToRemove);
-      _isLoading = false;
+      // DO NOT set _isLoading = false here. The stream will handle it.
     } catch (e) {
       _error = "Failed to remove user from plan: ${e.toString()}";
       _isLoading = false;
@@ -241,17 +249,13 @@ class TravelPlanProvider with ChangeNotifier {
     int itemIndex,
     bool newStatus,
   ) async {
-    // Fetch the current plan. It's important to work with the latest version.
-    TravelPlan? currentPlan = await getPlanById(
-      planId,
-    ); // Use existing method to fetch once
+    TravelPlan? currentPlan = await getPlanById(planId);
     if (currentPlan == null) {
       _error = "Could not find plan to update checklist.";
       notifyListeners();
       throw Exception(_error);
     }
 
-    // Create a mutable copy of the checklist
     List<Map<String, dynamic>> updatedChecklist =
         List<Map<String, dynamic>>.from(currentPlan.checklist);
 
@@ -261,34 +265,33 @@ class TravelPlanProvider with ChangeNotifier {
       throw Exception(_error);
     }
 
-    // Update the specific item
     updatedChecklist[itemIndex] = {
-      ...updatedChecklist[itemIndex], // Preserve other potential properties of the map
+      ...updatedChecklist[itemIndex],
       'done': newStatus,
     };
 
-    // Create the updated plan object
     TravelPlan planWithUpdatedChecklist = currentPlan.copyWith(
       additionalInfo: {
-        ...currentPlan.additionalInfo, // Preserve other additionalInfo
+        ...currentPlan.additionalInfo,
         'checklist': updatedChecklist,
       },
     );
 
-    // Use the general updatePlan method
-    // No need to set _isLoading here as updatePlan will do it.
+    // updatePlan will set its own isLoading and rely on the stream.
     try {
       await updatePlan(planWithUpdatedChecklist);
-      // The stream in PlanDetails will reflect the change.
     } catch (e) {
-      // Error already handled by updatePlan, but can re-log or re-throw if specific handling needed here
       print("Error in toggleChecklistItemStatus after calling updatePlan: $e");
+      // Error is handled by updatePlan's catch block.
       rethrow;
     }
   }
 
   Future<void> refresh() async {
     if (_auth.currentUser != null) {
+      // _isLoading is set to true by _fetchPlansForCurrentUser if it's not already true.
+      // No need to set it explicitly here if _fetchPlansForCurrentUser handles it.
+      // However, to ensure UI shows loading during manual refresh, it's good to set it.
       _isLoading = true;
       _error = null;
       notifyListeners();
@@ -324,18 +327,17 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Future<TravelPlan?> getPlanById(String planId) async {
-    // This method is less used now that PlanDetails uses getPlanStream.
-    // Kept for potential direct fetches if needed.
-    // _isLoading = true; // Avoid setting global loading for this internal fetch
-    // notifyListeners();
+    // This is a one-time fetch, should not affect global _isLoading for the list.
     try {
       final plan = await _travelPlanApi.getPlanByIdOnce(planId);
-      // _isLoading = false;
       return plan;
     } catch (e) {
-      _error = "Failed to get plan by ID: ${e.toString()}";
-      // _isLoading = false;
-      notifyListeners(); // Notify if error occurs
+      // Avoid setting global _error for this specific fetch unless it's unrecoverable
+      // and needs to be shown widely.
+      print(
+        "Error in getPlanById (one-time fetch for toggleChecklistItemStatus): $e",
+      );
+      // Not calling notifyListeners() for _error here to avoid broad UI changes for an internal fetch.
       rethrow;
     }
   }
