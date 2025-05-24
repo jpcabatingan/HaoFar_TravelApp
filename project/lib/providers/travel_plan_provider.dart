@@ -18,8 +18,7 @@ class TravelPlanProvider with ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String? get error => _error;
-  User? get currentUser =>
-      _auth.currentUser; // Changed from currentUserAuth for consistency
+  User? get currentUser => _auth.currentUser;
   TravelPlan? _draftPlan;
   TravelPlan? get draftPlan => _draftPlan;
 
@@ -42,9 +41,9 @@ class TravelPlanProvider with ChangeNotifier {
           _draftPlan = null;
           notifyListeners();
         } else {
-          _isLoading = true; // Set loading true before fetching
+          _isLoading = true;
           _error = null;
-          notifyListeners(); // Notify UI that we are about to fetch
+          notifyListeners();
           _fetchPlansForCurrentUser();
         }
       },
@@ -58,8 +57,9 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   void _fetchPlansForCurrentUser() {
-    // Ensure isLoading is true if this method is called directly after an operation
-    // or during initial load. The stream listener will set it to false.
+    // This method is called by refresh() and _listenToAuthChanges().
+    // isLoading is typically already true and notified by the caller.
+    // If called directly and isLoading is false, then set it.
     if (!_isLoading) {
       _isLoading = true;
       notifyListeners();
@@ -68,20 +68,17 @@ class TravelPlanProvider with ChangeNotifier {
     _plansSubscription = _travelPlanApi.getTravelPlans().listen(
       (plansData) {
         _plans = plansData;
-        _isLoading =
-            false; // Correctly set isLoading to false when data is received
+        _isLoading = false;
         _error = null;
-        notifyListeners(); // Notify UI to rebuild with new data and loading state
+        notifyListeners();
       },
       onError: (e) {
         _error = "Failed to fetch travel plans: ${e.toString()}";
-        _isLoading = false; // Also set isLoading to false on error
+        _isLoading = false;
         _plans = [];
-        notifyListeners(); // Notify UI about the error and loading state
+        notifyListeners();
       },
       onDone: () {
-        // If the stream closes unexpectedly while we thought we were loading, update state.
-        // This is less common for Firestore streams unless manually closed or due to auth changes.
         if (_isLoading) {
           _isLoading = false;
           notifyListeners();
@@ -168,26 +165,23 @@ class TravelPlanProvider with ChangeNotifier {
     }
     final planToSave = plan.copyWith(createdBy: user.uid);
 
-    _isLoading = true;
-    notifyListeners(); // Notify that an operation has started
+    // No direct _isLoading manipulation here; refresh will handle it.
     try {
       await _travelPlanApi.createTravelPlan(planToSave);
-      // DO NOT set _isLoading = false here. The stream will handle it.
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to create plan: ${e.toString()}";
       _isLoading =
-          false; // Set loading to false only on error during the operation itself
+          false; // Ensure loading stops if API call fails before refresh
       notifyListeners();
       rethrow;
     }
   }
 
   Future<void> updatePlan(TravelPlan plan) async {
-    _isLoading = true;
-    notifyListeners();
     try {
       await _travelPlanApi.updateTravelPlan(plan);
-      // DO NOT set _isLoading = false here. The stream will handle it.
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to update plan: ${e.toString()}";
       _isLoading = false;
@@ -197,11 +191,9 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Future<void> deletePlan(String planId) async {
-    _isLoading = true;
-    notifyListeners();
     try {
       await _travelPlanApi.deleteTravelPlan(planId);
-      // DO NOT set _isLoading = false here. The stream will handle it.
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to delete plan: ${e.toString()}";
       _isLoading = false;
@@ -214,11 +206,9 @@ class TravelPlanProvider with ChangeNotifier {
     String planId,
     String targetUsername,
   ) async {
-    _isLoading = true;
-    notifyListeners();
     try {
       await _travelPlanApi.sharePlanWithUserByUsername(planId, targetUsername);
-      // DO NOT set _isLoading = false here. The stream will handle it.
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to share plan by username: ${e.toString()}";
       _isLoading = false;
@@ -231,11 +221,9 @@ class TravelPlanProvider with ChangeNotifier {
     String planId,
     String userIdToRemove,
   ) async {
-    _isLoading = true;
-    notifyListeners();
     try {
       await _travelPlanApi.removeUserFromSharedPlan(planId, userIdToRemove);
-      // DO NOT set _isLoading = false here. The stream will handle it.
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to remove user from plan: ${e.toString()}";
       _isLoading = false;
@@ -277,26 +265,22 @@ class TravelPlanProvider with ChangeNotifier {
       },
     );
 
-    // updatePlan will set its own isLoading and rely on the stream.
     try {
+      // updatePlan will call refresh internally now
       await updatePlan(planWithUpdatedChecklist);
     } catch (e) {
       print("Error in toggleChecklistItemStatus after calling updatePlan: $e");
-      // Error is handled by updatePlan's catch block.
       rethrow;
     }
   }
 
   Future<void> refresh() async {
     if (_auth.currentUser != null) {
-      // _isLoading is set to true by _fetchPlansForCurrentUser if it's not already true.
-      // No need to set it explicitly here if _fetchPlansForCurrentUser handles it.
-      // However, to ensure UI shows loading during manual refresh, it's good to set it.
-      _isLoading = true;
+      _isLoading = true; // Set loading true at the start of refresh
       _error = null;
-      notifyListeners();
-      _plansSubscription?.cancel();
-      _fetchPlansForCurrentUser();
+      notifyListeners(); // Notify UI to show loading indicator
+      _plansSubscription?.cancel(); // Cancel any existing subscription
+      _fetchPlansForCurrentUser(); // This will re-subscribe and fetch
     } else {
       _plans = [];
       _isLoading = false;
@@ -327,17 +311,11 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Future<TravelPlan?> getPlanById(String planId) async {
-    // This is a one-time fetch, should not affect global _isLoading for the list.
     try {
       final plan = await _travelPlanApi.getPlanByIdOnce(planId);
       return plan;
     } catch (e) {
-      // Avoid setting global _error for this specific fetch unless it's unrecoverable
-      // and needs to be shown widely.
-      print(
-        "Error in getPlanById (one-time fetch for toggleChecklistItemStatus): $e",
-      );
-      // Not calling notifyListeners() for _error here to avoid broad UI changes for an internal fetch.
+      print("Error in getPlanById (one-time fetch): $e");
       rethrow;
     }
   }
