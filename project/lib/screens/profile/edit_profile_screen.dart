@@ -25,8 +25,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final List<String> interestTags = [
     "Local Food", "Fancy Cuisine", "Locals", "Rich History",
     "Beaches", "Mountains", "Malls", "Festivals",
-    "Solo Travel", "Adventure", "Luxury", "Photography",
-    "Museums",
   ];
 
   final List<String> travelStyleTags = [
