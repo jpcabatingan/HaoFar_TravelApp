@@ -29,11 +29,21 @@ class _FriendsState extends State<Friends> {
   Set<String> _filterStyles = {};
 
   static const List<String> _allInterestTags = [
-    "Local Food", "Fancy Cuisine", "Locals", "Rich History",
-    "Beaches", "Mountains", "Malls", "Festivals",
+    "Local Food",
+    "Fancy Cuisine",
+    "Locals",
+    "Rich History",
+    "Beaches",
+    "Mountains",
+    "Malls",
+    "Festivals",
   ];
   static const List<String> _allStyleTags = [
-    "Solo", "Group", "Backpacking", "Long-Term", "Short-Term",
+    "Solo",
+    "Group",
+    "Backpacking",
+    "Long-Term",
+    "Short-Term",
   ];
 
   late final UserProvider _userProvider;
@@ -80,15 +90,15 @@ class _FriendsState extends State<Friends> {
 
       setState(() {
         _allUsers = users;
-        _applyFiltersAndSearch();
+        _applyFiltersAndSearch(); // Initial filter application
         _isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load users: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to load users: $e')));
     }
   }
 
@@ -101,24 +111,45 @@ class _FriendsState extends State<Friends> {
     }
 
     if (_searchTerm.isNotEmpty) {
-      list = list.where((u) {
-        final fullName = '${u.firstName} ${u.lastName}'.toLowerCase();
-        return fullName.contains(_searchTerm) ||
-               u.username.toLowerCase().contains(_searchTerm);
-      }).toList();
+      list =
+          list.where((u) {
+            final fullName = '${u.firstName} ${u.lastName}'.toLowerCase();
+            return fullName.contains(_searchTerm) ||
+                u.username.toLowerCase().contains(_searchTerm);
+          }).toList();
     }
 
     final hasI = _filterInterests.isNotEmpty;
     final hasS = _filterStyles.isNotEmpty;
 
     if (hasI || hasS) {
-      list = list.where((u) {
-        final matchI = hasI && u.interests.any(_filterInterests.contains);
-        final matchS = hasS && u.travelStyles.any(_filterStyles.contains);
-        return matchI || matchS;
-      }).toList();
+      list =
+          list.where((u) {
+            // User must match if any interest filters are active AND they have common interests
+            // OR if any style filters are active AND they have common styles.
+            // If both interest and style filters are active, they need to match at least one category.
+            final matchI =
+                hasI ? u.interests.any(_filterInterests.contains) : false;
+            final matchS =
+                hasS ? u.travelStyles.any(_filterStyles.contains) : false;
+
+            if (hasI && hasS) {
+              // If both filter categories are active, user must match something in both
+              return u.interests.any(_filterInterests.contains) &&
+                  u.travelStyles.any(_filterStyles.contains);
+            } else if (hasI) {
+              // Only interest filters active
+              return matchI;
+            } else if (hasS) {
+              // Only style filters active
+              return matchS;
+            }
+            return false; // Should not happen if hasI or hasS is true
+          }).toList();
     }
 
+    // If no search term is present and no filters are selected, show no users
+    // This prompts the user to use search or filters.
     if (_searchTerm.isEmpty && !hasI && !hasS) {
       list = [];
     }
@@ -133,65 +164,91 @@ class _FriendsState extends State<Friends> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (modalCtx, setModalState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
-              top: 20, left: 20, right: 20,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Filter by Interests",
-                    style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildChipGroup(_allInterestTags, _filterInterests, setModalState),
-                  const SizedBox(height: 20),
-                  Text("Filter by Travel Styles",
-                    style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildChipGroup(_allStyleTags, _filterStyles, setModalState),
-                  const SizedBox(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      builder:
+          (ctx) => StatefulBuilder(
+            builder: (modalCtx, setModalState) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
+                  top: 20,
+                  left: 20,
+                  right: 20,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextButton(
-                        onPressed: () {
-                          setModalState(() {
-                            _filterInterests.clear();
-                            _filterStyles.clear();
-                          });
-                        },
-                        child: Text("Clear All",
-                          style: GoogleFonts.roboto(color: Colors.redAccent),
+                      Text(
+                        "Filter by Interests",
+                        style: GoogleFonts.roboto(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(_applyFiltersAndSearch);
-                          Navigator.pop(modalCtx);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                      const SizedBox(height: 10),
+                      _buildChipGroup(
+                        _allInterestTags,
+                        _filterInterests,
+                        setModalState,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        "Filter by Travel Styles",
+                        style: GoogleFonts.roboto(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: Text("Apply Filters",
-                          style: GoogleFonts.roboto(color: Colors.white),
-                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildChipGroup(
+                        _allStyleTags,
+                        _filterStyles,
+                        setModalState,
+                      ),
+                      const SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              setModalState(() {
+                                _filterInterests.clear();
+                                _filterStyles.clear();
+                              });
+                            },
+                            child: Text(
+                              "Clear All",
+                              style: GoogleFonts.roboto(
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(_applyFiltersAndSearch);
+                              Navigator.pop(modalCtx);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 12,
+                              ),
+                            ),
+                            child: Text(
+                              "Apply Filters",
+                              style: GoogleFonts.roboto(color: Colors.white),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+                ),
+              );
+            },
+          ),
     );
   }
 
@@ -201,26 +258,39 @@ class _FriendsState extends State<Friends> {
     StateSetter setModalState,
   ) {
     return Wrap(
-      spacing: 8, runSpacing: 6,
-      children: tags.map((tag) {
-        final sel = selectedSet.contains(tag);
-        return FilterChip(
-          label: Text(tag,
-            style: GoogleFonts.roboto(fontSize: 13, color: sel ? Colors.white : Colors.black87),
-          ),
-          selected: sel,
-          onSelected: (b) => setModalState(() {
-            if (b) selectedSet.add(tag); else selectedSet.remove(tag);
-          }),
-          backgroundColor: Colors.grey[200],
-          selectedColor: Theme.of(context).primaryColor.withOpacity(0.8),
-          checkmarkColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: sel ? Theme.of(context).primaryColor : Colors.grey[400]!),
-          ),
-        );
-      }).toList(),
+      spacing: 8,
+      runSpacing: 6,
+      children:
+          tags.map((tag) {
+            final sel = selectedSet.contains(tag);
+            return FilterChip(
+              label: Text(
+                tag,
+                style: GoogleFonts.roboto(
+                  fontSize: 13,
+                  color: sel ? Colors.white : Colors.black87,
+                ),
+              ),
+              selected: sel,
+              onSelected:
+                  (b) => setModalState(() {
+                    if (b)
+                      selectedSet.add(tag);
+                    else
+                      selectedSet.remove(tag);
+                  }),
+              backgroundColor: Colors.grey[200],
+              selectedColor: Theme.of(context).primaryColor.withOpacity(0.8),
+              checkmarkColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color:
+                      sel ? Theme.of(context).primaryColor : Colors.grey[400]!,
+                ),
+              ),
+            );
+          }).toList(),
     );
   }
 
@@ -238,8 +308,12 @@ class _FriendsState extends State<Friends> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Find People',
-          style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.w600),
+        title: Text(
+          'Find People',
+          style: GoogleFonts.roboto(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -263,7 +337,10 @@ class _FriendsState extends State<Friends> {
                   borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 20,
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -272,19 +349,30 @@ class _FriendsState extends State<Friends> {
               child: ElevatedButton.icon(
                 onPressed: _openFilterSheet,
                 icon: const Icon(Icons.filter_list_rounded, size: 20),
-                label: Text("Filters", style: GoogleFonts.roboto(fontWeight: FontWeight.w500)),
+                label: Text(
+                  "Filters",
+                  style: GoogleFonts.roboto(fontWeight: FontWeight.w500),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: highlightColor,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 16),
             if (_isLoading)
               const Expanded(child: Center(child: CircularProgressIndicator()))
-            else if (_filteredUsers.isEmpty && (_searchTerm.isNotEmpty || _filterInterests.isNotEmpty || _filterStyles.isNotEmpty))
+            else if (_filteredUsers.isEmpty &&
+                (_searchTerm.isNotEmpty ||
+                    _filterInterests.isNotEmpty ||
+                    _filterStyles.isNotEmpty))
               Expanded(
                 child: Center(
                   child: Padding(
@@ -292,12 +380,16 @@ class _FriendsState extends State<Friends> {
                     child: Text(
                       "No users match your search or filter criteria.\nTry adjusting your filters or search term.",
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey[700]),
+                      style: GoogleFonts.roboto(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                      ),
                     ),
                   ),
                 ),
               )
-            else if (_filteredUsers.isEmpty)
+            else if (_filteredUsers
+                .isEmpty) // This handles the initial state or when filters/search are cleared
               Expanded(
                 child: Center(
                   child: Padding(
@@ -305,7 +397,10 @@ class _FriendsState extends State<Friends> {
                     child: Text(
                       "Search for users or apply filters to find people.",
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(fontSize: 16, color: Colors.grey[700]),
+                      style: GoogleFonts.roboto(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                      ),
                     ),
                   ),
                 ),
@@ -319,189 +414,93 @@ class _FriendsState extends State<Friends> {
                     final user = _filteredUsers[i];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 2,
                       child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                         leading: CircleAvatar(
                           radius: 28,
                           backgroundColor: Colors.grey[300],
-                          backgroundImage: user.profilePicture != null && user.profilePicture!.isNotEmpty
-                              ? MemoryImage(base64Decode(user.profilePicture!))
-                              : null,
-                          child: (user.profilePicture == null || user.profilePicture!.isEmpty)
-                              ? Text(
-                                  user.firstName.isNotEmpty
-                                      ? user.firstName[0].toUpperCase()
-                                      : (user.username.isNotEmpty
-                                          ? user.username[0].toUpperCase()
-                                          : "?"),
-                                  style: GoogleFonts.roboto(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
-                                )
-                              : null,
+                          backgroundImage:
+                              user.profilePicture != null &&
+                                      user.profilePicture!.isNotEmpty
+                                  ? MemoryImage(
+                                    base64Decode(user.profilePicture!),
+                                  )
+                                  : null,
+                          child:
+                              (user.profilePicture == null ||
+                                      user.profilePicture!.isEmpty)
+                                  ? Text(
+                                    user.firstName.isNotEmpty
+                                        ? user.firstName[0].toUpperCase()
+                                        : (user.username.isNotEmpty
+                                            ? user.username[0].toUpperCase()
+                                            : "?"),
+                                    style: GoogleFonts.roboto(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                  : null,
                         ),
-                        title: Text("${user.firstName} ${user.lastName}",
-                          style: GoogleFonts.roboto(fontWeight: FontWeight.w600, fontSize: 16),
+                        title: Text(
+                          "${user.firstName} ${user.lastName}",
+                          style: GoogleFonts.roboto(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
                         ),
-                        subtitle: Text("@${user.username}",
-                          style: GoogleFonts.roboto(color: Colors.grey[600], fontSize: 13),
+                        subtitle: Text(
+                          "@${user.username}",
+                          style: GoogleFonts.roboto(
+                            color: Colors.grey[600],
+                            fontSize: 13,
+                          ),
                         ),
-                        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
                         onTap: () {
                           if (user.isProfilePublic) {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => PublicProfileScreen(userId: user.userId)),
+                              // Ensure PublicProfileScreen is correctly imported and defined
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => PublicProfileScreen(
+                                      userId: user.userId,
+                                    ),
+                              ),
                             );
                           } else {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => PrivateProfilePlaceholderScreen(user: user)),
+                              // Ensure PrivateProfilePlaceholderScreen is correctly imported and defined
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => PrivateProfilePlaceholderScreen(
+                                      user: user,
+                                    ),
+                              ),
                             );
                           }
                         },
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
-
-              const SizedBox(height: 16),
-              if (_isLoading)
-                const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (_filteredUsers.isEmpty &&
-                  (_searchTerm.isNotEmpty ||
-                      _filterInterests.isNotEmpty ||
-                      _filterStyles.isNotEmpty))
-                Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Text(
-                        "No users match your search or filter criteria.\nTry adjusting your filters or search term.",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.roboto(
-                          fontSize: 16,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              else if (_filteredUsers.isEmpty &&
-                  _searchTerm.isEmpty &&
-                  _filterInterests.isEmpty &&
-                  _filterStyles.isEmpty)
-                Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Text(
-                        "Search for users or apply filters to find people.",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.roboto(
-                          fontSize: 16,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              else
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(top: 8),
-                    itemCount: _filteredUsers.length,
-                    itemBuilder: (ctx, i) {
-                      final user = _filteredUsers[i];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 2,
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          leading: CircleAvatar(
-                            radius: 28,
-                            backgroundColor:
-                                Colors.grey[300],
-                            backgroundImage:
-                                user.profilePicture != null &&
-                                        user.profilePicture!.isNotEmpty
-                                    ? NetworkImage(user.profilePicture!)
-                                    : null,
-                            child:
-                                (user.profilePicture == null ||
-                                        user.profilePicture!.isEmpty)
-                                    ? Text(
-                                        user.firstName.isNotEmpty
-                                            ? user.firstName[0].toUpperCase()
-                                            : (user.username.isNotEmpty
-                                                ? user.username[0].toUpperCase()
-                                                : "?"),
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 20,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    : null,
-                          ),
-                          title: Text(
-                            "${user.firstName} ${user.lastName}",
-                            style: GoogleFonts.roboto(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                          subtitle: Text(
-                            "@${user.username}",
-                            style: GoogleFonts.roboto(
-                              color: Colors.grey[600],
-                              fontSize: 13,
-                            ),
-                          ),
-                          trailing: const Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                          onTap: () {
-                            if (user.isProfilePublic) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (_) => PublicProfileScreen(
-                                        userId: user.userId,
-                                      ),
-                                ),
-                              );
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (_) => PrivateProfilePlaceholderScreen(
-                                        user: user,
-                                      ),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-            ],
-          ),
+            // The duplicated block that was here has been removed.
+          ],
         ),
       ),
     );
