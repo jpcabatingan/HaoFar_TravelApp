@@ -57,6 +57,9 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   void _fetchPlansForCurrentUser() {
+    // This method is called by refresh() and _listenToAuthChanges().
+    // isLoading is typically already true and notified by the caller.
+    // If called directly and isLoading is false, then set it.
     if (!_isLoading) {
       _isLoading = true;
       notifyListeners();
@@ -74,6 +77,12 @@ class TravelPlanProvider with ChangeNotifier {
         _isLoading = false;
         _plans = [];
         notifyListeners();
+      },
+      onDone: () {
+        if (_isLoading) {
+          _isLoading = false;
+          notifyListeners();
+        }
       },
     );
   }
@@ -156,30 +165,23 @@ class TravelPlanProvider with ChangeNotifier {
     }
     final planToSave = plan.copyWith(createdBy: user.uid);
 
-    _isLoading = true;
-    notifyListeners();
+    // No direct _isLoading manipulation here; refresh will handle it.
     try {
       await _travelPlanApi.createTravelPlan(planToSave);
-      _isLoading = false;
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to create plan: ${e.toString()}";
-      _isLoading = false;
+      _isLoading =
+          false; // Ensure loading stops if API call fails before refresh
       notifyListeners();
       rethrow;
     }
   }
 
   Future<void> updatePlan(TravelPlan plan) async {
-    // This method is used by edit_plan.dart and now also for checklist updates.
-    _isLoading =
-        true; // Consider if this global loading is appropriate for quick checklist toggles.
-    notifyListeners();
     try {
-      await _travelPlanApi.updateTravelPlan(
-        plan,
-      ); // updateTravelPlan in API handles the full plan update
-      _isLoading = false;
-      // Stream will update the list.
+      await _travelPlanApi.updateTravelPlan(plan);
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to update plan: ${e.toString()}";
       _isLoading = false;
@@ -189,11 +191,9 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Future<void> deletePlan(String planId) async {
-    _isLoading = true;
-    notifyListeners();
     try {
       await _travelPlanApi.deleteTravelPlan(planId);
-      _isLoading = false;
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to delete plan: ${e.toString()}";
       _isLoading = false;
@@ -206,11 +206,9 @@ class TravelPlanProvider with ChangeNotifier {
     String planId,
     String targetUsername,
   ) async {
-    _isLoading = true;
-    notifyListeners();
     try {
       await _travelPlanApi.sharePlanWithUserByUsername(planId, targetUsername);
-      _isLoading = false;
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to share plan by username: ${e.toString()}";
       _isLoading = false;
@@ -223,11 +221,9 @@ class TravelPlanProvider with ChangeNotifier {
     String planId,
     String userIdToRemove,
   ) async {
-    _isLoading = true;
-    notifyListeners();
     try {
       await _travelPlanApi.removeUserFromSharedPlan(planId, userIdToRemove);
-      _isLoading = false;
+      await refresh(); // Explicitly refresh after the operation
     } catch (e) {
       _error = "Failed to remove user from plan: ${e.toString()}";
       _isLoading = false;
@@ -241,17 +237,13 @@ class TravelPlanProvider with ChangeNotifier {
     int itemIndex,
     bool newStatus,
   ) async {
-    // Fetch the current plan. It's important to work with the latest version.
-    TravelPlan? currentPlan = await getPlanById(
-      planId,
-    ); // Use existing method to fetch once
+    TravelPlan? currentPlan = await getPlanById(planId);
     if (currentPlan == null) {
       _error = "Could not find plan to update checklist.";
       notifyListeners();
       throw Exception(_error);
     }
 
-    // Create a mutable copy of the checklist
     List<Map<String, dynamic>> updatedChecklist =
         List<Map<String, dynamic>>.from(currentPlan.checklist);
 
@@ -261,27 +253,22 @@ class TravelPlanProvider with ChangeNotifier {
       throw Exception(_error);
     }
 
-    // Update the specific item
     updatedChecklist[itemIndex] = {
-      ...updatedChecklist[itemIndex], // Preserve other potential properties of the map
+      ...updatedChecklist[itemIndex],
       'done': newStatus,
     };
 
-    // Create the updated plan object
     TravelPlan planWithUpdatedChecklist = currentPlan.copyWith(
       additionalInfo: {
-        ...currentPlan.additionalInfo, // Preserve other additionalInfo
+        ...currentPlan.additionalInfo,
         'checklist': updatedChecklist,
       },
     );
 
-    // Use the general updatePlan method
-    // No need to set _isLoading here as updatePlan will do it.
     try {
+      // updatePlan will call refresh internally now
       await updatePlan(planWithUpdatedChecklist);
-      // The stream in PlanDetails will reflect the change.
     } catch (e) {
-      // Error already handled by updatePlan, but can re-log or re-throw if specific handling needed here
       print("Error in toggleChecklistItemStatus after calling updatePlan: $e");
       rethrow;
     }
@@ -289,11 +276,11 @@ class TravelPlanProvider with ChangeNotifier {
 
   Future<void> refresh() async {
     if (_auth.currentUser != null) {
-      _isLoading = true;
+      _isLoading = true; // Set loading true at the start of refresh
       _error = null;
-      notifyListeners();
-      _plansSubscription?.cancel();
-      _fetchPlansForCurrentUser();
+      notifyListeners(); // Notify UI to show loading indicator
+      _plansSubscription?.cancel(); // Cancel any existing subscription
+      _fetchPlansForCurrentUser(); // This will re-subscribe and fetch
     } else {
       _plans = [];
       _isLoading = false;
@@ -324,18 +311,11 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Future<TravelPlan?> getPlanById(String planId) async {
-    // This method is less used now that PlanDetails uses getPlanStream.
-    // Kept for potential direct fetches if needed.
-    // _isLoading = true; // Avoid setting global loading for this internal fetch
-    // notifyListeners();
     try {
       final plan = await _travelPlanApi.getPlanByIdOnce(planId);
-      // _isLoading = false;
       return plan;
     } catch (e) {
-      _error = "Failed to get plan by ID: ${e.toString()}";
-      // _isLoading = false;
-      notifyListeners(); // Notify if error occurs
+      print("Error in getPlanById (one-time fetch): $e");
       rethrow;
     }
   }
