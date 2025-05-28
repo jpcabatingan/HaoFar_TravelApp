@@ -680,7 +680,7 @@ class _NewPlanExtraState extends State<NewPlanExtra> {
                         ),
                         dense: true,
                       );
-                                          return const SizedBox.shrink();
+                      return const SizedBox.shrink();
                     }),
                     const SizedBox(height: 8),
                     Align(
