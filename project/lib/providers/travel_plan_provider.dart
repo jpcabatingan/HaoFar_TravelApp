@@ -64,11 +64,7 @@ class TravelPlanProvider with ChangeNotifier {
 
     _plansSubscription = _travelPlanApi.getTravelPlans().listen(
       (plansData) {
-        final uniquePlans = <String, TravelPlan>{};
-        for (var plan in plansData) {
-          uniquePlans[plan.planId] = plan;
-        }
-        _plans = uniquePlans.values.toList();
+        _plans = plansData;
         _isLoading = false;
         _error = null;
         notifyListeners();
@@ -86,20 +82,56 @@ class TravelPlanProvider with ChangeNotifier {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return [];
 
+    List<TravelPlan> plansToFilter = List.from(_plans);
+    DateTime now = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+
     switch (planCategory) {
       case 'my':
-        return _plans.where((p) => p.createdBy == userId).toList();
+        return plansToFilter.where((p) {
+          DateTime planEndDate = DateTime(
+            p.endDate.year,
+            p.endDate.month,
+            p.endDate.day,
+          );
+          return p.createdBy == userId &&
+              (planEndDate.isAtSameMomentAs(now) || planEndDate.isAfter(now));
+        }).toList();
       case 'shared':
-        return _plans
-            .where(
-              (p) => p.sharedWith.contains(userId) && p.createdBy != userId,
-            )
-            .toList();
+        return plansToFilter.where((p) {
+          DateTime planEndDate = DateTime(
+            p.endDate.year,
+            p.endDate.month,
+            p.endDate.day,
+          );
+          return p.sharedWith.contains(userId) &&
+              p.createdBy != userId &&
+              (planEndDate.isAtSameMomentAs(now) || planEndDate.isAfter(now));
+        }).toList();
       case 'done':
-        final now = DateTime.now();
-        return _plans.where((p) => p.endDate.isBefore(now)).toList();
+        return plansToFilter.where((p) {
+          DateTime planEndDate = DateTime(
+            p.endDate.year,
+            p.endDate.month,
+            p.endDate.day,
+          );
+          return (p.createdBy == userId || p.sharedWith.contains(userId)) &&
+              planEndDate.isBefore(now);
+        }).toList();
+      case 'none':
       default:
-        return _plans;
+        return plansToFilter.where((p) {
+          DateTime planEndDate = DateTime(
+            p.endDate.year,
+            p.endDate.month,
+            p.endDate.day,
+          );
+          return (p.createdBy == userId || p.sharedWith.contains(userId)) &&
+              (planEndDate.isAtSameMomentAs(now) || planEndDate.isAfter(now));
+        }).toList();
     }
   }
 
@@ -116,10 +148,18 @@ class TravelPlanProvider with ChangeNotifier {
       notifyListeners();
       throw Exception("planId cannot be empty");
     }
+    final user = _auth.currentUser;
+    if (user == null) {
+      _error = "User not authenticated.";
+      notifyListeners();
+      throw Exception("User not authenticated");
+    }
+    final planToSave = plan.copyWith(createdBy: user.uid);
+
     _isLoading = true;
     notifyListeners();
     try {
-      await _travelPlanApi.createTravelPlan(plan);
+      await _travelPlanApi.createTravelPlan(planToSave);
       _isLoading = false;
     } catch (e) {
       _error = "Failed to create plan: ${e.toString()}";
@@ -130,11 +170,16 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Future<void> updatePlan(TravelPlan plan) async {
-    _isLoading = true;
+    // This method is used by edit_plan.dart and now also for checklist updates.
+    _isLoading =
+        true; // Consider if this global loading is appropriate for quick checklist toggles.
     notifyListeners();
     try {
-      await _travelPlanApi.updateTravelPlan(plan);
+      await _travelPlanApi.updateTravelPlan(
+        plan,
+      ); // updateTravelPlan in API handles the full plan update
       _isLoading = false;
+      // Stream will update the list.
     } catch (e) {
       _error = "Failed to update plan: ${e.toString()}";
       _isLoading = false;
@@ -153,6 +198,91 @@ class TravelPlanProvider with ChangeNotifier {
       _error = "Failed to delete plan: ${e.toString()}";
       _isLoading = false;
       notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> sharePlanWithUserByUsername(
+    String planId,
+    String targetUsername,
+  ) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _travelPlanApi.sharePlanWithUserByUsername(planId, targetUsername);
+      _isLoading = false;
+    } catch (e) {
+      _error = "Failed to share plan by username: ${e.toString()}";
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> removeUserFromSharedPlan(
+    String planId,
+    String userIdToRemove,
+  ) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _travelPlanApi.removeUserFromSharedPlan(planId, userIdToRemove);
+      _isLoading = false;
+    } catch (e) {
+      _error = "Failed to remove user from plan: ${e.toString()}";
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> toggleChecklistItemStatus(
+    String planId,
+    int itemIndex,
+    bool newStatus,
+  ) async {
+    // Fetch the current plan. It's important to work with the latest version.
+    TravelPlan? currentPlan = await getPlanById(
+      planId,
+    ); // Use existing method to fetch once
+    if (currentPlan == null) {
+      _error = "Could not find plan to update checklist.";
+      notifyListeners();
+      throw Exception(_error);
+    }
+
+    // Create a mutable copy of the checklist
+    List<Map<String, dynamic>> updatedChecklist =
+        List<Map<String, dynamic>>.from(currentPlan.checklist);
+
+    if (itemIndex < 0 || itemIndex >= updatedChecklist.length) {
+      _error = "Invalid checklist item index.";
+      notifyListeners();
+      throw Exception(_error);
+    }
+
+    // Update the specific item
+    updatedChecklist[itemIndex] = {
+      ...updatedChecklist[itemIndex], // Preserve other potential properties of the map
+      'done': newStatus,
+    };
+
+    // Create the updated plan object
+    TravelPlan planWithUpdatedChecklist = currentPlan.copyWith(
+      additionalInfo: {
+        ...currentPlan.additionalInfo, // Preserve other additionalInfo
+        'checklist': updatedChecklist,
+      },
+    );
+
+    // Use the general updatePlan method
+    // No need to set _isLoading here as updatePlan will do it.
+    try {
+      await updatePlan(planWithUpdatedChecklist);
+      // The stream in PlanDetails will reflect the change.
+    } catch (e) {
+      // Error already handled by updatePlan, but can re-log or re-throw if specific handling needed here
+      print("Error in toggleChecklistItemStatus after calling updatePlan: $e");
       rethrow;
     }
   }
@@ -194,17 +324,18 @@ class TravelPlanProvider with ChangeNotifier {
   }
 
   Future<TravelPlan?> getPlanById(String planId) async {
-    _isLoading = true;
-    notifyListeners();
+    // This method is less used now that PlanDetails uses getPlanStream.
+    // Kept for potential direct fetches if needed.
+    // _isLoading = true; // Avoid setting global loading for this internal fetch
+    // notifyListeners();
     try {
       final plan = await _travelPlanApi.getPlanByIdOnce(planId);
-      _isLoading = false;
-      notifyListeners();
+      // _isLoading = false;
       return plan;
     } catch (e) {
       _error = "Failed to get plan by ID: ${e.toString()}";
-      _isLoading = false;
-      notifyListeners();
+      // _isLoading = false;
+      notifyListeners(); // Notify if error occurs
       rethrow;
     }
   }

@@ -25,8 +25,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final List<String> interestTags = [
     "Local Food", "Fancy Cuisine", "Locals", "Rich History",
     "Beaches", "Mountains", "Malls", "Festivals",
-    "Solo Travel", "Adventure", "Luxury", "Photography",
-    "Museums",
   ];
 
   final List<String> travelStyleTags = [
@@ -66,8 +64,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _toggleSelection(String tag, List<String> list) {
     setState(() {
-      if (list.contains(tag)) list.remove(tag);
-      else list.add(tag);
+      if (list.contains(tag)) {
+        list.remove(tag);
+      } else {
+        list.add(tag);
+      }
     });
   }
 

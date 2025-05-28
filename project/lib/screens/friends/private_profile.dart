@@ -29,16 +29,17 @@ class PrivateProfilePlaceholderScreen extends StatelessWidget {
                 radius: 50,
                 backgroundColor: Colors.grey[400],
                 backgroundImage:
-                    user.profilePicture != null && user.profilePicture!.isNotEmpty
+                    user.profilePicture != null &&
+                            user.profilePicture!.isNotEmpty
                         ? NetworkImage(user.profilePicture!)
                         : null,
                 child:
                     user.profilePicture == null || user.profilePicture!.isEmpty
                         ? Icon(
-                            Icons.no_photography_outlined,
-                            size: 50,
-                            color: Colors.grey[700],
-                          )
+                          Icons.no_photography_outlined,
+                          size: 50,
+                          color: Colors.grey[700],
+                        )
                         : null,
               ),
               const SizedBox(height: 20),
@@ -50,11 +51,7 @@ class PrivateProfilePlaceholderScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Icon(
-                Icons.lock_outline,
-                size: 60,
-                color: Colors.grey[600],
-              ),
+              Icon(Icons.lock_outline, size: 60, color: Colors.grey[600]),
               const SizedBox(height: 20),
               const Text(
                 'This Profile is Private',
